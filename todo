@@ -17,4 +17,10 @@
     8. Transferir as imagens para o HTML
     9. Criar um arquivo HTML com as mensagens formatadas
     10. Transformar em PDF
-    11. Criar FrontEnd  
+    11. Criar FrontEnd
+
+# Today
+- Corrigir linhas fora da formatação no arquivo base (file-fixer.py)
+- O probema é que existem várias linhas seguidas sem a formatação desejada
+- Então eu tenho que colocar algum tipo de marcação nestas linhas até a próxima linha correta
+- Depois eu preciso juntar todas elas à linha anterior
