@@ -2,6 +2,7 @@ LEGADO/
 __pycache__
 bin
 include
-lib
+lib/
 pymupdf-venv
-whats
+whats/
+whats2/
