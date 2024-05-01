@@ -1,7 +1,7 @@
 LEGADO/
-__pycache__
-bin
-include
+__pycache__/
+bin/
+include/
 lib/
 pymupdf-venv
 whats/
