@@ -25,7 +25,6 @@ def process_text_file(input_file):
     return(processed_lines)
 
 
-
 # Usage example
 input_file = "_chat_to_join.txt"
 
