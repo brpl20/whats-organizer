@@ -6,3 +6,14 @@ lib/
 pymupdf-venv
 whats/
 whats2/
+_chat.txt
+_chat_output_stack.txt
+paulochat.txt
+paulochat_fixed.txt
+/projeto/__pycache__/
+/projeto/bin/
+/projeto/include/
+/projeto/lib/
+/projeto/pyvenv.cfg/
+/projeto/whats/
+/projeto/zip_tests/
