@@ -1,0 +1,35 @@
+# PROJETO WHATS-ORGANIZER
+## BACKEND 
+1. Extrair o Arquivo ".zip" da conversa exportada com anexos para uma pasta temporária de trabalho única
+
+2. Tratar Arquivo .TXT: 
+    a) Juntar Linhas que ficam SEPARADAS (quando usuário da ener) (Ver no Aquivo CHAT1) => OK
+    b) Remover Caracteres Inválidos ‎=> PENDENTE
+    c) Extrair nome únicos: Ivete / Vinicius => OK 
+    d) Bloquear quando for conversa de grupos -> Não suportado -> Criar lógica para acima de dois interlocutores => PENDENTE
+    e) Extrair a data e hora: [03/03/2020, 15:02:30] => OK
+    e) Identificar diferença de Chats entre Dispositivos Android/Iphone -> Parcial -> Criar Lógica para identificar as diferenças
+    e) Conferência entre arquivos do Chat e Arquivos da Pasta => **** 
+    f) Extrair mensagem => OK 
+    g) Lidar com anexos extraindo somente o nome correto => OK
+    h) Transformar tudo em objeto que dê para trabalhar => OK
+
+3. Anexos: 
+    a) Audios: 
+        1. Converter .OPUS para .MP3 => PARCIAL
+        2. Criar serviço de transcrição de áudio => PENDENTE
+    c) PDF e Imagens
+        1. Transferir PDFs para HTML em miniaturas => PENDENTE
+        2. Transferir Imagens para o HTML em ministuras => PENDENTE 
+    d) Arquivos de Contatos: Ignorar
+
+4. Finalização 
+    1. Criar Arquivo HTML com as mensagens formatadas => PENDENTE
+    2. Criar Template => PENDENTE
+    3. Criar CSS => PENDENTE
+    4. Criar Transposição dos Diálogos para HTML => PENDENTE
+    5. Converter HTML para PDF => PENDENTE
+    6. Entregar 
+    7. Destruir Arquivos 
+
+## FRONTEND 
