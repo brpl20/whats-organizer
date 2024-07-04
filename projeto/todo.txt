@@ -1,18 +1,21 @@
 # PROJETO WHATS-ORGANIZER
 ## BACKEND 
-1. Extrair o Arquivo ".zip" da conversa exportada com anexos para uma pasta temporária de trabalho única
+1. Extrair o Arquivo ".zip" da conversa exportada com anexos para uma pasta temporária de trabalho única => OK 
 
 2. Tratar Arquivo .TXT: 
     a) Juntar Linhas que ficam SEPARADAS (quando usuário da ener) (Ver no Aquivo CHAT1) => OK
-    b) Remover Caracteres Inválidos ‎=> PENDENTE
+    b) Remover Caracteres Inválidos ‎=> OK
     c) Extrair nome únicos: Ivete / Vinicius => OK 
-    d) Bloquear quando for conversa de grupos -> Não suportado -> Criar lógica para acima de dois interlocutores => PENDENTE
+    d) Bloquear quando for conversa de grupos -> Não suportado -> Criar lógica para acima de dois interlocutores => PENDENTE => OK
     e) Extrair a data e hora: [03/03/2020, 15:02:30] => OK
-    e) Identificar diferença de Chats entre Dispositivos Android/Iphone -> Parcial -> Criar Lógica para identificar as diferenças
+    e) Identificar diferença de Chats entre Dispositivos Android/Iphone -> Parcial -> Criar Lógica para identificar as diferenças => OK 
+    e) Refatorar Tudo ... => OK 
     e) Conferência entre arquivos do Chat e Arquivos da Pasta => **** 
     f) Extrair mensagem => OK 
     g) Lidar com anexos extraindo somente o nome correto => OK
     h) Transformar tudo em objeto que dê para trabalhar => OK
+
+## FOCAR A PARTIR DAQUI: 
 
 3. Anexos: 
     a) Audios: 

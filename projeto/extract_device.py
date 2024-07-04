@@ -2,6 +2,7 @@ import re
 import os
 
 def extract_info_device(input_file):
+    
     # Android
     message_pattern_android = r'\] (.*?): (.*)'
     
