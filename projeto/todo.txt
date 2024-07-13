@@ -3,28 +3,30 @@
 1. Extrair o Arquivo ".zip" da conversa exportada com anexos para uma pasta temporária de trabalho única => OK 
 
 2. Tratar Arquivo .TXT: 
-    a) Juntar Linhas que ficam SEPARADAS (quando usuário da ener) (Ver no Aquivo CHAT1) => OK
-    b) Remover Caracteres Inválidos ‎=> OK
+    a) Juntar Linhas que ficam SEPARADAS (quando usuário da enter) (Ver no Aquivo CHAT1) => OK
+    b) Remover Caracteres Inválidos ‎ => OK
     c) Extrair nome únicos: Ivete / Vinicius => OK 
-    d) Bloquear quando for conversa de grupos -> Não suportado -> Criar lógica para acima de dois interlocutores => PENDENTE => OK
+    d) Bloquear quando for conversa de grupos -> Não suportado -> Criar lógica para acima de dois interlocutores => OK
     e) Extrair a data e hora: [03/03/2020, 15:02:30] => OK
-    e) Identificar diferença de Chats entre Dispositivos Android/Iphone -> Parcial -> Criar Lógica para identificar as diferenças => OK 
+                              19/03/2018 16:05 -     => OK 
+    e) Identificar diferença de Chats entre Dispositivos Android/Iphone => OK 
     e) Refatorar Tudo ... => OK 
-    e) Conferência entre arquivos do Chat e Arquivos da Pasta => **** 
+    e) Conferência entre arquivos do Chat e Arquivos da Pasta => OK 
     f) Extrair mensagem => OK 
     g) Lidar com anexos extraindo somente o nome correto => OK
     h) Transformar tudo em objeto que dê para trabalhar => OK
 
-## FOCAR A PARTIR DAQUI: 
-
 3. Anexos: 
     a) Audios: 
-        1. Converter .OPUS para .MP3 => PARCIAL
-        2. Criar serviço de transcrição de áudio => PENDENTE
+        1. Converter .OPUS para .MP3 => OK
+        2. Criar serviço de transcrição de áudio => OK
+        3. Anexar a transcrição no objeto principal => PENDENTE
+
     c) PDF e Imagens
         1. Transferir PDFs para HTML em miniaturas => PENDENTE
         2. Transferir Imagens para o HTML em ministuras => PENDENTE 
-    d) Arquivos de Contatos: Ignorar
+    
+    d) Arquivos de Contatos: Ignorar => OK
 
 4. Finalização 
     1. Criar Arquivo HTML com as mensagens formatadas => PENDENTE

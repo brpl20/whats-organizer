@@ -21,15 +21,13 @@ unique_folder_name = str(uuid.uuid4())
 final_work_folder = base_folder + unique_folder_name
 
 print("Extraindo Arquivos .zip") 
-handle_zip_file("./zip_tests/arquivo.zip", final_work_folder)
+handle_zip_file("./zip_tests/android-b.zip", final_work_folder)
 
 print("Listando Objetos do Diretório") 
 file_object = list_files_in_directory(final_work_folder)
 
-print("Converter MP3...")
-convert_opus_to_mp3(file_object)
-
-print("Todo: Criar TranscriptionJob")
+print("Converter MP3 e transcrever...")
+convert_opus_to_mp3(final_work_folder)
 
 print("Extraíndo Conversa Principal")
 whats_main_file = find_whats_key(file_object)
@@ -48,8 +46,8 @@ if dispositivo == "android":
     pdb.set_trace()
 elif dispositivo == "iphone":
     iphone = extract_info_iphone(fixed_file)
+    pdb.set_trace()
 else:
     print("Erro: Dispositivo não selecionado ou identificado")
 
 
-#pdb.set_trace()
