@@ -39,6 +39,7 @@ def extract_info_android(input_file):
                 file_pattern = r'(\S+)\.(opus)'
                 file_match = re.search(file_pattern, message)
                 file_attached = file_match.group(0)
+                print(file_attached)
 
             elif '.pdf' in message:
                 file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
@@ -91,6 +92,7 @@ def extract_info_iphone(input_file):
                 file_pattern = r'(\S+)\.(opus)'
                 file_match = re.search(file_pattern, message)
                 file_attached = file_match.group()
+                print(file_attached)
 
             elif '.pdf' in message:
                 file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'

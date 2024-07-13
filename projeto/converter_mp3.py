@@ -1,19 +1,14 @@
 import os
 import subprocess
 
-# Directory containing .opus files
-path = os.path.join(os.getcwd(), 'whats')
-input_directory = path
-output_directory = path
-
-# Iterate over files in the input directory
-for filename in os.listdir(input_directory):
-    if filename.endswith(".opus"):
-        # Construct input and output file paths
-        input_file = os.path.join(input_directory, filename)
-        output_file = os.path.join(output_directory, os.path.splitext(filename)[0] + ".mp3")
-        
-        # Run ffmpeg command to convert .opus to .mp3
-        subprocess.run(['ffmpeg', '-i', input_file, '-acodec', 'libmp3lame', output_file])
-        
-        print(f"Converted {input_file} to {output_file}")
+def convert_opus_to_mp3(file_locations):
+    for file_item in file_locations:
+        if isinstance(file_item, dict) and file_item.get('path', '').endswith(".opus"):
+            file_path = file_item['path']
+            output_file = file_path[:-5] + ".mp3"
+            subprocess.run(['ffmpeg', '-i', file_path, '-acodec', 'libmp3lame', output_file])
+            print(f"Converted {file_path} to {output_file}")
+        elif isinstance(file_item, str) and file_item.endswith(".opus"):
+            output_file = file_item[:-5] + ".mp3"
+            subprocess.run(['ffmpeg', '-i', file_item, '-acodec', 'libmp3lame', output_file])
+            print(f"Converted {file_item} to {output_file}")
