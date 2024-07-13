@@ -17,3 +17,5 @@ paulochat_fixed.txt
 /projeto/pyvenv.cfg/
 /projeto/whats/
 /projeto/zip_tests/
+env
+.env
