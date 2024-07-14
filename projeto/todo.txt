@@ -15,6 +15,7 @@
     f) Extrair mensagem => OK 
     g) Lidar com anexos extraindo somente o nome correto => OK
     h) Transformar tudo em objeto que dê para trabalhar => OK
+    e) Corrigir Android e Iphone ... _chat.txt resolvido ... resolver "Android" não está retornando todas as informações necessárias
 
 3. Anexos: 
     a) Audios: 
