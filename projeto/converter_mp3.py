@@ -28,8 +28,8 @@ def convert_opus_to_mp3(path, client=clientopenai):
                     files = {'file': f}
                     transcript = client.audio.transcriptions.create(model="whisper-1",file=f)
                     add_transcription(file_name, transcript.text)
-                    print(transcript.text)
+                    #print(transcript.text)
             except subprocess.CalledProcessError as e:
                 print(f"Failed to convert {file_name}. Error: {str(e)}")
-    pdb.set_trace()
+    #pdb.set_trace()
     return transcriptions_list
