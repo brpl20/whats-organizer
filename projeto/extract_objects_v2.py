@@ -26,6 +26,8 @@ def extract_info_android(input_file):
         message_match = re.search(message_pattern, line)
         if message_match:
             sender = message_match.group(1)
+            print(sender)
+
             message = message_match.group(2)
 
             file_attached = False
@@ -57,6 +59,7 @@ def extract_info_android(input_file):
 def extract_info_iphone(input_file):
     extracted_info = []
     unique_names = set()
+    unique_ids = {}
     date_time_pattern = r'(\d{2}/\d{2}/\d{4}) (\d{2}:\d{2}) -'
     message_pattern = r'- (.*?): (.*)'
 
@@ -76,10 +79,15 @@ def extract_info_iphone(input_file):
             time = date_time_match.group(2)
 
         message_match = re.search(message_pattern, line)
+ 
         if message_match:
             sender = message_match.group(1)
             message = message_match.group(2)
             file_attached = False
+
+            if sender not in unique_ids:
+                unique_ids[sender] = len(unique_ids) + 1
+            sender_id = unique_ids[sender]
 
             if any(ext in message for ext in ['.docx', '.jpg']):
                 file_pattern = r'(\S+)\.(docx|jpg)'
@@ -97,7 +105,7 @@ def extract_info_iphone(input_file):
                 file_pattern_pdf_match = re.search(file_pattern_pdf, message)
                 file_attached = file_pattern_pdf_match.group(1)
 
-            extracted_info.append({'Name': sender, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
+            extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
     
     if len(unique_names) > 2:
         raise ValueError("ERRO: Conversas em Grupo não suportadas")

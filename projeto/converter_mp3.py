@@ -1,10 +1,13 @@
 import os
 import subprocess
+from dotenv import load_dotenv 
 from openai import OpenAI
 import pdb
 
 
-clientopenai = OpenAI(api_key="")
+load_dotenv()
+api_key = os.getenv("WHISPER")
+clientopenai = OpenAI(api_key=api_key)
 transcriptions_list = []
 
 def add_transcription(file_name, transcription):
@@ -28,7 +31,8 @@ def convert_opus_to_mp3(path, client=clientopenai):
                     files = {'file': f}
                     transcript = client.audio.transcriptions.create(model="whisper-1",file=f)
                     add_transcription(file_name, transcript.text)
-                    #print(transcript.text)
+                    print("Transcrição...")
+                    print(transcript.text)
             except subprocess.CalledProcessError as e:
                 print(f"Failed to convert {file_name}. Error: {str(e)}")
     #pdb.set_trace()
