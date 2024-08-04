@@ -2,9 +2,11 @@ import re
 import csv
 import os
 import uuid
+import pdb
+import json
+
 from openai import OpenAI
 from pydub import AudioSegment
-import pdb
 
 from handle_zip_file import handle_zip_file
 from list_files import list_files_in_directory
@@ -44,13 +46,15 @@ fixed_file = process_file_fixer(whats_main_folder_file, dispositivo)
 print("extracting info") 
 if dispositivo == "android":
     android = extract_info_android(fixed_file)
-    file_appending(android, transcriptions)
+    list_files = file_appending(android, transcriptions)
     #pdb.set_trace()
 elif dispositivo == "iphone":
     iphone = extract_info_iphone(fixed_file)
-    file_appending(iphone, transcriptions)
-    pdb.set_trace()
+    list_files = file_appending(iphone, transcriptions)
+    #pdb.set_trace()
 else:
     print("Erro: Dispositivo não selecionado ou identificado")
 
-
+print("Criando Arquivo Json")
+with open('output.json', 'w') as f:
+    json.dump(list_files, f)
