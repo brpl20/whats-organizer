@@ -24,7 +24,7 @@ unique_folder_name = str(uuid.uuid4())
 final_work_folder = base_folder + unique_folder_name
 
 print("Extraindo Arquivos .zip") 
-handle_zip_file("./zip_tests/rose.zip", final_work_folder)
+handle_zip_file("./zip_tests/android-grupo-sem-midia.zip", final_work_folder)
 
 print("Listando Objetos do Diretório") 
 file_object = list_files_in_directory(final_work_folder)

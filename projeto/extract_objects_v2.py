@@ -2,7 +2,7 @@ import re
 import os
 
 
-def extract_info_android(input_file):
+def extract_info_iphone(input_file):
     extracted_info = []
     unique_names = set()
     date_time_pattern = r'\[(\d{2}/\d{2}/\d{4}), (\d{2}:\d{2}:\d{2})\]'
@@ -49,14 +49,19 @@ def extract_info_android(input_file):
 
             extracted_info.append({'Name': sender, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
         if len(unique_names) > 2:
-            raise ValueError("ERRO: Conversas em Grupo não suportadas")
-        else: 
+            # Limpa a lista de entradas anteriores
+            extracted_info.clear()
+            # Adiciona a nova entrada no início da lista
+            extracted_info.insert(0, {'ERRO': "Conversas em grupo não suportadas"})
+            # Levanta um erro
+            raise ValueError("Conversas em grupo não suportadas")
+        else:
             return extracted_info
 
     return extracted_info
 
 
-def extract_info_iphone(input_file):
+def extract_info_android(input_file):
     extracted_info = []
     unique_names = set()
     unique_ids = {}
@@ -72,6 +77,7 @@ def extract_info_iphone(input_file):
         if matches:
             name = matches[0][0]
             unique_names.add(name)
+            #print(len(unique_names))
 
         date_time_match = re.search(date_time_pattern, line)
         if date_time_match:
@@ -108,6 +114,13 @@ def extract_info_iphone(input_file):
             extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
     
     if len(unique_names) > 2:
-        raise ValueError("ERRO: Conversas em Grupo não suportadas")
-    else: 
+        # Limpa a lista de entradas anteriores
+        extracted_info.clear()
+        # Adiciona a nova entrada no início da lista
+        extracted_info.insert(0, {'ERRO': "Conversas em grupo não suportadas"})
+        # Levanta um erro
+        #raise ValueError("Conversas em grupo não suportadas")
+        return extracted_info
+    else:
+        extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
         return extracted_info

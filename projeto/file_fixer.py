@@ -8,7 +8,7 @@ def process_file_fixer(filename, device):
         processed_lines = []
         processed_lines_clean = []
         processed_lines_final = []
-        if device == 'iphone': 
+        if device == 'android': 
             pattern = r'^\d{2}\/'
         else: 
             pattern = r'^\[\d{2}\/'
