@@ -67,7 +67,9 @@ def process_zip():
         
         # Append files
         list_files = file_appending(extracted_info, transcriptions)
-        
+        print(extracted_info)
+        print(type(extracted_info))
+
         # Create JSON output
         output_path = os.path.join(final_work_folder, 'output.json')
         with open(output_path, 'w') as f:
@@ -77,6 +79,9 @@ def process_zip():
         with open(output_path, 'r') as f:
             result = json.load(f)
         
+        print("????")
+        print(result)
+        print(jsonify(result))
         return jsonify(result)
     
     return jsonify({"error": "Invalid file format"}), 400
