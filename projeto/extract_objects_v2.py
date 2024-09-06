@@ -49,10 +49,14 @@ def extract_info_iphone(input_file):
 
             elif '.pdf' in message:
                 file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
+                # file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
                 file_pattern_pdf_match = re.search(file_pattern_pdf, message)
                 #print(file_pattern_pdf_match)
                 if file_pattern_pdf_match:
-                    file_attached = file_pattern_pdf_match.group(0)
+                    print("result")
+                    print("-----------------------------")
+                    file_attached = file_pattern_pdf_match.group(1)
+                    print(file_attached)
 
             extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
     

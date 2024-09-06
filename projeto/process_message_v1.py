@@ -15,7 +15,8 @@ from extract_device import extract_info_device
 from file_fixer import process_file_fixer 
 from extract_objects_v2 import extract_info_iphone, extract_info_android
 from converter_mp3 import convert_opus_to_mp3
-from file_append import file_appending
+from converter_pdf import process_pdf_folder
+from file_append import file_appending, file_appending_pdf
 
 
 print("Criando pasta de trabalho única")
@@ -24,13 +25,17 @@ unique_folder_name = str(uuid.uuid4())
 final_work_folder = base_folder + unique_folder_name
 
 print("Extraindo Arquivos .zip") 
-handle_zip_file("./zip_tests/android-magnos-pdf-bom.zip", final_work_folder)
+handle_zip_file("./zip_tests/iphone-pdf.zip", final_work_folder)
 
 print("Listando Objetos do Diretório") 
 file_object = list_files_in_directory(final_work_folder)
 
 print("Converter MP3 e transcrever...")
 transcriptions = convert_opus_to_mp3(final_work_folder)
+
+print("Converter PDF, transformar em imagens e links")
+bucket_name = 'tempfilesprocessing'
+pdf_img_links = process_pdf_folder(final_work_folder, bucket_name)
 
 print("Extraíndo Conversa Principal")
 whats_main_file = find_whats_key(file_object)
@@ -47,14 +52,16 @@ print("extracting info")
 if dispositivo == "android":
     android = extract_info_android(fixed_file)
     list_files = file_appending(android, transcriptions)
+    lit_files_pdf = file_appending_pdf(android, pdf_img_links)
     #pdb.set_trace()
 elif dispositivo == "iphone":
     iphone = extract_info_iphone(fixed_file)
     list_files = file_appending(iphone, transcriptions)
+    lit_files_pdf = file_appending_pdf(iphone, pdf_img_links)
     #pdb.set_trace()
 else:
     print("Erro: Dispositivo não selecionado ou identificado")
 
 print("Criando Arquivo Json")
 with open('output.json', 'w') as f:
-    json.dump(list_files, f)
+    json.dump(list_files, f)ca
