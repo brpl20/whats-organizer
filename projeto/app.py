@@ -1,9 +1,11 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify
 from flask_cors import CORS
+
 import uuid
 import json
 import os
-from flask_sse import sse
+import shutil
+
 
 # Import your existing functions
 from handle_zip_file import handle_zip_file
@@ -18,13 +20,6 @@ from file_append import file_appending, file_appending_pdf
 
 app = Flask(__name__)
 CORS(app)
-app.config["REDIS_URL"] = "redis://localhost"
-app.register_blueprint(sse, url_prefix='/stream')
-
-def send_message(message):
-    sse.publish({"message": message}, type='status')
-    print(message)  # Keep the print for server-side logging
-
 @app.route('/process', methods=['POST'])
 def process_zip():
     if 'file' not in request.files:
@@ -47,37 +42,30 @@ def process_zip():
         file.save(zip_path)
         
         # Process the zip file
-        send_message("Processing zip file")
         handle_zip_file(zip_path, final_work_folder)
         
         # List objects in the directory
-        send_message("Listing files in directory")
         file_object = list_files_in_directory(final_work_folder)
         
         # Convert MP3 and transcribe
-        send_message("Converting audio files and transcribing")
         transcriptions = convert_opus_to_mp3(final_work_folder)
         
         # Transform PDF into Images 
-        send_message("Converting PDF, transforming into images and links")
+        print("Converter PDF, transformar em imagens e links")
         bucket_name = 'tempfilesprocessing'
         pdf_img_links = process_pdf_folder(final_work_folder, bucket_name)
 
         # Extract main conversation
-        send_message("Extracting main conversation")
         whats_main_file = find_whats_key(file_object)
         whats_main_folder_file = os.path.join(final_work_folder, whats_main_file)
         
         # Extract device info
-        send_message("Extracting device info")
         dispositivo = extract_info_device(whats_main_folder_file)
         
         # Fix files
-        send_message("Fixing files")
         fixed_file = process_file_fixer(whats_main_folder_file, dispositivo)
         
         # Extract info based on device type
-        send_message(f"Extracting info for {dispositivo}")
         if dispositivo == "android":
             extracted_info = extract_info_android(fixed_file)
         elif dispositivo == "iphone":
@@ -86,11 +74,11 @@ def process_zip():
             return jsonify({"error": "Unknown device type"}), 400
         
         # Append files
-        send_message("Appending files")
         list_files = file_appending(extracted_info, transcriptions)
         lit_files_pdf = file_appending_pdf(extracted_info, pdf_img_links)
 
-        send_message("Processing complete")
+        print(extracted_info)
+        print(type(extracted_info))
 
         # Create JSON output
         output_path = os.path.join(final_work_folder, 'output.json')
@@ -101,8 +89,22 @@ def process_zip():
         with open(output_path, 'r') as f:
             result = json.load(f)
         
-        return jsonify(result)
+        print("????")
+        print(result)
+        print(jsonify(result))
+        if os.path.exists(final_work_folder):
+            try:
+                # Delete the folder and all its contents
+                shutil.rmtree(final_work_folder)
+                print(f"Successfully deleted folder: {final_work_folder}")
+            except Exception as e:
+                print(f"Error deleting folder: {e}")
+        else:
+            print(f"Folder does not exist: {final_work_folder}")
     
+        return jsonify(result)
+        
+
     return jsonify({"error": "Invalid file format"}), 400
 
 if __name__ == '__main__':

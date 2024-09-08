@@ -6,6 +6,12 @@ from botocore.exceptions import NoCredentialsError
 import io
 import re
 import unicodedata 
+from docx2pdf import convert
+
+def convert_docx_to_pdf(docx_path):
+    pdf_path = os.path.splitext(docx_path)[0] + '.pdf'
+    convert(docx_path, pdf_path)
+    return pdf_path
 
 def process_pdf(pdf_path, bucket_name):
     # Convert PDF to images
@@ -28,8 +34,10 @@ def process_pdf(pdf_path, bucket_name):
         # Resize for full image (maintaining aspect ratio)
         if is_landscape:
             image.thumbnail((1920, 1080))
+            orientation = 'landscape'
         else:
             image.thumbnail((1080, 1920))
+            orientation = 'portrait'
 
         # Prepare file name
         pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
@@ -72,6 +80,16 @@ def process_pdf(pdf_path, bucket_name):
 
 def process_pdf_folder(folder_path, bucket_name):
     all_results = []
+
+    # First, convert all DOCX files to PDF
+    for filename in os.listdir(folder_path):
+        if filename.lower().endswith('.docx'):
+            docx_path = os.path.join(folder_path, filename)
+            try:
+                pdf_path = convert_docx_to_pdf(docx_path)
+                print(f"Converted {filename} to PDF")
+            except Exception as e:
+                print(f"Error converting {filename} to PDF: {str(e)}")
     
     for filename in os.listdir(folder_path):
         if filename.lower().endswith('.pdf'):
@@ -82,5 +100,6 @@ def process_pdf_folder(folder_path, bucket_name):
                 print(f"Processed {filename}")
             except Exception as e:
                 print(f"Error processing {filename}: {str(e)}")
+
     return all_results
 

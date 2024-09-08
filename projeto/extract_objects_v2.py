@@ -36,14 +36,35 @@ def extract_info_iphone(input_file):
                 unique_ids[sender] = len(unique_ids) + 1
             sender_id = unique_ids[sender]
 
-            if any(ext in message for ext in ['.docx', '.jpg']):
-                file_pattern = r'(\S+)\.(docx|jpg)'
+            if any(ext in message for ext in ['.jpg']):
+                file_pattern = r'(\S+)\.(jpg)'
                 file_match = re.search(file_pattern, message)
                 if file_match:
                     file_attached = file_match.group()
 
+            # if any(ext in message for ext in ['.docx', '.jpg']):
+            #     file_pattern = r'(\S+)\.(docx|jpg)'
+            #     file_match = re.search(file_pattern, message)
+            #     if file_match:
+            #         if file_match.group(2) == 'docx':
+            #             file_attached = file_match.group(1) + '.pdf'  # Only filename for DOCX
+            #         else:
+            #             file_attached = file_match.group()  # Full filename with extension for others
+            if '.docx' in message:
+                file_pattern = r'<anexado:\s*(.+?)\.docx>'
+                file_match = re.search(file_pattern, message)
+                if file_match:
+                    file_attached = file_match.group(1) + '.pdf'  # Full filename with .pdf extension
+                else:
+                    file_attached = None  # or handle the case when no match is found
+
             elif any(ext in message for ext in ['.opus']):
                 file_pattern = r'(\S+)\.(opus)'
+                file_match = re.search(file_pattern, message)
+                file_attached = file_match.group()
+
+            elif any(ext in message for ext in ['.mp4']):
+                file_pattern = r'(\S+)\.(mp4)'
                 file_match = re.search(file_pattern, message)
                 file_attached = file_match.group()
 
@@ -115,6 +136,11 @@ def extract_info_android(input_file):
 
             elif any(ext in message for ext in ['.opus']):
                 file_pattern = r'(\S+)\.(opus)'
+                file_match = re.search(file_pattern, message)
+                file_attached = file_match.group()
+            
+            elif any(ext in message for ext in ['.mp4']):
+                file_pattern = r'(\S+)\.(mp4)'
                 file_match = re.search(file_pattern, message)
                 file_attached = file_match.group()
 
