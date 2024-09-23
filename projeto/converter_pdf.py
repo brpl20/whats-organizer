@@ -10,6 +10,7 @@ from docx2pdf import convert
 
 def convert_docx_to_pdf(docx_path):
     pdf_path = os.path.splitext(docx_path)[0] + '.pdf'
+    print(pdf_path)
     convert(docx_path, pdf_path)
     return pdf_path
 
@@ -38,6 +39,8 @@ def process_pdf(pdf_path, bucket_name):
         else:
             image.thumbnail((1080, 1920))
             orientation = 'portrait'
+
+        page_orientation = orientation 
 
         # Prepare file name
         pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
@@ -72,6 +75,7 @@ def process_pdf(pdf_path, bucket_name):
         # Get public URL
         full_url = f"https://{bucket_name}.s3.us-west-2.amazonaws.com/{full_image_key}"
         file_entry['Links'].append(full_url)
+        file_entry['Links'].append(page_orientation)
 
         #'ImageLink': full_url})
         # links_list.append(full_url)

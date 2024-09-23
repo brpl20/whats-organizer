@@ -17,7 +17,7 @@ from converter_pdf import process_pdf_folder
 from file_append import file_appending, file_appending_pdf
 
 app = Flask(__name__)
-CORS(app)e
+CORS(app)
 @app.route('/process', methods=['POST'])
 def process_zip():
     if 'file' not in request.files:

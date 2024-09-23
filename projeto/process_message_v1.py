@@ -18,14 +18,21 @@ from converter_mp3 import convert_opus_to_mp3
 from converter_pdf import process_pdf_folder
 from file_append import file_appending, file_appending_pdf
 
+def handle_zip(base_folder, max_size_mb, unique_folder): 
+    final_work_folder = base_folder + unique_folder
+    max_size_bytes = max_size_mb * 1024 * 1024
+    file_size = os.path.getsize(base_folder)
+    if file_size > max_size_bytes:
+        return False, f'File is too large. Maximum size allowed is {max_size_mb} MB.'
+    else: 
+        handle_zip_file("./zip_tests/android2.zip", final_work_folder)
+        return True, 'File handled successfully.', final_work_folder
+
 
 print("Criando pasta de trabalho única")
-base_folder = "./zip_tests/"
-unique_folder_name = str(uuid.uuid4())
-final_work_folder = base_folder + unique_folder_name
-
-print("Extraindo Arquivos .zip") 
-handle_zip_file("./zip_tests/iphone-pdf.zip", final_work_folder)
+base_folder1 = "./zip_tests/"
+unique_folder1 = str(uuid.uuid4())
+success, message, final_work_folder = handle_zip(base_folder1, 100, unique_folder1)
 
 print("Listando Objetos do Diretório") 
 file_object = list_files_in_directory(final_work_folder)
@@ -64,4 +71,4 @@ else:
 
 print("Criando Arquivo Json")
 with open('output.json', 'w') as f:
-    json.dump(list_files, f)ca
+    json.dump(list_files, f)
