@@ -16,11 +16,16 @@ from extract_objects_v2 import extract_info_iphone, extract_info_android
 from converter_mp3 import convert_opus_to_mp3
 from converter_pdf import process_pdf_folder
 from file_append import file_appending, file_appending_pdf
+from dotenv import load_dotenv
+
+load_dotenv()
+prod = os.getenv("FLASK_ENV")
 
 app = Flask(__name__)
 #CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 @app.route('/process', methods=['POST'])
 def process_zip():
@@ -121,4 +126,4 @@ def process_zip():
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=os.getenv("FLASK_ENV"))

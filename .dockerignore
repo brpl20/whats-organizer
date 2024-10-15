@@ -1,3 +1,25 @@
+LEGADO/
+__pycache__/
+bin/
+include/
+lib/
+pymupdf-venv
+whats/
+whats2/
+_chat.txt
+_chat_output_stack.txt
+paulochat.txt
+paulochat_fixed.txt
+/__pycache__/
+/bin/
+/include/
+/lib/
+/pyvenv.cfg/
+/whats/
+/zip_tests/
+env
+
+
 # Ignore Python files
 *.pyc
 __pycache__/
@@ -40,11 +62,11 @@ coverage/
 pip/
 pip.log
 
-# Ignore environment files
-.env
-
 # Ignore other files
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+pyvenv.cfg
+.git
+.gitignore

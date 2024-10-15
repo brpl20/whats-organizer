@@ -1,0 +1,37 @@
+services:
+  nginx:
+    restart: always
+    env_file:
+      - infra/server/.env
+    build:
+      context: ./infra/server
+      args:
+        - FLASK_ENV=production
+    container_name: nginx-whats-organizer
+    ports:
+      - 443:443
+      - 80:80
+      - 5000:5000
+    networks:
+      - whats-organizer
+    volumes:
+      - ./infra/server/templates:/etc/nginx/templates
+      - /etc/letsencrypt/live/${DOMAIN}/fullchain.pem:/etc/nginx/ssl/fullchain.pem
+      - /etc/letsencrypt/live/${DOMAIN}/privkey.pem:/etc/nginx/ssl/privkey.pem
+    depends_on:
+      - flask
+  flask:
+    container_name: flask
+    restart: always
+    env_file:
+      - .env
+    build:
+      args:
+        - FLASK_ENV=production
+        - FLASK_PORT=${FLASK_PORT}
+        - GUNICORN_WORKERS=${GUNICORN_WORKERS}
+    networks:
+      - whats-organizer
+
+networks:
+  whats-organizer:
