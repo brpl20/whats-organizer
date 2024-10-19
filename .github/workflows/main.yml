@@ -1,0 +1,36 @@
+name: remote ssh command
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          export PROJECT=back
+          export PROJECT_DIR="/root/whats-organizer-${PROJECT}"
+          export ENV_DIR=/root/envs/${PROJECT}
+          if [ ! -d ${PROJECT_DIR} ]; then
+            rm -r ${PROJECT_DIR}
+            mkdir ${PROJECT_DIR}
+            cd ${PROJECT_DIR}
+            git clone https://github.com/${{ github.repository }} ${PROJECT_DIR}
+          else
+            cd ${PROJECT_DIR}
+            git pull
+          fi
+          cp ${ENV_DIR}/.env .
+          cp {ENV_DIR}/nginx.env ./infra/server/.env
+          docker compose build
+          docker compose up -d
+          docker image prune --force
+          docker container prune --force

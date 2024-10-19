@@ -1,6 +1,4 @@
 import re
-import os
-
 
 def extract_info_iphone(input_file):
     extracted_info = []

@@ -1,0 +1,10 @@
+Flask
+Flask-Cors
+flask_socketio
+openai
+pdf2image
+boto3
+botocore
+docx2pdf
+gunicorn
+python-dotenv

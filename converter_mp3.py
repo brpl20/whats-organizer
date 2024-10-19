@@ -2,7 +2,6 @@ import os
 import subprocess
 from dotenv import load_dotenv 
 from openai import OpenAI
-import pdb
 
 
 load_dotenv()
@@ -23,6 +22,7 @@ def convert_opus_to_mp3(path, client=clientopenai):
         if file_name.endswith('.opus'):
             opus_file_path = os.path.join(path, file_name)
             mp3_file_path = opus_file_path.replace('.opus', '.mp3')
+            # @TODO verificar se tem falha de injeção de comando aqui
             command = ['ffmpeg', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
             try:
                 subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)

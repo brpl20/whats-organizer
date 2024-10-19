@@ -1,12 +1,6 @@
-import re
-import csv
 import os
 import uuid
-import pdb
 import json
-
-from openai import OpenAI
-from pydub import AudioSegment
 
 from handle_zip_file import handle_zip_file
 from list_files import list_files_in_directory
