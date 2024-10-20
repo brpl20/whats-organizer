@@ -29,7 +29,7 @@ jobs:
             git pull
           fi
           cp ${ENV_DIR}/.env .
-          cp {ENV_DIR}/nginx.env ./infra/server/.env
+          cp ${ENV_DIR}/nginx.env ./infra/server/.env
           docker compose build
           docker compose up -d
           docker image prune --force
