@@ -21,4 +21,4 @@ ARG GUNICORN_WORKERS="${GUNICORN_WORKERS}"
 
 ENV PATH="/home/python/.local/bin:${PATH}"
 # https://stackoverflow.com/questions/62629125/unable-to-connect-to-flask-socketio-with-invalid-session-id-error
-CMD ["sh", "-c", "gunicorn -w ${GUNICORN_WORKERS} -k eventlet --timeout 300 -b 0.0.0.0:${FLASK_PORT} app:app"]
+CMD ["sh", "-c", "gunicorn -w ${GUNICORN_WORKERS} -k gevent -b 0.0.0.0:${FLASK_PORT} app:app"]
