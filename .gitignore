@@ -3,7 +3,7 @@ __pycache__/
 bin/
 include/
 lib/
-pymupdf-venv
+pymupdf-
 whats/
 whats2/
 _chat.txt
@@ -14,7 +14,7 @@ paulochat_fixed.txt
 /bin/
 /include/
 /lib/
-/pyvenv.cfg/
+/py.cfg/
 /whats/
 /zip_tests/
 env
@@ -69,3 +69,6 @@ pip.log
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+.venv
+
