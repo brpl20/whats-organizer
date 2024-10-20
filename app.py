@@ -24,7 +24,7 @@ prod = os.getenv("FLASK_ENV")
 app = Flask(__name__)
 #CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", transports=['websocket', 'polling'])
 
 
 @app.route('/process', methods=['POST'])
@@ -126,4 +126,4 @@ def process_zip():
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=os.getenv("FLASK_ENV"))
+    socketio.run(app, debug=os.getenv("FLASK_ENV") == 'production')
