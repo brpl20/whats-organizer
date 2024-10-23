@@ -20,7 +20,6 @@ jobs:
           export PROJECT_DIR="/root/whats-organizer-${PROJECT}"
           export ENV_DIR=/root/envs/${PROJECT}
           if [ ! -d ${PROJECT_DIR} ]; then
-            rm -r ${PROJECT_DIR}
             mkdir ${PROJECT_DIR}
             cd ${PROJECT_DIR}
             git clone https://github.com/${{ github.repository }} ${PROJECT_DIR}

@@ -70,3 +70,4 @@ Desktop.ini
 pyvenv.cfg
 .git
 .gitignore
+.venv
