@@ -16,9 +16,20 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY --chown=python:python --exclude=infra . .
 
-ARG FLASK_PORT="${FLASK_PORT}"
-ARG GUNICORN_WORKERS="${GUNICORN_WORKERS}"
+ARG FLASK_PORT_START=${FLASK_PORT_START}
+ARG FLASK_PORT_END=${FLASK_PORT_END}
+EXPOSE ${FLASK_PORT_START}-${FLASK_PORT_END}
 
 ENV PATH="/home/python/.local/bin:${PATH}"
-# https://stackoverflow.com/questions/62629125/unable-to-connect-to-flask-socketio-with-invalid-session-id-error
-CMD ["sh", "-c", "gunicorn -w ${GUNICORN_WORKERS} -k gevent -b 0.0.0.0:${FLASK_PORT} app:app"]
+# https://flask-socketio.readthedocs.io/en/latest/deployment.html
+# Por que Gevent? Eventlet é mais performático, porém escolhi gevent
+# pela propagação automática de exceções (praticidade)
+# Se for melhor usar eventlet, remova gevent do requirements.txt
+# OBS.: É necessário usar um worker com websocket, para usar multiplos processos,
+# Invocamos vários processos e usamos load balancing no nginx, caso mude
+# as envs de FLASK_PORT, precisa configurar o nginx de acordo também
+# -w apenas é suportado com 1 thread.
+CMD ["sh", "-c", "\
+for FLASK_PORT in $(seq ${FLASK_PORT_START} ${FLASK_PORT_END}); do \
+  gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} app:app & \
+done && wait"]
