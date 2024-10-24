@@ -24,7 +24,7 @@ services:
       context: ./infra/server
     container_name: nginx-whats-organizer_back
     ports:
-      - "5000:5000"
+      - "4000:4000"
     networks:
       - whats-organizer_back
     volumes:
