@@ -8,9 +8,12 @@ services:
       args:
         - FLASK_ENV=production
         - FLASK_PORT=${FLASK_PORT}
-        - GUNICORN_WORKERS=${GUNICORN_WORKERS}
+        - FLASK_PORT_START=${FLASK_PORT_START}
+        - FLASK_PORT_END=${FLASK_PORT_END}
     networks:
       - whats-organizer_back
+    expose:
+      - "${FLASK_PORT_START}-${FLASK_PORT_END}" 
 
   nginx:
     restart: always
@@ -21,7 +24,7 @@ services:
       context: ./infra/server
     container_name: nginx-whats-organizer_back
     ports:
-      - "5000:5000"
+      - "4000:4000"
     networks:
       - whats-organizer_back
     volumes:

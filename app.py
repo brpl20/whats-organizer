@@ -126,4 +126,4 @@ def process_zip():
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=os.getenv("FLASK_ENV"))
+    socketio.run(app, debug=os.getenv("FLASK_ENV") == 'production')
