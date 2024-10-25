@@ -10,7 +10,8 @@ FROM nginx:alpine
 COPY --chown=nginx:nginx ./nginx.conf /etc/nginx/nginx.conf
 COPY --chown=nginx:nginx ./ssl.conf /etc/nginx/ssl.conf
 COPY --chown=nginx:nginx ./setup_balancer.sh /
-RUN sh -c 'echo -e "$(cat setup_balancer.sh)\n$(cat docker-entrypoint.sh)" > docker-entrypoint.sh'
+COPY --chown=nginx:nginx ./setup_firewall.sh /
+RUN sh -c 'echo -e "$(cat setup_balancer.sh)\n$(cat setup_firewall.sh)\n$(cat docker-entrypoint.sh)" > docker-entrypoint.sh'
 #COPY ./iptables.sh /iptables.sh
 RUN sh -c 'if [ -f /var/www/html/ ]; then rm -rf /var/www/html/; fi'
 RUN sh -c 'if [ -f /usr/share/nginx/html/index.html ]; then echo "" > /usr/share/nginx/html/index.html; fi'
