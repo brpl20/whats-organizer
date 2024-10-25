@@ -10,7 +10,7 @@ CF_IPV6_URL="https://www.cloudflare.com/ips-v6"
 CLOUDFLARE_IPS_FIREWALL="$(wget -qO- ${CF_IPV4_URL})\n$(wget -qO- ${CF_IPV6_URL})"
 
 export CLOUDFLARE_IPS_FIREWALL=$(printf "allow %s;\n" $CLOUDFLARE_IPS_FIREWALL)"\
-# allow 127.0.0.1;\
+allow 127.0.0.1;\
 # Docker's IP\
 # allow 172.17.0.0/16;\
 deny all;"
