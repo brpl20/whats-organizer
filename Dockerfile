@@ -31,5 +31,5 @@ ENV PATH="/home/python/.local/bin:${PATH}"
 # -w apenas é suportado com 1 thread.
 CMD ["sh", "-c", "\
 for FLASK_PORT in $(seq ${FLASK_PORT_START} ${FLASK_PORT_END}); do \
-  gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} app:app --timeout 300 & \
+  gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} hello_world_websocket:app --timeout 300 & \
 done && wait"]
