@@ -10,6 +10,7 @@ upstream ${UPSTREAM}_upstream {
     ${UPSTREAM_SERVERS}
     # Previne perda de sessão usando vários workers
     hash $remote_addr consistent;
+    keepalive 64;
 }
 
 server {
@@ -36,6 +37,7 @@ server {
         proxy_set_header Host $host;
 
         proxy_cache off;
+        proxy_buffering off;
         proxy_pass http://${UPSTREAM}_upstream;
 
         proxy_http_version 1.1;
