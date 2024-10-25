@@ -14,4 +14,3 @@ export CLOUDFLARE_IPS_FIREWALL=$(printf "allow %s;\n" $CLOUDFLARE_IPS_FIREWALL)"
 # Docker's IP\
 # allow 172.17.0.0/16;\
 deny all;"
-echo ${CLOUDFLARE_IPS_FIREWALL}
