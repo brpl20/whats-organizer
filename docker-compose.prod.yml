@@ -1,0 +1,36 @@
+services:
+  flask:
+    container_name: flask
+    restart: always
+    env_file:
+      - .env
+    build:
+      args:
+        - FLASK_ENV=production
+        - FLASK_PORT=${FLASK_PORT}
+        - FLASK_PORT_START=${FLASK_PORT_START}
+        - FLASK_PORT_END=${FLASK_PORT_END}
+    networks:
+      - whats-organizer_back
+    expose:
+      - "${FLASK_PORT_START}-${FLASK_PORT_END}" 
+
+  nginx:
+    restart: always
+    env_file:
+      - infra/server/.env
+      - .env
+    build:
+      context: ./infra/server
+    container_name: nginx-whats-organizer_back
+    ports:
+      - "8443:8443"
+    networks:
+      - whats-organizer_back
+    volumes:
+      - ./infra/server/templates:/etc/nginx/templates
+      - /etc/letsencrypt/live/${DOMAIN}/fullchain.pem:/etc/nginx/ssl/fullchain.pem
+      - /etc/letsencrypt/live/${DOMAIN}/privkey.pem:/etc/nginx/ssl/privkey.pem
+    depends_on:
+      - flask
+

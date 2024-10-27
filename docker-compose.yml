@@ -1,38 +1,21 @@
 services:
-  flask:
-    container_name: flask
-    restart: always
-    env_file:
-      - .env
+  rabbitmq:
     build:
+      dockerfile: rabbitmq.Dockerfile
       args:
-        - FLASK_ENV=production
-        - FLASK_PORT=${FLASK_PORT}
-        - FLASK_PORT_START=${FLASK_PORT_START}
-        - FLASK_PORT_END=${FLASK_PORT_END}
-    networks:
-      - whats-organizer_back
-    expose:
-      - "${FLASK_PORT_START}-${FLASK_PORT_END}" 
-
-  nginx:
-    restart: always
+        - RMQ_PORT=${RMQ_PORT}
+        - RMQ_GID=${RMQ_GID}
+        - RMQ_UID=${RMQ_UID}
+        - RMQ_LINUX_USER=${RMQ_LINUX_USER}
+        - RMQ_LINUX_GROUP=${RMQ_LINUX_GROUP}
     env_file:
-      - infra/server/.env
-      - .env
-    build:
-      context: ./infra/server
-    container_name: nginx-whats-organizer_back
+      - ./.env
+    restart: always
+    container_name: 'rabbitmq-socketio'
     ports:
-      - "8443:8443"
+        - ${RMQ_PORT}:5672
     networks:
       - whats-organizer_back
-    volumes:
-      - ./infra/server/templates:/etc/nginx/templates
-      - /etc/letsencrypt/live/${DOMAIN}/fullchain.pem:/etc/nginx/ssl/fullchain.pem
-      - /etc/letsencrypt/live/${DOMAIN}/privkey.pem:/etc/nginx/ssl/privkey.pem
-    depends_on:
-      - flask
 
 networks:
   whats-organizer_back:

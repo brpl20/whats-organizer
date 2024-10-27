@@ -24,8 +24,8 @@ prod = os.getenv("FLASK_ENV")
 app = Flask(__name__)
 #CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="*", ping_timeout=60)
-
+rmq_url = f"amqp://{os.getenv('RABBITMQ_HOST')}:{os.getenv('RABBITMQ_PORT')}"
+socketio = SocketIO(app, cors_allowed_origins="*", message_queue=rmq_url, ping_timeout=60)
 
 @app.route('/process', methods=['POST'])
 def process_zip():

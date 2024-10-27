@@ -29,7 +29,9 @@ ENV PATH="/home/python/.local/bin:${PATH}"
 # Invocamos vários processos e usamos load balancing no nginx, caso mude
 # as envs de FLASK_PORT, precisa configurar o nginx de acordo também
 # -w apenas é suportado com 1 thread.
+# É possível que -w possa ser usado agora, pois foi implementado redis pra lidar
+# com concorrência, mas a documentação do gevent não recomenda.
 CMD ["sh", "-c", "\
 for FLASK_PORT in $(seq ${FLASK_PORT_START} ${FLASK_PORT_END}); do \
-  gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} hello_world_websocket:app --timeout 300 & \
+  gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} app:app --timeout 300 & \
 done && wait"]

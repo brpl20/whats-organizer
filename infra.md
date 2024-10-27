@@ -47,3 +47,7 @@ Para ver os logs de renovação:
 ```
 less /var/log/certbot-renew.log
 ```
+
+### Redis
+
+Para o socket io não perder a sessão, é necessário usar rabbitmq (ou redis, kafka, etc). Isso porque com múltiplos processos, o socket io pode se perder caso o balancer troque de processo.

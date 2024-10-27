@@ -30,6 +30,6 @@ jobs:
           cp ${ENV_DIR}/.env .
           cp ${ENV_DIR}/nginx.env ./infra/server/.env
           docker compose build
-          docker compose up -d
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
           docker image prune --force
           docker container prune --force

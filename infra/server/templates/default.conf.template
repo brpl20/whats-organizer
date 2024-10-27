@@ -9,7 +9,7 @@ upstream ${UPSTREAM}_upstream {
     # FLASK_PORT_START and FLASK_PORT_END
     ${UPSTREAM_SERVERS}
     # Previne perda de sessão usando vários workers
-    hash $remote_addr consistent;
+    hash $http_cf_connecting_ip consistent;
     keepalive 64;
 }
 
@@ -24,12 +24,12 @@ server {
     gzip_comp_level 8;
     gzip_types text/css application/javascript application/json image/svg+xml;
 
+    # Blocks all IPs outside cloudflare's network
+    ${CLOUDFLARE_IPS_FIREWALL}
+
     location / {
         proxy_cache off;
         proxy_pass http://${UPSTREAM}_upstream;
-
-        # Blocks all IPs outside cloudflare's network
-        ${CLOUDFLARE_IPS_FIREWALL}
     }
 
     location /socket.io/ {
@@ -38,7 +38,7 @@ server {
 
         proxy_cache off;
         proxy_buffering off;
-        proxy_pass http://${UPSTREAM}_upstream;
+        proxy_pass http://${UPSTREAM}_upstream/socket.io/;
 
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -46,9 +46,6 @@ server {
 
         proxy_read_timeout 60m;
         proxy_send_timeout 60m;
-
-        # Blocks all IPs outside cloudflare's network
-        ${CLOUDFLARE_IPS_FIREWALL}
     }
 
     if ($host !~* ^(${NGINX_HOST})$) {
