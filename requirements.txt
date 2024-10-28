@@ -1,3 +1,4 @@
+amqp==5.2.0
 annotated-types==0.7.0
 anyio==4.6.2.post1
 bidict==0.23.1
@@ -24,6 +25,7 @@ itsdangerous==2.2.0
 Jinja2==3.1.4
 jiter==0.6.1
 jmespath==1.0.1
+kombu==5.4.2
 MarkupSafe==3.0.2
 numpy==2.1.2
 openai==1.52.0
@@ -48,6 +50,7 @@ types-pytz==2024.2.0.20241003
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
+vine==5.1.0
 Werkzeug==3.0.4
 wsproto==1.2.0
 zope.event==5.0
