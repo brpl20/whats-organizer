@@ -49,8 +49,4 @@ server {
         proxy_read_timeout 60m;
         proxy_send_timeout 60m;
     }
-
-    if ($host !~* ^(${NGINX_HOST})$) {
-        return 444;
-    }
 }
