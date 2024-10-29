@@ -10,8 +10,8 @@ upstream ${UPSTREAM}_upstream {
     ${UPSTREAM_SERVERS}
     # Previne perda de sessão usando vários workers
     # Use ip_hash em dev e hash em prod (Cloudflare)
-    # ip_hash;
-    hash $http_cf_connecting_ip consistent;
+    ip_hash;
+    # hash $http_cf_connecting_ip consistent;
     keepalive 64;
 }
 
