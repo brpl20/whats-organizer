@@ -1,17 +1,17 @@
 # Base Image
 FROM nginx:alpine
 
-# Install dependencies
 # RUN apk update && apk add openssl python3 python3-dev py3-pip build-base libressl-dev musl-dev libffi-dev rust cargo iptables openrc
 # RUN pip3 install pip --upgrade
 # RUN pip3 install certbot-nginx # certbot
 
-# Copy files
 COPY --chown=nginx:nginx ./nginx.conf /etc/nginx/nginx.conf
 COPY --chown=nginx:nginx ./ssl.conf /etc/nginx/ssl.conf
 COPY --chown=nginx:nginx ./setup_balancer.sh /
 COPY --chown=nginx:nginx ./setup_firewall.sh /
-RUN sh -c 'echo -e "$(cat setup_balancer.sh)\n$(cat setup_firewall.sh)\n$(cat docker-entrypoint.sh)" > docker-entrypoint.sh'
+COPY --chown=nginx:nginx ./setup_ip.sh /
+RUN sh -c 'echo -e "$(cat setup_balancer.sh)\n$(cat setup_firewall.sh)\n$(cat setup_ip.sh)\n$(cat docker-entrypoint.sh)" > docker-entrypoint.sh'
+
 #COPY ./iptables.sh /iptables.sh
 RUN sh -c 'if [ -f /var/www/html/ ]; then rm -rf /var/www/html/; fi'
 RUN sh -c 'if [ -f /usr/share/nginx/html/index.html ]; then echo "" > /usr/share/nginx/html/index.html; fi'
@@ -55,7 +55,3 @@ COPY .env /
 
 EXPOSE 443
 EXPOSE 80
-
-# Start command
-# CMD ["/run.sh"]
-

@@ -19,6 +19,8 @@ server {
     ${HTTP_OR_SSL}
 	http2 on;
 
+    ${CLOUDFLARE_REAL_IP}
+
     server_name ${NGINX_HOST};
     server_tokens off;
     gzip on;
@@ -48,5 +50,9 @@ server {
 
         proxy_read_timeout 60m;
         proxy_send_timeout 60m;
+    }
+
+    if ($host !~* ^(${NGINX_HOST})$) {
+        return 444;
     }
 }
