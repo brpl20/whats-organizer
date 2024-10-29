@@ -9,8 +9,9 @@ upstream ${UPSTREAM}_upstream {
     # FLASK_PORT_START and FLASK_PORT_END
     ${UPSTREAM_SERVERS}
     # Previne perda de sessão usando vários workers
-    ip_hash;
-    # hash $http_cf_connecting_ip consistent;
+    # Use ip_hash em dev e hash em prod (Cloudflare)
+    # ip_hash;
+    hash $http_cf_connecting_ip consistent;
     keepalive 64;
 }
 
@@ -33,21 +34,21 @@ server {
         proxy_pass http://${UPSTREAM}_upstream;
     }
 
-    #location /socket.io/ {
-    #    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    #    proxy_set_header Host $host;
-#
-    #    proxy_cache off;
-    #    proxy_buffering off;
-    #    proxy_pass http://${UPSTREAM}_upstream/socket.io/;
-#
-    #    proxy_http_version 1.1;
-    #    proxy_set_header Upgrade $http_upgrade;
-    #    proxy_set_header Connection "upgrade";
-#
-    #    proxy_read_timeout 60m;
-    #    proxy_send_timeout 60m;
-    #}
+    location /socket.io/ {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+
+        proxy_cache off;
+        proxy_buffering off;
+        proxy_pass http://${UPSTREAM}_upstream/socket.io/;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_read_timeout 60m;
+        proxy_send_timeout 60m;
+    }
 
     if ($host !~* ^(${NGINX_HOST})$) {
         return 444;
