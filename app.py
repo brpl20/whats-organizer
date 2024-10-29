@@ -25,10 +25,17 @@ app = Flask(__name__)
 #CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 rmq_url = f"amqp://{os.getenv('RMQ_HOST')}:{os.getenv('RMQ_PORT')}"
-socketio = SocketIO(app, cors_allowed_origins="*", message_queue=rmq_url, ping_timeout=60)
+socketio = SocketIO(app, cors_allowed_origins="*", ping_timeout=60, async_mode='gevent', message_queue=rmq_url)
+
+
+@socketio.on('connect')
+def handle_connect():
+    socketio.emit('Smessage', {'data': 'Connected'})
+
 
 @app.route('/process', methods=['POST'])
 def process_zip():
+    socketio.emit('Smessage', { 'data': "Iniciando processamento do Arquivo ZIP"})
     if 'file' not in request.files:
         return jsonify({"Erro": "Arquivo Não Encontrado"}), 400
     
@@ -43,9 +50,7 @@ def process_zip():
         unique_folder_name = str(uuid.uuid4())
         final_work_folder = os.path.join(base_folder, unique_folder_name)
         os.makedirs(final_work_folder, exist_ok=True)
-        
-        socketio.emit('Smessage')
-        
+                
         # Save the uploaded file
         zip_path = os.path.join(final_work_folder, "uploaded.zip")
         file.save(zip_path)
@@ -126,4 +131,5 @@ def process_zip():
 
 
 if __name__ == '__main__':
+    print('main')
     socketio.run(app, debug=os.getenv("FLASK_ENV") == 'production')

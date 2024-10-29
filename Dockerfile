@@ -31,7 +31,10 @@ ENV PATH="/home/python/.local/bin:${PATH}"
 # -w apenas é suportado com 1 thread.
 # É possível que -w possa ser usado agora, pois foi implementado redis pra lidar
 # com concorrência, mas a documentação do gevent não recomenda.
+# É aplicado o monkey patch para funcionar com o kumbu (Rabbitmq e multi thread)
+# o monkey patch faz com que o IO seja non-blocking e mais eficiente
 CMD ["sh", "-c", "\
+python -c 'from gevent import monkey; monkey.patch_all()' && \
 for FLASK_PORT in $(seq ${FLASK_PORT_START} ${FLASK_PORT_END}); do \
   gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} app:app --timeout 300 & \
 done && wait"]
