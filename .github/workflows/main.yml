@@ -25,6 +25,7 @@ jobs:
             git clone https://github.com/${{ github.repository }} ${PROJECT_DIR}
           else
             cd ${PROJECT_DIR}
+            git reset --hard origin
             git pull
           fi
           cp ${ENV_DIR}/.env .

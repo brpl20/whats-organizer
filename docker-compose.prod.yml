@@ -28,7 +28,7 @@ services:
     networks:
       - whats-organizer_back
     volumes:
-      - ./infra/server/templates:/etc/nginx/templates
+      # - ./infra/server/templates:/etc/nginx/templates
       - /etc/letsencrypt/live/${DOMAIN}/fullchain.pem:/etc/nginx/ssl/fullchain.pem
       - /etc/letsencrypt/live/${DOMAIN}/privkey.pem:/etc/nginx/ssl/privkey.pem
     depends_on:
