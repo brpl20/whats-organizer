@@ -13,6 +13,7 @@ WORKDIR /app
 
 COPY --chown=python:python requirements.txt .
 RUN pip3 install --no-cache-dir --upgrade pip
+ENV PATH="/home/python/.local/bin:${PATH}"
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY --chown=python:python --exclude=infra . .
@@ -21,7 +22,6 @@ ARG FLASK_PORT_START=${FLASK_PORT_START}
 ARG FLASK_PORT_END=${FLASK_PORT_END}
 EXPOSE ${FLASK_PORT_START}-${FLASK_PORT_END}
 
-ENV PATH="/home/python/.local/bin:${PATH}"
 # https://flask-socketio.readthedocs.io/en/latest/deployment.html
 # Por que Gevent? Eventlet é mais performático, porém escolhi gevent
 # pela propagação automática de exceções (praticidade)
