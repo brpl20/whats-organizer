@@ -25,7 +25,11 @@ docker run -it whats-organizer-nginx /bin/sh
 
 Caso tenha erro 413 (Entity too large), ao fazer upload de arquivo, mude essa linha no nginx.conf: client_max_body_size 10G;
 
-Renovar certificado:
+### CORS
+
+O cors é manejado pelo nginx, qualquer tentativa de usar CORS no flask, socketio ou gunicorn/ gevent vai causar duplicidade do header e causar erros de CORS, habilite CORS apenas a nível de servidor (`infra/.env` e/ ou `infra/...`)
+
+### Renovar certificado:
 
 O certificado do front é manejado pela cloudflare (na porta 80), mas o plano free não permite manejar outras portas, como há dois containers nginx, para manter as redes isoladas, usaremos um certificado gerado pelo certbot no backend.
 
