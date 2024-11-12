@@ -19,6 +19,9 @@ jobs:
           export PROJECT=back
           export PROJECT_DIR="/root/whats-organizer-${PROJECT}"
           export ENV_DIR=/root/envs/${PROJECT}
+          export ERROR=false
+          export DISK_USAGE=$(df -h / | egrep -o '[0-9]+%' | cut -d '%' -f 1)
+          export MESSAGE="Whats-Organizer-${PROJECT}:"
           if [ ! -d ${PROJECT_DIR} ]; then
             mkdir ${PROJECT_DIR}
             cd ${PROJECT_DIR}
@@ -30,7 +33,22 @@ jobs:
           fi
           cp ${ENV_DIR}/.env .
           cp ${ENV_DIR}/nginx.env ./infra/server/.env
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml build
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml build || \
+            export ERROR=true
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d || \
+            export ERROR=true
           docker image prune --force
           docker container prune --force
+          if [ ${ERROR} == true ]; then
+            export MESSAGE="${MESSAGE} Falhou ao Subir Imagem de Docker!"
+          else
+            export MESSAGE="${MESSAGE} Build feita com sucesso!"
+          fi
+          if [ "$DISK_USAGE" -gt 90 ]; then
+            export MESSAGE="${MESSAGE} *** AVISO: Disco Lotado ***"
+          fi
+          curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" \
+               -H "Content-Type: application/json" \
+               -d '{ "message": "${MESSAGE}" }
+
+
