@@ -44,7 +44,7 @@ def handle_connect():
 
 @app.route('/process', methods=['POST'])
 def process_zip():
-    socketio.emit('Smessage', { 'data': "Iniciando processamento do Arquivo ZIP"})
+    socketio.emit('Smessage', { 'data': "Iniciando Processamento..."})
     if 'file' not in request.files:
         return jsonify({"Erro": "Arquivo Não Encontrado"}), 400
     
