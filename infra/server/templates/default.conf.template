@@ -32,11 +32,23 @@ server {
     ${CLOUDFLARE_IPS_FIREWALL}
 
     location / {
+        # CORS
+        add_header Access-Control-Allow-Origin "${ALLOWED_CORS}";
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
+        add_header Access-Control-Allow-Credentials "true";
+
         proxy_cache off;
         proxy_pass http://${UPSTREAM}_upstream;
     }
 
     location /socket.io/ {
+        # CORS
+        add_header Access-Control-Allow-Origin "${ALLOWED_CORS}";
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
+        add_header Access-Control-Allow-Credentials "true";
+
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
 

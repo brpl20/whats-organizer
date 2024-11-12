@@ -22,10 +22,19 @@ load_dotenv()
 prod = os.getenv("FLASK_ENV")
 
 app = Flask(__name__)
-#CORS(app)
-CORS(app, resources={r"/*": {"origins": "*"}})
+
+cors_origins=[
+    "https://whatsorganizer.com.br",
+    "https://www.whatsorganizer.com.br"
+    ]
+
+CORS(app, resources={ "/*": { "origins": cors_origins } })
 rmq_url = f"amqp://{os.getenv('RMQ_HOST')}:{os.getenv('RMQ_PORT')}"
-socketio = SocketIO(app, cors_allowed_origins="*", ping_timeout=60, async_mode='gevent', message_queue=rmq_url)
+socketio = SocketIO(app,
+                    cors_allowed_origins=cors_origins,
+                    ping_timeout=60,
+                    async_mode='gevent',
+                    message_queue=rmq_url)
 
 
 @socketio.on('connect')
