@@ -31,7 +31,7 @@ RUN rm -rf /etc/nginx/conf.d/*.conf
 # COPY ./acme.conf /etc/nginx/conf.d/
 
 # Redisparar a build caso mude os templates
-COPY --chown=nginx:nginx ./infra/server/templates /etc/nginx/templates
+COPY --chown=nginx:nginx ./server/templates /etc/nginx/templates
 
 # COPY ./docker-genssl-entrypoint.d/install_ssl.sh /docker-entrypoint.d/
 COPY .env .
