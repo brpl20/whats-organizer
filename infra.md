@@ -21,6 +21,10 @@ Para rodar comando em um container morto (inicia ele):
 docker run -it whats-organizer-nginx /bin/sh
 ```
 
+### Upload de arquivo
+
+Caso tenha erro 413 (Entity too large), ao fazer upload de arquivo, mude essa linha no nginx.conf: client_max_body_size 10G;
+
 Renovar certificado:
 
 O certificado do front é manejado pela cloudflare (na porta 80), mas o plano free não permite manejar outras portas, como há dois containers nginx, para manter as redes isoladas, usaremos um certificado gerado pelo certbot no backend.
