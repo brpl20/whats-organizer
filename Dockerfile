@@ -3,7 +3,8 @@
 
 FROM python:3.13.0-alpine3.20
 
-RUN apk update && apk upgrade
+RUN apk update && apk --no-cache upgrade
+RUN apk --no-cache add ffmpeg
 RUN addgroup -S python && adduser -S python -G python
 
 USER python
@@ -11,7 +12,7 @@ USER python
 WORKDIR /app
 
 COPY --chown=python:python requirements.txt .
-RUN pip3 install --upgrade pip
+RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY --chown=python:python --exclude=infra . .
