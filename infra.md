@@ -29,6 +29,8 @@ Caso tenha erro 413 (Entity too large), ao fazer upload de arquivo, mude essa li
 
 O cors é manejado pelo nginx, qualquer tentativa de usar CORS no flask, socketio ou gunicorn/ gevent vai causar duplicidade do header e causar erros de CORS, habilite CORS apenas a nível de servidor (`infra/.env` e/ ou `infra/...`)
 
+Já no websocket, o cors é habilitado na aplicação e desabilitado no nginx, isso garante que funcione tanto com wss, quanto com https (em navegadores antigos https polling é caso padrão)
+
 ### Renovar certificado:
 
 O certificado do front é manejado pela cloudflare (na porta 80), mas o plano free não permite manejar outras portas, como há dois containers nginx, para manter as redes isoladas, usaremos um certificado gerado pelo certbot no backend.
