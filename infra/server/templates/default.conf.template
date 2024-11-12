@@ -40,25 +40,19 @@ server {
             add_header Access-Control-Allow-Credentials "true";
         }
 
-        if ($http_upgrade = "websocket") {
-            more_clear_headers 'Access-Control-Allow-Origin';
-            more_clear_headers 'Access-Control-Allow-Methods';
-            more_clear_headers 'Access-Control-Allow-Headers';
-            more_clear_headers 'Access-Control-Allow-Credentials';
-        }
-
         proxy_cache off;
         proxy_pass http://${UPSTREAM}_upstream;
     }
 
     location /socket.io/ {
         # CORS for www or (root)
-        if ($http_origin ~* ${ALLOWED_CORS}) {
-            add_header Access-Control-Allow-Origin $http_origin;
-            add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-            add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
-            add_header Access-Control-Allow-Credentials "true";
-        }
+        # Does not work for websockets (but would be ideal when socketio fallsback to https)
+        # if ($http_origin ~* ${ALLOWED_CORS}) {
+        #     add_header Access-Control-Allow-Origin $http_origin;
+        #     add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+        #     add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
+        #     add_header Access-Control-Allow-Credentials "true";
+        # }
         
 
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
