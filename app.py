@@ -32,7 +32,7 @@ cors_origins=[
 
 rmq_url = f"amqp://{os.getenv('RMQ_HOST')}:{os.getenv('RMQ_PORT')}"
 socketio = SocketIO(app,
-                    # cors_allowed_origins=cors_origins,
+                    cors_allowed_origins=cors_origins,
                     ping_timeout=60,
                     async_mode='gevent',
                     message_queue=rmq_url)
