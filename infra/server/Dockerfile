@@ -30,6 +30,9 @@ RUN sh -c 'if [ -f /usr/share/nginx/html/index.html ]; then echo "" > /usr/share
 RUN rm -rf /etc/nginx/conf.d/*.conf
 # COPY ./acme.conf /etc/nginx/conf.d/
 
+# Redisparar a build caso mude os templates
+ADD ./infra/server/templates /etc/nginx/templates
+
 # COPY ./docker-genssl-entrypoint.d/install_ssl.sh /docker-entrypoint.d/
 COPY .env .
 COPY .env /
