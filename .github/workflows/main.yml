@@ -20,7 +20,7 @@ jobs:
           export PROJECT_DIR="/root/whats-organizer-${PROJECT}"
           export ENV_DIR=/root/envs/${PROJECT}
           export ERROR=false
-          export DISK_USAGE=$(df -h / | egrep -o '[0-9]+%' | cut -d '%' -f 1)
+          export DISK_USAGE=$(df -h / | egrep -o "[0-9]+%" | cut -d "%" -f 1)
           export MESSAGE="Whats-Organizer-${PROJECT}:"
           if [ ! -d ${PROJECT_DIR} ]; then
             mkdir ${PROJECT_DIR}
@@ -49,6 +49,6 @@ jobs:
           fi
           curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" \
                -H "Content-Type: application/json" \
-               -d '{ "message": "${MESSAGE}" }
+               -d "{ \"message\": \"${MESSAGE}\" }"
 
 
