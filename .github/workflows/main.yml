@@ -39,14 +39,13 @@ jobs:
             export ERROR=true
           docker image prune --force
           docker container prune --force
-          if [ ${ERROR} == true ]; then
+          if [ ${ERROR} = true ]; then
             export MESSAGE="${MESSAGE} Falhou ao Subir Imagem de Docker!"
           else
             export MESSAGE="${MESSAGE} Build feita com sucesso!"
           fi
-          if [ "$DISK_USAGE" -gt 90 ]; then
+          [ "$DISK_USAGE" -lt 90 ] || \
             export MESSAGE="${MESSAGE} *** AVISO: Disco Lotado ***"
-          fi
           curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" \
                -H "Content-Type: application/json" \
                -d "{ \"message\": \"${MESSAGE}\" }"
