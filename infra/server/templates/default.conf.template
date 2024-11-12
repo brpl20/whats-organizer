@@ -15,12 +15,6 @@ upstream ${UPSTREAM}_upstream {
     keepalive 64;
 }
 
-# allows multiple domains for CORS
-map $http_origin $cors_allowed {
-    default 0;
-    ~*$ALLOWED_CORS 1;
-}
-
 server {
     ${HTTP_OR_SSL}
 	http2 on;
@@ -38,7 +32,8 @@ server {
     ${CLOUDFLARE_IPS_FIREWALL}
 
     location / {
-        if ($cors_allowed) {
+        # CORS for www or (root)
+        if ($http_origin ~* ${ALLOWED_CORS}) {
             add_header Access-Control-Allow-Origin $http_origin;
             add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
             add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
@@ -50,8 +45,8 @@ server {
     }
 
     location /socket.io/ {
-        # CORS
-        if ($cors_allowed) {
+        # CORS for www or (root)
+        if ($http_origin ~* ${ALLOWED_CORS}) {
             add_header Access-Control-Allow-Origin $http_origin;
             add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
             add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
