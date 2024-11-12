@@ -28,9 +28,8 @@ cors_origins=[
     "https://www.whatsorganizer.com.br"
     ]
 
-CORS(app,
-     #resources={ "/*": { "origins": cors_origins } }
-    )
+# CORS(app, resources={ "/*": { "origins": cors_origins } })
+
 rmq_url = f"amqp://{os.getenv('RMQ_HOST')}:{os.getenv('RMQ_PORT')}"
 socketio = SocketIO(app,
                     # cors_allowed_origins=cors_origins,
