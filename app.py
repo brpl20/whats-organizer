@@ -25,7 +25,8 @@ app = Flask(__name__)
 
 cors_origins=[
     "https://whatsorganizer.com.br",
-    "https://www.whatsorganizer.com.br"
+    "https://www.whatsorganizer.com.br",
+    "http://localhost:5173"
     ]
 
 # CORS(app, resources={ "/*": { "origins": cors_origins } })
