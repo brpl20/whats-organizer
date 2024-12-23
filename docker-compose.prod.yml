@@ -10,6 +10,7 @@ services:
         - FLASK_PORT=${FLASK_PORT}
         - FLASK_PORT_START=${FLASK_PORT_START}
         - FLASK_PORT_END=${FLASK_PORT_END}
+      dockerfile: slim.Dockerfile
     networks:
       - whats-organizer_back
     expose:

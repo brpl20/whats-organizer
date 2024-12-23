@@ -1,12 +1,16 @@
 # syntax=docker.io/docker/dockerfile:1.7-labs
 # Syntax necessary for --exclude to work
 
-FROM python:3.13.0-alpine3.20
+FROM python:3.12.8-alpine3.20
 
 RUN apk update && apk --no-cache upgrade
-RUN apk --no-cache add ffmpeg
 RUN addgroup -S python && adduser -S python -G python
-
+RUN apk --no-cache add ffmpeg
+# Playwright (depends on glibc) https://wiki.alpinelinux.org/wiki/Running_glibc_programs
+RUN apk --no-cache add gcompat libc6-compat libstdc++
+ENV PY_BUILD_DEPENDS="g++ make patchelf"
+RUN apk add --no-cache ${PY_BUILD_DEPENDS}
+# créditos pela fix: https://github.com/jbwdevries
 USER python
 
 WORKDIR /app
@@ -15,6 +19,16 @@ COPY --chown=python:python requirements.txt .
 RUN pip3 install --no-cache-dir --upgrade pip
 ENV PATH="/home/python/.local/bin:${PATH}"
 RUN pip3 install --no-cache-dir -r requirements.txt
+
+USER root
+RUN patchelf --set-interpreter /lib/ld-linux-x86-64.so.2 $(which python3)
+USER python
+RUN pip3 install --no-cache-dir playwright==1.49.1
+USER root
+RUN sh -c \
+  "patchelf --set-interpreter /lib/ld-linux-x86-64.so.2 ~python/.local/lib/python*/site-packages/playwright/driver/node"
+RUN apk del ${PY_BUILD_DEPENDS}
+USER python
 
 COPY --chown=python:python --exclude=infra . .
 

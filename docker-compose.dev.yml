@@ -1,0 +1,8 @@
+services:
+  flask:
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/home/python/.Xauthority
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/home/python/.Xauthority

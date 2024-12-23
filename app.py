@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+from time import sleep
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import uuid
@@ -17,8 +18,9 @@ from converter_mp3 import convert_opus_to_mp3
 from converter_pdf import process_pdf_folder
 from file_append import file_appending, file_appending_pdf
 from dotenv import load_dotenv
+from playwright.sync_api import sync_playwright
 
-load_dotenv()
+load_dotenv(override=True)
 prod = os.getenv("FLASK_ENV")
 
 app = Flask(__name__)
@@ -35,14 +37,65 @@ rmq_url = f"amqp://{os.getenv('RMQ_HOST')}:{os.getenv('RMQ_PORT')}"
 socketio = SocketIO(app,
                     cors_allowed_origins=cors_origins,
                     ping_timeout=60,
-                    async_mode='gevent',
-                    message_queue=rmq_url)
+                    async_mode='gevent' if prod else None,
+                    message_queue=rmq_url if prod else None)
+playwright_headless = os.getenv("HEADLESS", "True") == "True"
 
 
 @socketio.on('connect')
 def handle_connect():
     socketio.emit('Smessage', {'data': 'Enviando Arquivo...'})
 
+@app.route('/download-pdf', methods=['POST'])
+def download_pdf():
+    messages = request.json.get('messages')
+    if not messages:
+        return jsonify({"Erro", "Erro ao obter Mensagens"})
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=playwright_headless)
+        page = browser.new_page()
+        # page.add_init_script(script=f"window.messages = {messages}")
+        page.goto("http://whatsorganizer.com.br")
+        page.wait_for_load_state('domcontentloaded')
+
+        injector_input = page.locator('[data-testid="playwright-inject-chat"]')
+        injector_input.wait_for(state='attached', timeout=5000)
+        injector_input.evaluate(f"""
+            (e) => {{
+                e.setAttribute('style', 'display: block');
+                e.setAttribute('value', String('{json.dumps(messages)}'))
+            }}
+        """)
+        injector_input.press('Enter')
+
+        chat = page.locator('[data-testid="playwright-chat"]')
+        chat.wait_for(timeout=10000)
+        locators = page.locator('//img')
+        locators.evaluate_all("elements => elements.forEach(e => e.scrollIntoView())")
+        for image in locators.element_handles():
+            image.evaluate("async (img) => img.complete || new Promise(resolve => img.onload = resolve)")
+        # page.emulate_media(media="print")
+        sleep(0.1)
+        pdf_bytes = page.pdf(
+            format="A4",
+            print_background=True,
+            scale=1.2,
+            margin={
+                **{y: '30' for y in ('top', 'bottom')},
+                **{x: '5' for x in ('left', 'right')},
+            },
+        )  
+        browser.close()
+
+    return Response(
+        pdf_bytes,
+        mimetype='application/pdf',
+        headers={
+            'Content-Disposition': 'attachment; filename="document.pdf"'
+        }
+    )
+
+    
 
 @app.route('/process', methods=['POST'])
 def process_zip():
@@ -104,7 +157,7 @@ def process_zip():
             extracted_info = extract_info_iphone(fixed_file)
             socketio.emit('Smessage', {'data': 'Iphone Detectado!'})
         else:
-            return jsonify({"error": "Unknown device type"}), 400
+            return jsonify({"Erro": "Dispositivo desconhecido"}), 400
         
         # Append files
         list_files = file_appending(extracted_info, transcriptions)
