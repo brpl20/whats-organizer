@@ -1,15 +1,5 @@
 ... 
 
-ver no front
+Ver no front [todo](https://github.com/brpl20/whats-organizer-front/blob/master/td.md) [infra](https://github.com/brpl20/whats-organizer-front/blob/master/explain.txt) 
+Ver [wiki](https://github.com/brpl20/whats-organizer/wiki)
 
-
-Para iniciar o Docker em modo dev com o playwright podendo ser headfull, mude a env
-
-Use no Xserver, não garanto que funciona no wayland
-
-Garanta que você instalou docker no modo usuário docker (sem precisar de sudo pra rodar)
-
-```
-xhost +local:docker
-docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.dev.yml up --build
-```
