@@ -1,8 +1,22 @@
+from dataclasses import dataclass
 import re
+from typing import List, Literal, Mapping, Optional, Set, TypeVar, TypedDict, Union
+from os import PathLike
 
-def extract_info_iphone(input_file):
-    extracted_info = []
-    unique_names = set()
+@dataclass(unsafe_hash=True)
+class MessageData(TypedDict):
+    Name: str
+    ID: int
+    Date: str
+    Time: str
+    Message: str
+    FileAttached: Optional[Union[Literal[False], str]]
+    
+TMessageData = TypeVar("TMessageData", bound=Union[MessageData, Mapping[Literal["ERRO"], str]])
+
+def extract_info_iphone(input_file: Union[str, bytes, PathLike]):
+    extracted_info: List[TMessageData] = []
+    unique_names: Set[str] = set()
     unique_ids = {}
     date_time_pattern = r'\[(\d{2}/\d{2}/\d{4}), (\d{2}:\d{2}:\d{2})\]'
     message_pattern = r'\] (.*?): (.*)'
@@ -77,7 +91,16 @@ def extract_info_iphone(input_file):
                     file_attached = file_pattern_pdf_match.group(1)
                     print(file_attached)
 
-            extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
+            extracted_info.append(
+                MessageData(**{
+                    'Name': sender,
+                    'ID': sender_id,
+                    'Date': date,
+                    'Time': time,
+                    'Message': message,
+                    'FileAttached': file_attached
+                })
+            )
     
     if len(unique_names) > 2:
         # Limpa a lista de entradas anteriores
@@ -89,12 +112,22 @@ def extract_info_iphone(input_file):
         # print(extract_info)
         return extracted_info
     else:
-        extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
+        extracted_info.append(
+            MessageData(**{
+                'Name': sender,
+                'ID': sender_id,
+                'Date': date,
+                'Time': time,
+                'Message': message,
+                'FileAttached': file_attached
+            })
+        )
         return extracted_info
 
-def extract_info_android(input_file):
-    extracted_info = []
-    unique_names = set()
+
+def extract_info_android(input_file: Union[str, bytes, PathLike]):
+    extracted_info: List[TMessageData] = []
+    unique_names: Set[str] = set()
     unique_ids = {}
     date_time_pattern = r'(\d{2}/\d{2}/\d{4}) (\d{2}:\d{2}) -'
     message_pattern = r'- (.*?): (.*)'
@@ -200,7 +233,16 @@ def extract_info_android(input_file):
                     print("-----------------------------")
                     print(file_attached)
 
-            extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
+            extracted_info.append(
+                MessageData(**{
+                    'Name': sender,
+                    'ID': sender_id,
+                    'Date': date,
+                    'Time': time,
+                    'Message': message,
+                    'FileAttached': file_attached
+                })
+            )
     
     if len(unique_names) > 2:
         # Limpa a lista de entradas anteriores
@@ -212,7 +254,16 @@ def extract_info_android(input_file):
         # print(extract_info)
         return extracted_info
     else:
-        extracted_info.append({'Name': sender, 'ID': sender_id, 'Date': date, 'Time': time, 'Message': message, 'FileAttached': file_attached})
+        extracted_info.append(
+            MessageData(**{
+                'Name': sender,
+                'ID': sender_id,
+                'Date': date,
+                'Time': time,
+                'Message': message,
+                'FileAttached': file_attached
+            })
+        )
         return extracted_info
 
 

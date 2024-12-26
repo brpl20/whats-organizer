@@ -1,4 +1,4 @@
-from time import sleep
+from typing import Callable, Literal, Mapping, TypeAlias, Union, List
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -6,19 +6,20 @@ import uuid
 import json
 import os
 import shutil
+from asyncio import new_event_loop, run, run_coroutine_threadsafe, set_event_loop
+from dotenv import load_dotenv
 
-# Import your existing functions
+
 from handle_zip_file import handle_zip_file
 from list_files import list_files_in_directory
 from find_whats_key_data import find_whats_key
 from extract_device import extract_info_device
 from file_fixer import process_file_fixer 
-from extract_objects_v2 import extract_info_iphone, extract_info_android
+from extract_objects_v2 import extract_info_iphone, extract_info_android, TMessageData
 from converter_mp3 import convert_opus_to_mp3
 from converter_pdf import process_pdf_folder
 from file_append import file_appending, file_appending_pdf
-from dotenv import load_dotenv
-from playwright.sync_api import sync_playwright
+from print_page import print_page, JSON
 
 load_dotenv(override=True)
 prod = os.getenv("FLASK_ENV")
@@ -39,54 +40,33 @@ socketio = SocketIO(app,
                     ping_timeout=60,
                     async_mode='gevent' if prod else None,
                     message_queue=rmq_url if prod else None)
-playwright_headless = os.getenv("HEADLESS", "True") == "True"
-
 
 @socketio.on('connect')
 def handle_connect():
     socketio.emit('Smessage', {'data': 'Enviando Arquivo...'})
 
 @app.route('/download-pdf', methods=['POST'])
-def download_pdf():
-    messages = request.json.get('messages')
-    if not messages:
-        return jsonify({"Erro", "Erro ao obter Mensagens"})
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=playwright_headless)
-        page = browser.new_page()
-        # page.add_init_script(script=f"window.messages = {messages}")
-        page.goto("http://whatsorganizer.com.br")
-        page.wait_for_load_state('domcontentloaded')
+async def download_pdf():
+    messages_str:str = request.form.get('messages')
+    messages: JSON
+    try:
+        messages = json.loads(messages_str)
+        if not messages:
+            return jsonify({"Erro", "Erro ao Obter Mensagens"}, 400)
+    except ValueError:
+        return jsonify({'Erro': 'Erro ao Obter Mensagens'}), 400
+    
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
 
-        injector_input = page.locator('[data-testid="playwright-inject-chat"]')
-        injector_input.wait_for(state='attached', timeout=5000)
-        injector_input.evaluate(f"""
-            (e) => {{
-                e.setAttribute('style', 'display: block');
-                e.setAttribute('value', String('{json.dumps(messages)}'))
-            }}
-        """)
-        injector_input.press('Enter')
-
-        chat = page.locator('[data-testid="playwright-chat"]')
-        chat.wait_for(timeout=10000)
-        locators = page.locator('//img')
-        locators.evaluate_all("elements => elements.forEach(e => e.scrollIntoView())")
-        for image in locators.element_handles():
-            image.evaluate("async (img) => img.complete || new Promise(resolve => img.onload = resolve)")
-        # page.emulate_media(media="print")
-        sleep(0.1)
-        pdf_bytes = page.pdf(
-            format="A4",
-            print_background=True,
-            scale=1.2,
-            margin={
-                **{y: '30' for y in ('top', 'bottom')},
-                **{x: '5' for x in ('left', 'right')},
-            },
-        )  
-        browser.close()
-
+    '''
+        Evita o erro que playwright sync está rodando em um contexto
+        de loop assíncrono, já que async não funciona bem com flask
+        quando roda no gevent
+    '''
+    pdf_bytes = await print_page(file, messages)
+    
     return Response(
         pdf_bytes,
         mimetype='application/pdf',
@@ -150,14 +130,24 @@ def process_zip():
         fixed_file = process_file_fixer(whats_main_folder_file, dispositivo)
         
         # Extract info based on device type
-        if dispositivo == "android":
-            extracted_info = extract_info_android(fixed_file)
-            socketio.emit('Smessage', {'data': 'Android Detectado!'})
-        elif dispositivo == "iphone":
-            extracted_info = extract_info_iphone(fixed_file)
-            socketio.emit('Smessage', {'data': 'Iphone Detectado!'})
-        else:
+        extract: Mapping[
+            Literal["android, iphone"],
+            Callable[[Union[str, bytes, os.PathLike], List[TMessageData]]]
+        ] = {
+            "android": lambda: extract_info_android(fixed_file),
+            "iphone": lambda: extract_info_iphone(fixed_file),
+        }
+        
+        notify_extract: Callable[
+            [str],
+        None] = lambda device:socketio.emit('Smessage', {
+                "data": f'{device.title()} detectado!'
+            })
+        
+        if dispositivo not in extract.keys():
             return jsonify({"Erro": "Dispositivo desconhecido"}), 400
+        notify_extract(dispositivo)
+        extracted_info = extract[dispositivo]()
         
         # Append files
         list_files = file_appending(extracted_info, transcriptions)
@@ -196,5 +186,4 @@ def process_zip():
 
 
 if __name__ == '__main__':
-    print('main')
     socketio.run(app, debug=os.getenv("FLASK_ENV") == 'production')
