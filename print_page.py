@@ -48,7 +48,7 @@ async def print_page( file: FileStorage, messages: JSON ) -> bytes:
             for image in await unloaded_imgs.element_handles():
                 await image.evaluate("async (el) => el.complete || new Promise(resolve => el.onload = resolve)")
         
-        while await page.locator('[data-rendered-thumbnail="false"]').first.count():
+        while await page.locator('[data-rendered="false"]').first.count():
             await sleep(.2)
 
         #await page.emulate_media(media="print")
