@@ -1,7 +1,12 @@
 import os
+from os.path import abspath
 import subprocess
+from subprocess import STDOUT, PIPE
 from dotenv import load_dotenv 
 from openai import OpenAI
+from re import sub
+
+from sanitize import sanitize_path
 
 
 load_dotenv()
@@ -20,21 +25,25 @@ def convert_opus_to_mp3(path, client=clientopenai):
         return
     for file_name in os.listdir(path):
         if file_name.endswith('.opus'):
-            opus_file_path = os.path.join(path, file_name)
-            mp3_file_path = opus_file_path.replace('.opus', '.mp3')
-            # @TODO verificar se tem falha de injeção de comando aqui
-            command = ['sh', '-c', 'ffmpeg', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
-            try:
-                subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-                print(f"Converted {file_name} to MP3 format.")
-                # WhisperTranscribe
-                with open(mp3_file_path, 'rb') as f:
-                    files = {'file': f}
-                    transcript = client.audio.transcriptions.create(model="whisper-1",file=f)
-                    add_transcription(file_name, transcript.text)
-                    print("Transcrição...")
-                    print(transcript.text)
-            except subprocess.CalledProcessError as e:
-                print(f"Failed to convert {file_name}. Error: {str(e)}")
+            cwd = os.path.dirname(__file__)
+            opus_file_path = abspath(os.path.join(cwd, path, file_name))
+            mp3_file_path = abspath(opus_file_path.replace('.opus', '.mp3'))
+            opus_file_path = sanitize_path(opus_file_path)
+            mp3_file_path = sanitize_path(mp3_file_path)
+            command = ['ffmpeg', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
+            process = subprocess.Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
+
+            if process.returncode != 0:
+                stdout, stderr = process.communicate()
+                print(f"Failed to convert {file_name}.\n\n{' '.join(command)}\n\n{stdout}\n\n{stderr}")
+                return []
+                
+            # WhisperTranscribe
+            with open(mp3_file_path, 'rb') as f:
+                files = {'file': f}
+                transcript = client.audio.transcriptions.create(model="whisper-1",file=f)
+                add_transcription(file_name, transcript.text)
+                print("Transcrição...")
+                print(transcript.text)
     #pdb.set_trace()
     return transcriptions_list

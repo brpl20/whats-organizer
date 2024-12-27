@@ -6,13 +6,7 @@ from botocore.exceptions import NoCredentialsError
 import io
 import re
 import unicodedata 
-from docx2pdf import convert
-
-def convert_docx_to_pdf(docx_path):
-    pdf_path = os.path.splitext(docx_path)[0] + '.pdf'
-    print(pdf_path)
-    convert(docx_path, pdf_path)
-    return pdf_path
+from docxtopdf import convert_to
 
 def process_pdf(pdf_path, bucket_name):
     # Convert PDF to images
@@ -90,7 +84,7 @@ def process_pdf_folder(folder_path, bucket_name):
         if filename.lower().endswith('.docx'):
             docx_path = os.path.join(folder_path, filename)
             try:
-                pdf_path = convert_docx_to_pdf(docx_path)
+                pdf_path = convert_to(folder_path, docx_path)
                 print(f"Converted {filename} to PDF")
             except Exception as e:
                 print(f"Error converting {filename} to PDF: {str(e)}")

@@ -5,17 +5,16 @@ FROM python:3.12.8-slim
 
 RUN apt-get update && apt-get upgrade -y --no-install-recommends
 RUN addgroup --system python && adduser --system --ingroup python --home /home/python python
-RUN apt-get install -y --no-install-recommends ffmpeg wget # libnss3 libnspr4 \
-    libatk1.0-0 libatk-bridge2.0-0 \
-    libatspi2.0-0 libxcomposite1 \
-    libxdamage1 libcups2
+RUN apt-get install -y --no-install-recommends ffmpeg wget libreoffice-writer-nogui poppler-utils
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 # Video not loading, see https://github.com/microsoft/playwright/issues/4585
 RUN apt -y install ./google-chrome-stable_current_amd64.deb && rm google-chrome-stable_current_amd64.deb
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-USER python
+
 WORKDIR /app
+RUN mkdir -p zip_tests && chown python:python zip_tests
+USER python
 
 COPY --chown=python:python requirements.txt .
 RUN pip3 install --no-cache-dir --upgrade pip
