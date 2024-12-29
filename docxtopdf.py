@@ -1,4 +1,4 @@
-from subprocess import CalledProcessError, run, PIPE, STDOUT
+from subprocess import CalledProcessError, Popen, run, PIPE, STDOUT
 from re import search
 from typing import Callable, Dict, Optional
 from sys import platform
@@ -9,7 +9,7 @@ from sanitize import sanitize_path
 def convert_to(folder: str, source:str, timeout:Optional[int]=None) -> str:
     folder = sanitize_path(folder)
     source = sanitize_path(source)
-    args = [
+    command = [
         libreoffice_exec(),
         '--headless',
         '--convert-to',
@@ -19,11 +19,13 @@ def convert_to(folder: str, source:str, timeout:Optional[int]=None) -> str:
         source,
     ]
 
-    try:
-        process = run(args, stdout=PIPE, stderr=STDOUT, timeout=timeout, check=True)
-    except CalledProcessError as e:
-        print(e)
-        return ""
+
+    process = Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
+    process.communicate()
+    if int(process.returncode or 0):
+        print(f'failed to convert docx to pdf {source}')
+        return ''
+    
     filename = search('-> (.*?) using filter', process.stdout.decode())
 
     if filename is None: 
@@ -38,7 +40,7 @@ libreoffice_path: Dict[str, str] = {
 
 get_platform: Callable[
     [], str
-] = platform if platform in dict.keys(libreoffice_path) else 'linux'
+] = lambda: platform if platform in dict.keys(libreoffice_path) else 'linux'
 # TODO: Provide support for more platforms
 libreoffice_exec: Callable[
     [], str

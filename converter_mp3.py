@@ -32,10 +32,11 @@ def convert_opus_to_mp3(path, client=clientopenai):
             mp3_file_path = sanitize_path(mp3_file_path)
             command = ['ffmpeg', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
             process = subprocess.Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
+            process.communicate()
 
-            if process.returncode != 0:
+            if int(process.returncode or 0):
                 stdout, stderr = process.communicate()
-                print(f"Failed to convert {file_name}.\n\n{' '.join(command)}\n\n{stdout}\n\n{stderr}")
+                print(f"[{process.returncode}] Failed to convert {file_name}.\n\n{' '.join(command)}\n\n{stdout}\n\n{stderr}")
                 return []
                 
             # WhisperTranscribe
