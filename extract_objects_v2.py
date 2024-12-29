@@ -89,7 +89,7 @@ def extract_info_iphone(input_file: Union[str, bytes, PathLike]):
                     print("result")
                     print("-----------------------------")
                     file_attached = file_pattern_pdf_match.group(1)
-                    print(file_attached)
+                    #print(file_attached)
 
             extracted_info.append(
                 MessageData(**{

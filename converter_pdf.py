@@ -75,7 +75,6 @@ def process_pdf_aws(pdf_path, bucket_name):
 
         #'ImageLink': full_url})
         # links_list.append(full_url)
-    print(links_list)
     return links_list
 
 def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:

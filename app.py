@@ -154,9 +154,6 @@ def process_zip():
         lit_files_pdf = file_appending_pdf(extracted_info, pdf_img_links)
         socketio.emit('Smessage', {'data': 'Organizando Mensagens...'})
 
-        print(extracted_info)
-        print(type(extracted_info))
-
         # Create JSON output
         output_path = os.path.join(final_work_folder, 'output.json')
         with open(output_path, 'w') as f:
@@ -167,8 +164,8 @@ def process_zip():
             result = json.load(f)
         
         print("????")
-        print(result)
-        print(jsonify(result))
+        # print(result)
+        # print(jsonify(result))
         if os.path.exists(final_work_folder):
             try:
                 # Delete the folder and all its contents

@@ -14,10 +14,8 @@ def file_appending(first_list, second_list):
 
 def file_appending_pdf(messages, file_links):
     for message in messages:
-        print(message)
         if message.get('FileAttached'):
             for file_info in file_links:
-                print(file_info)
                 if message['FileAttached'] == file_info['File']:
                     message['links'] = file_info['Links']
     return messages

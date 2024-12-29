@@ -28,7 +28,6 @@ def list_files_in_directory(directory_path):
                 # Check for WhatsApp chat
                 if file.endswith(".txt") and "WhatsApp" in file:
                     whatsapp_chat_found = True
-                    print(file)
                     file_info_whats = {
                         "whats": file
                     }
