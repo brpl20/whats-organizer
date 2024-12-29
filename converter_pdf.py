@@ -91,13 +91,13 @@ def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
         width, height = image.size
         is_landscape = width > height
         landscape_size = (1080, 1920)
-        portrait_size = landscape_size[::-1]
-        OrientationT = TypeVar('OrientationT', Dict[bool, Tuple[Tuple[int, int], Literal['landscape', 'portrait']]])
-        orientation_landscape: OrientationT = {
+        portrait_size = (1920, 1080)
+
+        orientation_landscape = {
             True: (landscape_size, 'landscape'),
             False: (portrait_size, 'portrait')
         }
-        
+
         size, orientation = orientation_landscape[is_landscape]
         image.thumbnail(size)
 
@@ -112,6 +112,7 @@ def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
         file_entry['Links'].append(orientation)
 
     return links_list
+
 
 
 def process_pdf_folder(folder_path: str):
@@ -131,8 +132,9 @@ def process_pdf_folder(folder_path: str):
         if filename.lower().endswith('.pdf'):
             pdf_path = os.path.join(folder_path, filename)
             try:
-                urls = process_pdf(pdf_path, bucket_name)
-                all_results.extend(urls)  # Use extend instead of creating a new dictionary
+                #urls = process_pdf(pdf_path, bucket_name)
+                urls = process_pdf_base64(pdf_path)
+                all_results.extend(urls)
                 print(f"Processed {filename}")
             except Exception as e:
                 print(f"Error processing {filename}: {str(e)}")
