@@ -172,7 +172,7 @@ def process_zip():
         if os.path.exists(final_work_folder):
             try:
                 # Delete the folder and all its contents
-                # shutil.rmtree(final_work_folder)
+                shutil.rmtree(final_work_folder)
                 print(f"Successfully deleted folder: {final_work_folder}")
             except Exception as e:
                 print(f"Error deleting folder: {e}")

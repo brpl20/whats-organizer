@@ -1,4 +1,6 @@
+from base64 import b64encode
 import os
+from typing import List, Dict, Literal, Tuple, TypeVar
 from pdf2image import convert_from_path
 from PIL import Image
 import boto3
@@ -8,7 +10,7 @@ import re
 import unicodedata 
 from docxtopdf import convert_to
 
-def process_pdf(pdf_path, bucket_name):
+def process_pdf_aws(pdf_path, bucket_name):
     # Convert PDF to images
     images = convert_from_path(pdf_path, first_page=1, last_page=6)
 
@@ -76,7 +78,43 @@ def process_pdf(pdf_path, bucket_name):
     print(links_list)
     return links_list
 
-def process_pdf_folder(folder_path, bucket_name):
+def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
+    images = convert_from_path(pdf_path, first_page=1, last_page=6)
+    images = images[:6]
+
+    links_list = []
+    pdf_base_name = os.path.basename(pdf_path)
+    file_entry = {'File': pdf_base_name, 'Links': []}
+    links_list.append(file_entry)
+
+    for image in images:
+        width, height = image.size
+        is_landscape = width > height
+        landscape_size = (1080, 1920)
+        portrait_size = landscape_size[::-1]
+        OrientationT = TypeVar('OrientationT', Dict[bool, Tuple[Tuple[int, int], Literal['landscape', 'portrait']]])
+        orientation_landscape: OrientationT = {
+            True: (landscape_size, 'landscape'),
+            False: (portrait_size, 'portrait')
+        }
+        
+        size, orientation = orientation_landscape[is_landscape]
+        image.thumbnail(size)
+
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+
+        base64_image = b64encode(img_byte_arr).decode('utf-8')
+        base64_url = f"data:image/png;base64,{base64_image}"
+        
+        file_entry['Links'].append(base64_url)
+        file_entry['Links'].append(orientation)
+
+    return links_list
+
+
+def process_pdf_folder(folder_path: str):
     all_results = []
 
     # First, convert all DOCX files to PDF
