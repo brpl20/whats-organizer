@@ -114,8 +114,8 @@ def process_zip():
         
         # Transform PDF into Images 
         print("Converter PDF, transformar em imagens e links")
-        bucket_name = 'tempfilesprocessing'
-        pdf_img_links = process_pdf_folder(final_work_folder, bucket_name)
+        # bucket_name = 'tempfilesprocessing'
+        pdf_img_links = process_pdf_folder(final_work_folder)
         socketio.emit('Smessage', {'data': 'Trabalhando com PDFs e DOCXs...'})
 
         # Extract main conversation
