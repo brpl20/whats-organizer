@@ -23,7 +23,7 @@ def convert_to(folder: str, source:str, timeout:Optional[int]=None) -> str:
     process = Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
     stdout, stderr = process.communicate()
     if int(process.returncode or 0):
-        print(f'failed to convert docx to pdf {source}')
+        print(f'failed to convert document to pdf {source}')
         return ''
     
     filename = search('-> (.*?) using filter', process.stdout.decode())
