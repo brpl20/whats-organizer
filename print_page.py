@@ -8,7 +8,7 @@ from asyncio import sleep
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 
-async def print_page( file: FileStorage, messages: JSON ) -> bytes:
+async def print_page( file: FileStorage ) -> bytes:
     playwright_headless = getenv("HEADLESS", "True") == "True"
 
     async with async_playwright() as p:
@@ -23,17 +23,11 @@ async def print_page( file: FileStorage, messages: JSON ) -> bytes:
         await page.goto("http://whatsorganizer.com.br")
 
         injector_media_input = page.locator('[data-testid="playwright-inject-media"]')
-        injector_chat_input = page.locator('[data-testid="playwright-inject-chat"]')
         
-        for el in (injector_media_input, injector_chat_input):
+        for el in (injector_media_input,):
             await el.wait_for(state='attached', timeout=5000)
             await el.evaluate(f"""(e) => e.setAttribute('style', 'display: block');""")
             await el.wait_for(state='visible', timeout=5000)
-    
-        await injector_chat_input.evaluate(f"""
-            (e) => e.setAttribute('value', String('{dumps(messages)}'))
-        """)
-        await injector_chat_input.press('Enter')
         
         file_buffer = file.stream.read()
         await injector_media_input.set_input_files([{"name": file.filename, "mimeType": "application/zip", "buffer": file_buffer}])

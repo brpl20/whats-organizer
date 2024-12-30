@@ -1,5 +1,5 @@
 from typing import Callable, Mapping, List
-from flask import Flask, Request, request, jsonify, Response
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import uuid
@@ -51,20 +51,11 @@ def handle_connect():
 
 @app.route('/download-pdf', methods=['POST'])
 async def download_pdf():
-    messages_str:str = request.form.get('messages')
-    messages: JSON
-    try:
-        messages = json.loads(messages_str)
-        if not messages:
-            return jsonify({"Erro", "Erro ao Obter Mensagens"}, 400)
-    except ValueError:
-        return jsonify({'Erro': 'Erro ao Obter Mensagens'}), 400
-    
     file = request.files.get('file')
     if not file:
         return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
 
-    pdf_bytes = await print_page(file, messages)
+    pdf_bytes = await print_page(file)
     
     return Response(
         pdf_bytes,
