@@ -26,10 +26,10 @@ def convert_to(folder: str, source:str, timeout:Optional[int]=None) -> str:
         print(f'failed to convert document to pdf {source}')
         return ''
     
-    filename = search('-> (.*?) using filter', process.stdout.decode())
+    filename = search('-> (.*?) using filter', stdout)
 
     if filename is None: 
-        raise LibreOfficeError(process.stdout.decode())
+        raise LibreOfficeError(stdout)
 
     return filename.group(1) or ""
 
