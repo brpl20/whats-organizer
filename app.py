@@ -1,19 +1,18 @@
-from typing import Callable, Literal, Mapping, TypeAlias, Union, List
-from flask import Flask, request, jsonify, Response
+from typing import Callable, Mapping, List
+from flask import Flask, Request, request, jsonify, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import uuid
 import json
 import os
 import shutil
-from asyncio import new_event_loop, run, run_coroutine_threadsafe, set_event_loop
 from dotenv import load_dotenv
 
 
 from handle_zip_file import handle_zip_file
 from list_files import list_files_in_directory
 from find_whats_key_data import find_whats_key
-from extract_device import extract_info_device
+from extract_device import extract_info_device, Mobile
 from file_fixer import process_file_fixer 
 from extract_objects_v2 import extract_info_iphone, extract_info_android, TMessageData
 from converter_mp3 import convert_opus_to_mp3
@@ -25,6 +24,11 @@ load_dotenv(override=True)
 prod = os.getenv("FLASK_ENV")
 
 app = Flask(__name__)
+MEGABYTE = (2 ** 10) ** 2
+app.config['MAX_CONTENT_LENGTH'] = None
+# Max number of fields in a multi part form (I don't send more than one file)
+# app.config['MAX_FORM_PARTS'] = ...
+app.config['MAX_FORM_MEMORY_SIZE'] = 50 * MEGABYTE
 
 cors_origins=[
     "https://whatsorganizer.com.br",
@@ -60,11 +64,6 @@ async def download_pdf():
     if not file:
         return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
 
-    '''
-        Evita o erro que playwright sync está rodando em um contexto
-        de loop assíncrono, já que async não funciona bem com flask
-        quando roda no gevent
-    '''
     pdf_bytes = await print_page(file, messages)
     
     return Response(

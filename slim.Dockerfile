@@ -32,5 +32,5 @@ EXPOSE ${FLASK_PORT_START}-${FLASK_PORT_END}
 CMD ["sh", "-c", "\
 python -c 'from gevent import monkey; monkey.patch_all()' && \
 for FLASK_PORT in $(seq ${FLASK_PORT_START} ${FLASK_PORT_END}); do \
-  gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} app:app --timeout 300 & \
+  gunicorn -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} app:app --timeout 300 --limit-request-line 0 & \
 done && wait"]

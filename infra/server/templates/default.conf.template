@@ -40,6 +40,7 @@ server {
             add_header Access-Control-Allow-Credentials "true";
         }
 
+        client_max_body_size 50M;
         proxy_cache off;
         proxy_pass http://${UPSTREAM}_upstream;
     }
