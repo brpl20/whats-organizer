@@ -68,8 +68,10 @@ def download_pdf():
     file = request.files.get('file')
     if not file:
         return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
+    
+    notify_callback: Callable[[str], None] = lambda msg: socketio.emit('Smessage', {'data': msg})
 
-    pdf_bytes = executor.submit(run_coroutine_sync, print_page(file)).result()
+    pdf_bytes = executor.submit(run_coroutine_sync, print_page(file, notify_callback)).result()
     
     return Response(
         pdf_bytes,
