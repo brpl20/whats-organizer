@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import re
-from typing import List, Literal, Mapping, Optional, Set, TypeVar, TypedDict, Union
+from typing import List, Literal, Mapping, Optional, Set, TypeAlias, TypedDict, Union
 from os import PathLike
 
 @dataclass(unsafe_hash=True)
@@ -12,7 +12,7 @@ class MessageData(TypedDict):
     Message: str
     FileAttached: Optional[Union[Literal[False], str]]
     
-TMessageData = TypeVar("TMessageData", bound=Union[MessageData, Mapping[Literal["ERRO"], str]])
+TMessageData: TypeAlias = Union[MessageData, Mapping[Literal["ERRO"], str]]
 
 def extract_info_iphone(input_file: Union[str, bytes, PathLike]):
     extracted_info: List[TMessageData] = []

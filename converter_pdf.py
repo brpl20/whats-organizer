@@ -1,6 +1,6 @@
 from base64 import b64encode
 import os
-from typing import List, Dict, Literal, Tuple, TypeVar
+from typing import List, Dict
 from pdf2image import convert_from_path
 from PIL import Image
 import boto3

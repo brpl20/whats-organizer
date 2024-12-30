@@ -1,6 +1,10 @@
+from os import PathLike
 import re
+from typing import Literal, TypeAlias, Union
 
-def extract_info_device(input_file):
+Mobile: TypeAlias = Literal['andoid', 'iphone']
+
+def extract_info_device(input_file: Union[str, bytes, PathLike]) -> Mobile:
     
     # iphone
     message_pattern_iphone = r'\] (.*?): (.*)'
@@ -16,12 +20,14 @@ def extract_info_device(input_file):
         matches_iphone = re.search(message_pattern_iphone, line)
         matches_android = re.search(message_pattern_android, line)
         
-        message_device = "Erro: Dispositivo ou formato do texto não detectado"
+        message_device = ''
         
         if matches_android:
             message_device = "android"
         elif matches_iphone:
             message_device = "iphone"
-        return message_device
+        else:
+            print("Erro: Dispositivo ou formato do texto não detectado")
+        return message_device or "android"
     
     

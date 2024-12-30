@@ -131,8 +131,8 @@ def process_zip():
         
         # Extract info based on device type
         extract: Mapping[
-            Literal["android, iphone"],
-            Callable[[Union[str, bytes, os.PathLike], List[TMessageData]]]
+            Mobile,
+            Callable[[], List[TMessageData]]
         ] = {
             "android": lambda: extract_info_android(fixed_file),
             "iphone": lambda: extract_info_iphone(fixed_file),

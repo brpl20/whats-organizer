@@ -1,7 +1,8 @@
 import re
+from typing import Literal
 # Juntar as linhas em branco 
 # Remover caracteres indesejados
-def process_file_fixer(filename, device):
+def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> str:
     print(filename)
     with open(filename, 'r') as file:
         lines = file.readlines()
