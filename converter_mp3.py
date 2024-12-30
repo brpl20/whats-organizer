@@ -2,6 +2,7 @@ import os
 from os.path import abspath
 import subprocess
 from subprocess import STDOUT, PIPE
+from typing import List, TypedDict, TypeAlias, cast
 from dotenv import load_dotenv 
 from openai import OpenAI
 from re import sub
@@ -9,20 +10,25 @@ from re import sub
 from sanitize import sanitize_path
 
 
-load_dotenv()
-api_key = os.getenv("WHISPER")
-clientopenai = OpenAI(api_key=api_key)
+load_dotenv(override=True)
+api_key = os.getenv("OPENAI_API_KEY")
 # clientopenai = OpenAI(api_key='')
-transcriptions_list = []
 
-def add_transcription(file_name, transcription):
-    transcriptions_list.append({'FileName': file_name, 'Transcription': transcription})
+class Transcription(TypedDict):
+    FileName: str
+    Transcription: str
 
+TranscriptionList: TypeAlias = List[Transcription]
 
-def convert_opus_to_mp3(path, client=clientopenai):
+def convert_opus_to_mp3(path: str) -> TranscriptionList:
+    transcriptions_list: TranscriptionList = []
+
     if not os.path.isdir(path):
         print(f"The specified path {path} does not exist or is not a directory.")
-        return
+        return transcriptions_list
+    
+    client = OpenAI(api_key=api_key) if api_key else None 
+
     for file_name in os.listdir(path):
         if file_name.endswith('.opus'):
             cwd = os.path.dirname(__file__)
@@ -37,13 +43,16 @@ def convert_opus_to_mp3(path, client=clientopenai):
             if int(process.returncode or 0):
                 stdout, stderr = process.communicate()
                 print(f"[{process.returncode}] Failed to convert {file_name}.\n\n{' '.join(command)}\n\n{stdout}\n\n{stderr}")
-                return []
+                return transcriptions_list
                 
             # WhisperTranscribe
+            if (not client):
+                print("Não foi detectada uma chave OPENAI")
+                return []
             with open(mp3_file_path, 'rb') as f:
                 files = {'file': f}
                 transcript = client.audio.transcriptions.create(model="whisper-1",file=f)
-                add_transcription(file_name, transcript.text)
+                transcriptions_list.append({'FileName': file_name, 'Transcription': transcript.text})
                 print("Transcrição...")
                 print(transcript.text)
     #pdb.set_trace()
