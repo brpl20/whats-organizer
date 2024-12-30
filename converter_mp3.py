@@ -38,10 +38,9 @@ def convert_opus_to_mp3(path: str) -> TranscriptionList:
             mp3_file_path = sanitize_path(mp3_file_path)
             command = ['ffmpeg', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
             process = subprocess.Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
-            process.communicate()
+            stdout, stderr = process.communicate()
 
             if int(process.returncode or 0):
-                stdout, stderr = process.communicate()
                 print(f"[{process.returncode}] Failed to convert {file_name}.\n\n{' '.join(command)}\n\n{stdout}\n\n{stderr}")
                 return transcriptions_list
                 
