@@ -1,12 +1,13 @@
-from typing import Callable, Mapping, List
+from asyncio import new_event_loop, set_event_loop
+from typing import Awaitable, Callable, Mapping, List, TypeVar
 from flask import Flask, request, jsonify, Response
-from flask_cors import CORS
 from flask_socketio import SocketIO
 import uuid
 import json
 import os
 import shutil
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
 
 
 from handle_zip_file import handle_zip_file
@@ -48,14 +49,27 @@ socketio = SocketIO(app,
 @socketio.on('connect')
 def handle_connect():
     socketio.emit('Smessage', {'data': 'Enviando Arquivo...'})
+    
+executor = ThreadPoolExecutor()
+
+T = TypeVar('T')
+
+def run_coroutine_sync(coro: Awaitable[T]) -> T:
+    """ Creates a new event loop to run asynchronous operations in a threaded environment """
+    loop = new_event_loop()
+    set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
 
 @app.route('/download-pdf', methods=['POST'])
-async def download_pdf():
+def download_pdf():
     file = request.files.get('file')
     if not file:
         return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
 
-    pdf_bytes = await print_page(file)
+    pdf_bytes = executor.submit(run_coroutine_sync, print_page(file)).result()
     
     return Response(
         pdf_bytes,
