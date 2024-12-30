@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import re
-from typing import List, Literal, Mapping, Optional, Set, TypeAlias, TypedDict, Union
+from typing import List, Literal, Mapping, Optional, Set, Tuple, TypeAlias, TypedDict, Union
 from os import PathLike
 
 @dataclass(unsafe_hash=True)
@@ -13,6 +13,13 @@ class MessageData(TypedDict):
     FileAttached: Optional[Union[Literal[False], str]]
     
 TMessageData: TypeAlias = Union[MessageData, Mapping[Literal["ERRO"], str]]
+
+def remove_ext(file: str) -> Tuple[str, str]:
+    ''' Ex.: Imagem.seila.jpg -> (Imagem.seila, .jpg) '''
+    file_parts = file.split('.')
+    filename_no_ext = '.'.join(file_parts[:len(file_parts)-1:])
+    ext = f'.{file_parts[-1::]}'
+    return (filename_no_ext, ext)
 
 def extract_info_iphone(input_file: Union[str, bytes, PathLike]):
     extracted_info: List[TMessageData] = []
@@ -125,17 +132,27 @@ def extract_info_iphone(input_file: Union[str, bytes, PathLike]):
         return extracted_info
 
 
-def extract_info_android(input_file: Union[str, bytes, PathLike]):
+def extract_info_android(input_file: Union[str, bytes, PathLike], attachment_files: Tuple[str]):
     extracted_info: List[TMessageData] = []
     unique_names: Set[str] = set()
     unique_ids = {}
-    date_time_pattern = r'(\d{2}/\d{2}/\d{4}) (\d{2}:\d{2}) -'
-    message_pattern = r'- (.*?): (.*)'
+    date_time_pattern = re.compile(r'(\d{2}/\d{2}/\d{2,4}),{0,1} (\d{2}:\d{2}) -')
+    message_pattern = re.compile(r'- (.*?): (.*)')
+    # Pode ser em qualquer língua, (file attached), (arquivo anexado), etc
+    attachment_pattern = re.compile(r'(?<=\..{3} )\(.{3,25}?\)|(?<=\..{4} )\(.{3,25}?\)')
 
     with open(input_file, 'r', encoding='utf-8') as file:
         lines = file.readlines()
 
     for line in lines:
+        sender: str = None
+        sender_id: int = None
+        date: str = None
+        time: str = None
+        message: str = None
+        file_attached: Optional[Union[Literal[False], str]] = None
+        well_formated = lambda: all((sender, sender_id,  date, time, message))
+
         matches = re.findall(message_pattern, line)
 
         if matches:
@@ -144,6 +161,7 @@ def extract_info_android(input_file: Union[str, bytes, PathLike]):
             #print(len(unique_names))
 
         date_time_match = re.search(date_time_pattern, line)
+        print(line)
         if date_time_match:
             date = date_time_match.group(1)
             time = date_time_match.group(2)
@@ -158,12 +176,20 @@ def extract_info_android(input_file: Union[str, bytes, PathLike]):
             if sender not in unique_ids:
                 unique_ids[sender] = len(unique_ids) + 1
             sender_id = unique_ids[sender]
+            
+            attachment_test = re.split(attachment_pattern, message)
+            if len(attachment_test):
+                attachment_test[0] = attachment_test[0].strip()
+            has_attachment = len(attachment_test) == 2 and attachment_test[0] in attachment_files
+            attached_filename:str = None
+            if has_attachment:
+                attached_filename = attachment_test[0]
+                message = ' (Arquivo Anexado) '.join(attachment_test)
+                
+            print(f"attachment_test={attachment_test} attachment_files={attachment_files} has_attachment={has_attachment} attached_filename={attached_filename}")
 
-            if any(ext in message for ext in ['.jpg']):
-                file_pattern = r'(\S+)\.(jpg)'
-                file_match = re.search(file_pattern, message)
-                if file_match:
-                    file_attached = file_match.group()
+            if attached_filename and attached_filename.endswith(('.jpg', '.jpeg', '.opus', '.mp4')):
+                file_attached = attached_filename
 
             # if any(ext in message for ext in ['.docx', '.jpg']):
             #     file_pattern = r'(\S+)\.(docx|jpg)'
@@ -175,7 +201,7 @@ def extract_info_android(input_file: Union[str, bytes, PathLike]):
             #             file_attached = file_match.group()  # Full filename with extension for others
 
             
-            if any(ext in message for ext in ['.docx']):
+            if attached_filename and attached_filename.endswith(('.docx', '.docm', '.doc', 'odt', '.pptx', '.ppt', 'odp', '.xlsx', 'xls', 'ods')):
                 # print("message")
                 # print(message)
                 # #file_pattern = r'(\S+)\.(docx)'
@@ -193,56 +219,39 @@ def extract_info_android(input_file: Union[str, bytes, PathLike]):
                 #     print("--------------")
                 #     print(file_attached2)
                 # Updated regex pattern to capture the filename without extension
-                file_pattern = r'(.*?)\.docx'
-                file_match = re.search(file_pattern, message)
-                
-                print("FILE MATCH =>")
-                print(file_match)
-                
-                if file_match:
+                (file_attached, _) = remove_ext(attached_filename)
+
+                if file_attached:
                     # Extract the filename without extension and add .pdf
-                    file_attached = file_match.group(1) + '.pdf'
+                    file_attached += '.pdf'
                     print("FINAL FILE")
                     print("--------------")
                     print(file_attached)                
                 else:
                     file_attached = None  # or handle the case when no match is found
 
-            elif any(ext in message for ext in ['.opus']):
-                file_pattern = r'(\S+)\.(opus)'
-                file_match = re.search(file_pattern, message)
-                file_attached = file_match.group()
-
-            elif any(ext in message for ext in ['.mp4']):
-                file_pattern = r'(\S+)\.(mp4)'
-                file_match = re.search(file_pattern, message)
-                file_attached = file_match.group()
-
-            elif any(ext in message for ext in ['.pdf']):
+            elif attached_filename and attached_filename.endswith('.pdf'):
                 # file_pattern_pdf = r'(\S+)\.(pdf)'
-                file_pattern_pdf = r'([\d\w]+\.pdf)'
                 # file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
                 #file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
                 #file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
 
-                file_pattern_pdf_match = re.search(file_pattern_pdf, message)
                 #print(file_pattern_pdf_match)
-                if file_pattern_pdf_match:
-                    file_attached = file_pattern_pdf_match.group(1)
-                    print("result")
-                    print("-----------------------------")
-                    print(file_attached)
-
-            extracted_info.append(
-                MessageData(**{
-                    'Name': sender,
-                    'ID': sender_id,
-                    'Date': date,
-                    'Time': time,
-                    'Message': message,
-                    'FileAttached': file_attached
-                })
-            )
+                file_attached = attached_filename
+                print("result")
+                print("-----------------------------")
+                print(file_attached)
+            if well_formated():
+                extracted_info.append(
+                    MessageData(**{
+                        'Name': sender,
+                        'ID': sender_id,
+                        'Date': date,
+                        'Time': time,
+                        'Message': message,
+                        'FileAttached': file_attached
+                    })
+                )
     
     if len(unique_names) > 2:
         # Limpa a lista de entradas anteriores
@@ -253,7 +262,8 @@ def extract_info_android(input_file: Union[str, bytes, PathLike]):
         #raise ValueError("Conversas em grupo não suportadas")
         # print(extract_info)
         return extracted_info
-    else:
+    
+    if well_formated():
         extracted_info.append(
             MessageData(**{
                 'Name': sender,
@@ -264,7 +274,8 @@ def extract_info_android(input_file: Union[str, bytes, PathLike]):
                 'FileAttached': file_attached
             })
         )
-        return extracted_info
+
+    return extracted_info
 
 
 

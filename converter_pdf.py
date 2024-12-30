@@ -119,7 +119,7 @@ def process_pdf_folder(folder_path: str):
 
     # First, convert all DOCX files to PDF
     for filename in os.listdir(folder_path):
-        if filename.lower().endswith(('.docx', '.docm', '.doc', '.pptx', '.ppt', '.xlsx', 'xls')):
+        if filename.lower().endswith(('.docx', '.docm', '.doc', 'odt', '.pptx', '.ppt', 'odp', '.xlsx', 'xls', 'ods')):
             docx_path = os.path.join(folder_path, filename)
             try:
                 pdf_path = convert_to(folder_path, docx_path)

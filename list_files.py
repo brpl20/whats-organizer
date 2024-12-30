@@ -1,6 +1,14 @@
-import os 
+from dataclasses import dataclass
+import os
+from typing import List, Optional, TypedDict
 
-def list_files_in_directory(directory_path):
+@dataclass(unsafe_hash=True)
+class FileObj(TypedDict):
+    name: Optional[str]
+    size: Optional[int]
+    whats: Optional[str]
+
+def list_files_in_directory(directory_path: str):
     """
     Lists all files in the specified directory and returns a list of dictionaries.
 
@@ -11,7 +19,7 @@ def list_files_in_directory(directory_path):
     Additionally, checks for a WhatsApp chat file (.txt) and prints a message if found or not.
     """
 
-    file_list = []
+    file_list: List[FileObj] = []
     whatsapp_chat_found = False  # Flag to track WhatsApp chat
 
     try:
@@ -19,18 +27,13 @@ def list_files_in_directory(directory_path):
             file_path = os.path.join(directory_path, file)
             if os.path.isfile(file_path):
                 file_size = os.path.getsize(file_path)
-                file_info = {
-                    "name": file,
-                    "size": file_size
-                }
+                file_info = FileObj(name=file, size=file_size)
                 file_list.append(file_info)
 
                 # Check for WhatsApp chat
                 if file.endswith(".txt") and "WhatsApp" in file:
                     whatsapp_chat_found = True
-                    file_info_whats = {
-                        "whats": file
-                    }
+                    file_info_whats = FileObj(whats=file)
                     file_list.append(file_info_whats) 
 
     except FileNotFoundError:
