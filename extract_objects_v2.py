@@ -62,12 +62,13 @@ def remove_ext(file: str) -> Tuple[str, str]:
     return (filename_no_ext, ext)
 
 @dataclass
-class NameCounter:
+class NameCounterStore:
     pattern: RePattern
     unique_names: Set[str] = field(default_factory=set)
     unsupported_groupchat_err = [{'ERRO': "Conversas em grupo não suportadas"}]
-    def add(self, name: str):
+    def __iadd__(self, name: str):
         self.unique_names.add(name)
+        return self
     @property
     def is_groupchat(self) -> bool:
         '''
@@ -117,7 +118,7 @@ message_pattern = re.compile(r'\] (.*?): (.*)')
 
 def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
     messageStore = MessagesStore()
-    nameCounter = NameCounter(message_pattern)
+    nameCounterStore = NameCounterStore(message_pattern)
     uniqueIds = UniqueIdsStore()
 
     with open(input_file, 'r', encoding='utf-8') as file:
@@ -134,9 +135,9 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
 
         date, time = extract_datetime(date_time_pattern, line)
         sender, message = extract_sender_message(message_pattern, line)
-        nameCounter.add(sender)
-        if nameCounter.is_groupchat:
-            return nameCounter.unsupported_groupchat_err
+        nameCounterStore += sender
+        if nameCounterStore.is_groupchat:
+            return nameCounterStore.unsupported_groupchat_err
  
         if not (sender or message):
             continue
@@ -212,7 +213,7 @@ attachment_pattern = re.compile(r'(?<=\..{3} )\(.{3,25}?\)|(?<=\..{4} )\(.{3,25}
 
 def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
     messageStore = MessagesStore()
-    nameCounter = NameCounter(message_pattern)
+    nameCounterStore = NameCounterStore(message_pattern)
     uniqueIds = UniqueIdsStore()
 
     with open(input_file, 'r', encoding='utf-8') as file:
@@ -228,9 +229,9 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
 
         date, time = extract_datetime(date_time_pattern, line)
         sender, message = extract_sender_message(message_pattern, line)
-        nameCounter.add(sender)
-        if nameCounter.is_groupchat:
-            return nameCounter.unsupported_groupchat_err
+        nameCounterStore.add(sender)
+        if nameCounterStore.is_groupchat:
+            return nameCounterStore.unsupported_groupchat_err
  
         if not (sender or message):
             continue
