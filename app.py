@@ -6,7 +6,7 @@ from os import getenv
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
 
-from print_page import print_page, JSON
+from print_page import print_page
 from process_convo import process_convo
 
 load_dotenv(override=True)
@@ -66,8 +66,6 @@ def download_pdf():
             'Content-Disposition': 'attachment; filename="document.pdf"'
         }
     )
-
-    
 
 @app.route('/process', methods=['POST'])
 def process_zip():

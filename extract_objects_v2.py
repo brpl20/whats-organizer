@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import re
 from re import Pattern
-from typing import List, Literal, Mapping, Optional, Set, Tuple, TypeAlias, TypedDict, Union, cast, Callable, Tuple
+from typing import Iterator, List, Literal, Mapping, Optional, Set, Tuple, TypeAlias, TypedDict, Union, cast, Callable, Tuple
 from os import PathLike
 from enum import Enum
 
@@ -19,11 +19,12 @@ facilitar desenvolvimento futuro. Não combine as funções de extração
 para android e iphone
 '''
 
-OptionalStrOrFalse: TypeAlias = Optional[Union[Literal[False], str]]
+StrOrFalse: TypeAlias = Union[Literal[False], str]
 TMessageData: TypeAlias = Union['MessageData', Mapping[Literal["ERRO"], str]]
 FileLike: TypeAlias = Union[str, bytes, PathLike]
 RePattern: TypeAlias = str | Pattern[str]
 ExtractTwoGroups: TypeAlias = Callable[[RePattern, str], Tuple[str, str]]
+
 
 @dataclass(unsafe_hash=True)
 class MessageData(TypedDict):
@@ -32,27 +33,57 @@ class MessageData(TypedDict):
     Date: str
     Time: str
     Message: str
-    FileAttached: OptionalStrOrFalse
-    @property
-    def is_valid(self):
-        return all((self.sender, self.sender_id, self.date, self.time, self.message))
+    FileAttached: StrOrFalse
+
 
 @dataclass
 class MessagesStore:
-    messages: List[MessageData] = field(default_factory=list)
-    def __iadd__(self, message_data: MessageData):
-        if message_data.is_valid:
-            self.messages.append(message_data)
+    messages: List[MessageData] = field(
+        init=False,
+        default_factory=list
+    )
+    required_fields: tuple = field(
+        init=False,
+        default=(
+            'Name',
+            'ID',
+            'Date',
+            'Time',
+            'Message'
+        )
+    )
+
+    def __iadd__(self, messageData: MessageData):
+        if not all(tuple(messageData.get(field, None) for field in self.required_fields)):
+            return self
+
+        self.messages.append(messageData)
         return self
+
 
 @dataclass
 class UniqueIdsStore:
-    unique_ids: Mapping[str, int] = field(default_factory=dict)
+    unique_ids: Mapping[str, int] = field(init=False, default_factory=dict)
+    unsupported_groupchat_err: List[Mapping[Literal["ERRO"], str]] = field(
+        init=False,
+        default_factory=lambda: [{'ERRO': "Conversas em grupo não suportadas"}]
+    )
+
     def __iadd__(self, sender: str):
         if sender not in self.unique_ids:
             self.unique_ids[sender] = len(self.unique_ids) + 1
         # else
         return self
+
+    @property
+    def is_groupchat(self) -> bool:
+        '''
+        @todo Não é um método preciso:
+          - Um grupo com 2 pessoas não iria ser considerado grupo;
+          - Pessoas diferentes com mesmo nome de contato.
+        '''
+        return len(self.unique_ids) > 2
+
 
 def remove_ext(file: str) -> Tuple[str, str]:
     ''' Ex.: Imagem.seila.jpg -> (Imagem.seila, .jpg) '''
@@ -61,30 +92,15 @@ def remove_ext(file: str) -> Tuple[str, str]:
     ext = f'.{file_parts[-1::]}'
     return (filename_no_ext, ext)
 
-@dataclass
-class NameCounterStore:
-    pattern: RePattern
-    unique_names: Set[str] = field(default_factory=set)
-    unsupported_groupchat_err = [{'ERRO': "Conversas em grupo não suportadas"}]
-    def __iadd__(self, name: str):
-        self.unique_names.add(name)
-        return self
-    @property
-    def is_groupchat(self) -> bool:
-        '''
-        @todo Não é um método preciso:
-          - Um grupo com 2 pessoas não iria ser considerado grupo;
-          - Pessoas diferentes com mesmo nome de contato.
-        '''
-        return len(self.unique_names) > 2
-        
+
 class FileParsingMethod(Enum):
     NO_FILE = 0
     MEDIA = 1
     PDF = 2
     OFFICE = 3
     OTHER = 4
-    
+
+
 def parse_filetype(filename: Optional[str]) -> FileParsingMethod:
     if not filename:
         return FileParsingMethod.NO_FILE
@@ -100,7 +116,8 @@ def parse_filetype(filename: Optional[str]) -> FileParsingMethod:
     # else
     return FileParsingMethod.OTHER
 
-def extract_first_second_group(regex: RePattern, line:str):
+
+def extract_first_second_group(regex: RePattern, line: str):
     match = re.search(regex, line)
     if not match:
         return (None, None)
@@ -109,43 +126,59 @@ def extract_first_second_group(regex: RePattern, line:str):
     group2 = cast(str, match.group(2)) or None
     return (group1, group2)
 
-extract_datetime: ExtractTwoGroups = lambda regex, line: extract_first_second_group(regex, line)
-extract_sender_message: ExtractTwoGroups = lambda regex, line: extract_first_second_group(regex, line)
+
+extract_datetime: ExtractTwoGroups = lambda regex, line: extract_first_second_group(
+    regex, line)
+extract_sender_message: ExtractTwoGroups = lambda regex, line: extract_first_second_group(
+    regex, line)
 
 
-date_time_pattern = re.compile(r'\[(\d{2}/\d{2}/\d{2,4}), (\d{2}:\d{2}:\d{2})\]')
+date_time_pattern = re.compile(
+    r'\[(\d{2}/\d{2}/\d{2,4}), (\d{2}:\d{2}:\d{2})\]')
 message_pattern = re.compile(r'\] (.*?): (.*)')
 
-def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
-    messageStore = MessagesStore()
-    nameCounterStore = NameCounterStore(message_pattern)
-    uniqueIds = UniqueIdsStore()
 
-    with open(input_file, 'r', encoding='utf-8') as file:
+def read_file_lines(filename: FileLike) -> Iterator[str]:
+    with open(filename, 'r', encoding='utf-8') as file:
         lines = file.readlines()
 
     for line in lines:
+        yield line
+
+
+def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
+    messageStore = MessagesStore()
+    uniqueIds = UniqueIdsStore()
+
+    for line in read_file_lines(input_file):
         sender: str = None
         sender_id: int = None
         date: str = None
         time: str = None
         message: str = None
-        file_attached: OptionalStrOrFalse = None
-        well_formated = lambda: all((sender, sender_id,  date, time, message))
+        file_attached: StrOrFalse = False
 
         date, time = extract_datetime(date_time_pattern, line)
         sender, message = extract_sender_message(message_pattern, line)
-        nameCounterStore += sender
-        if nameCounterStore.is_groupchat:
-            return nameCounterStore.unsupported_groupchat_err
- 
+
         if not (sender or message):
             continue
-        
-        file_attached = False
 
         uniqueIds += sender
         sender_id = uniqueIds.unique_ids[sender]
+
+        if uniqueIds.is_groupchat:
+            return uniqueIds.unsupported_groupchat_err
+
+        attachment_test = re.split(attachment_pattern, message)
+        if len(attachment_test):
+            attachment_test[0] = attachment_test[0].strip()
+        has_attachment = len(
+            attachment_test) == 2 and attachment_test[0] in attachment_files
+        attached_filename: str = None
+        if has_attachment:
+            attached_filename = attachment_test[0]
+            message = ' (Arquivo Anexado) '.join(attachment_test)
 
         if any(ext in message for ext in ['.jpg']):
             file_pattern = r'(\S+)\.(jpg)'
@@ -165,7 +198,8 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
             file_pattern = r'<anexado:\s*(.+?)\.docx>'
             file_match = re.search(file_pattern, message)
             if file_match:
-                file_attached = file_match.group(1) + '.pdf'  # Full filename with .pdf extension
+                # Full filename with .pdf extension
+                file_attached = file_match.group(1) + '.pdf'
             else:
                 file_attached = None  # or handle the case when no match is found
 
@@ -183,12 +217,12 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
             file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
             # file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
             file_pattern_pdf_match = re.search(file_pattern_pdf, message)
-            #print(file_pattern_pdf_match)
+            # print(file_pattern_pdf_match)
             if file_pattern_pdf_match:
                 print("result")
                 print("-----------------------------")
                 file_attached = file_pattern_pdf_match.group(1)
-                #print(file_attached)
+                # print(file_attached)
 
         # Apenas vai adicionar no contraint messageStore.is_valid
         messageStore += (
@@ -205,56 +239,69 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
     return messageStore.messages
 
 
-
 date_time_pattern = re.compile(r'(\d{2}/\d{2}/\d{2,4}),{0,1} (\d{2}:\d{2}) -')
 message_pattern = re.compile(r'- (.*?): (.*)')
 # Pode ser em qualquer língua, (file attached), (arquivo anexado), etc
-attachment_pattern = re.compile(r'(?<=\..{3} )\(.{3,25}?\)|(?<=\..{4} )\(.{3,25}?\)')
+# a extensão se limita a 3-4 chars, caso queira algo por ex .md pra fazer
+# parsing especial, precisa alterar, é preciso fazer ou | no regex porque
+# lookbehind no python não suporta tamanho variável (apenas usando lib
+# externa)
+attachment_pattern_android = re.compile(
+    r'''
+    (?<=\.[A-Z,a-z,0-9]{3}\s) # Verifica se antes da string há .XXX, ex.: .jpg
+    \(.{3,25}?\) # Frase em qualquer língua entre parenteses ex.: (Arquivo Anexado)
+    | # Python não possui lookbehind com tamanho variável, agora ext com 4 dígitos
+    (?<=\.[A-Z,a-z,0-9]{4}\s) # ex.: .jpeg .webm, extensões com 4 dígitos
+    \(.{3,25}?\) # (Arquivo Anexado), (File attached), etc
+    ''',
+    re.VERBOSE)
+attachment_pattern_apple = re.compile(
+    r'''<.{3,25}:\s # <Anexado: <Attached: etc
+    (.*?\.[A-Z,a-z,0-9]{2,4}) # qualquercoisa.md, qualquercoisa.jpg, etc
+    >
+    ''')
+
 
 def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
     messageStore = MessagesStore()
-    nameCounterStore = NameCounterStore(message_pattern)
     uniqueIds = UniqueIdsStore()
 
-    with open(input_file, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
-
-    for line in lines:
+    for line in read_file_lines(input_file):
         sender: str = None
         sender_id: int = None
         date: str = None
         time: str = None
         message: str = None
-        file_attached: OptionalStrOrFalse = None
+        file_attached: StrOrFalse = False
 
         date, time = extract_datetime(date_time_pattern, line)
         sender, message = extract_sender_message(message_pattern, line)
-        nameCounterStore.add(sender)
-        if nameCounterStore.is_groupchat:
-            return nameCounterStore.unsupported_groupchat_err
- 
+        print(sender)
+
         if not (sender or message):
             continue
 
-        file_attached = False
-
         uniqueIds += sender
         sender_id = uniqueIds.unique_ids[sender]
-            
-        attachment_test = re.split(attachment_pattern, message)
+
+        if uniqueIds.is_groupchat:
+            return uniqueIds.unsupported_groupchat_err
+
+        attachment_test = re.split(attachment_pattern_android, message)
         if len(attachment_test):
             attachment_test[0] = attachment_test[0].strip()
-        has_attachment = len(attachment_test) == 2 and attachment_test[0] in attachment_files
-        attached_filename:str = None
+        has_attachment = len(
+            attachment_test) == 2 and attachment_test[0] in attachment_files
+        attached_filename: str = None
         if has_attachment:
             attached_filename = attachment_test[0]
             message = ' (Arquivo Anexado) '.join(attachment_test)
-            
+
         # print(f"attachment_test={attachment_test} attachment_files={attachment_files} has_attachment={has_attachment} attached_filename={attached_filename}")
         filetype = parse_filetype(attached_filename)
 
         if filetype == FileParsingMethod.MEDIA:
-            file_attached = attached_filename            
+            file_attached = attached_filename
         elif filetype == FileParsingMethod.OFFICE:
             (file_attached, _) = remove_ext(attached_filename)
             file_attached += '.pdf'
@@ -274,8 +321,6 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
         )
 
     return messageStore.messages
-
-
 
     # if len(unique_names) > 2:
     #     # Limpa a lista de entradas anteriores
