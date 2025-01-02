@@ -44,7 +44,7 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     transcriptions = convert_opus_to_mp3(final_work_folder)
 
     # Transform PDF into Images 
-    notify_callback('Trabalhando com PDFs e DOCXs...')
+    notify_callback('Trabalhando com PDFs e Office...')
     print("Converter PDF, transformar em imagens e links")
     # bucket_name = 'tempfilesprocessing'
     pdf_img_links = process_pdf_folder(final_work_folder)
@@ -55,7 +55,18 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     
     # Extract device info
     notify_callback('Extraindo Informações do Dispositivo...')
+    extract: Mapping[
+        Mobile,
+        Callable[[], List[TMessageData]]
+    ] = {
+        "android": lambda: extract_info_android(fixed_file, attached_files),
+        "iphone": lambda: extract_info_iphone(fixed_file, attached_files),
+    }
+
     dispositivo = extract_info_device(whats_main_folder_file)
+    
+    if dispositivo not in extract.keys():
+        return jsonify({"Erro": "Dispositivo desconhecido"}), 400
     
     # Fix files
     fixed_file = process_file_fixer(whats_main_folder_file, dispositivo)
@@ -63,21 +74,13 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     attached_files: Tuple[str] = tuple(obj['name'] for obj in file_obj_list if obj.get('name'))
     
     # Extract info based on device type
-    extract: Mapping[
-        Mobile,
-        Callable[[], List[TMessageData]]
-    ] = {
-        "android": lambda: extract_info_android(fixed_file, attached_files),
-        "iphone": lambda: extract_info_iphone(fixed_file),
-    }
     
     notify_extract: Callable[
         [Mobile],
     None] = lambda device: notify_callback(f'{device.title()} detectado!')
     
-    if dispositivo not in extract.keys():
-        return jsonify({"Erro": "Dispositivo desconhecido"}), 400
     notify_extract(dispositivo)
+    notify_callback('Processando Arquivos e Mídia...')
     extracted_info = extract[dispositivo]()
     
     # Append files

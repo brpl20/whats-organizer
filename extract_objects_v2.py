@@ -105,7 +105,7 @@ def parse_filetype(filename: Optional[str]) -> FileParsingMethod:
     if not filename:
         return FileParsingMethod.NO_FILE
     # else
-    extensions_map = {
+    extensions_map: Mapping[FileParsingMethod, Tuple[str]] = {
         FileParsingMethod.OFFICE: ('.docx', '.docm', '.doc', 'odt', '.pptx', '.ppt', 'odp', '.xlsx', 'xls', 'ods'),
         FileParsingMethod.MEDIA: ('.jpg', '.jpeg', '.opus', '.mp4'),
         FileParsingMethod.PDF: ('.pdf',)
@@ -131,11 +131,36 @@ extract_datetime: ExtractTwoGroups = lambda regex, line: extract_first_second_gr
     regex, line)
 extract_sender_message: ExtractTwoGroups = lambda regex, line: extract_first_second_group(
     regex, line)
+attached_message: Callable[[str], str] = lambda file: f'Arquivo Anexado: {file}'
 
 
-date_time_pattern = re.compile(
+datetime_pattern_apple = re.compile(
     r'\[(\d{2}/\d{2}/\d{2,4}), (\d{2}:\d{2}:\d{2})\]')
-message_pattern = re.compile(r'\] (.*?): (.*)')
+message_pattern_apple = re.compile(r'\] (.*?): (.*)')
+attachment_pattern_apple = re.compile(
+    r'''<.{3,25}:\s # <Anexado: <Attached: etc
+    (.{1,255}?\.[A-Za-z0-9]{2,4})> # qualquercoisa.md, qualquercoisa.jpg, etc
+    # Um arquivo pode ter até 255 chars no máximo
+    ''',
+    re.VERBOSE) # <.{3,25}:\s(.{1,255}?\.[A-Za-z0-9]{2,4})>
+
+datetime_pattern_android = re.compile(r'(\d{2}/\d{2}/\d{2,4}),{0,1} (\d{2}:\d{2}) -')
+message_pattern_android = re.compile(r'- (.*?): (.*)')
+# Pode ser em qualquer língua, (file attached), (arquivo anexado), etc
+# a extensão se limita a 3-4 chars, caso queira algo por ex .md pra fazer
+# parsing especial, precisa alterar, é preciso fazer ou | no regex porque
+# lookbehind no python não suporta tamanho variável (apenas usando lib
+# externa)
+attachment_pattern_android = re.compile(
+    r'''
+    (?<=\.[A-Z,a-z,0-9]{3}) # Verifica se antes da string há .XXX, ex.: .jpg
+    \s\(.{3,25}?\)\s? # Frase em qualquer língua entre parenteses ex.: (Arquivo Anexado)
+    | # Python não possui lookbehind com tamanho variável, .ext com 3 a 4 dígitos
+    (?<=\.[A-Z,a-z,0-9]{4}) # ex.: .jpeg .webm, extensões com 4 dígitos
+    \s\(.{3,25}?\)\s? # (Arquivo Anexado), (File attached), etc
+    ''',
+    re.VERBOSE)
+
 
 
 def read_file_lines(filename: FileLike) -> Iterator[str]:
@@ -158,8 +183,8 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
         message: str = None
         file_attached: StrOrFalse = False
 
-        date, time = extract_datetime(date_time_pattern, line)
-        sender, message = extract_sender_message(message_pattern, line)
+        date, time = extract_datetime(datetime_pattern_apple, line)
+        sender, message = extract_sender_message(message_pattern_apple, line)
 
         if not (sender or message):
             continue
@@ -170,61 +195,28 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
         if uniqueIds.is_groupchat:
             return uniqueIds.unsupported_groupchat_err
 
-        attachment_test = re.split(attachment_pattern, message)
-        if len(attachment_test):
-            attachment_test[0] = attachment_test[0].strip()
-        has_attachment = len(
-            attachment_test) == 2 and attachment_test[0] in attachment_files
-        attached_filename: str = None
+        matches = re.search(attachment_pattern_apple, message)
+        attachment_test = (matches.groups() or ()) if matches else ()
+        filename_group = 0
+        has_attachment = (
+            len(attachment_test) > filename_group and 
+            attachment_test[filename_group] in attachment_files
+        )
         if has_attachment:
-            attached_filename = attachment_test[0]
-            message = ' (Arquivo Anexado) '.join(attachment_test)
+            file_attached = attachment_test[filename_group] or None
+            if file_attached:
+                message = attached_message(file_attached)
+            
+        filetype = parse_filetype(file_attached)
 
-        if any(ext in message for ext in ['.jpg']):
-            file_pattern = r'(\S+)\.(jpg)'
-            file_match = re.search(file_pattern, message)
-            if file_match:
-                file_attached = file_match.group()
+        match filetype:
+            # case w if w in (FileParsingMethod.MEDIA, FileParsingMethod.PDF):
+            case FileParsingMethod.OFFICE:
+                file_attached, _ = remove_ext(file_attached)
+                file_attached += '.pdf'
 
-        # if any(ext in message for ext in ['.docx', '.jpg']):
-        #     file_pattern = r'(\S+)\.(docx|jpg)'
-        #     file_match = re.search(file_pattern, message)
-        #     if file_match:
-        #         if file_match.group(2) == 'docx':
-        #             file_attached = file_match.group(1) + '.pdf'  # Only filename for DOCX
-        #         else:
-        #             file_attached = file_match.group()  # Full filename with extension for others
-        if '.docx' in message:
-            file_pattern = r'<anexado:\s*(.+?)\.docx>'
-            file_match = re.search(file_pattern, message)
-            if file_match:
-                # Full filename with .pdf extension
-                file_attached = file_match.group(1) + '.pdf'
-            else:
-                file_attached = None  # or handle the case when no match is found
 
-        elif any(ext in message for ext in ['.opus']):
-            file_pattern = r'(\S+)\.(opus)'
-            file_match = re.search(file_pattern, message)
-            file_attached = file_match.group()
-
-        elif any(ext in message for ext in ['.mp4']):
-            file_pattern = r'(\S+)\.(mp4)'
-            file_match = re.search(file_pattern, message)
-            file_attached = file_match.group()
-
-        elif '.pdf' in message:
-            file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
-            # file_pattern_pdf = r'<anexado:\s*(.*?\.pdf)>'
-            file_pattern_pdf_match = re.search(file_pattern_pdf, message)
-            # print(file_pattern_pdf_match)
-            if file_pattern_pdf_match:
-                print("result")
-                print("-----------------------------")
-                file_attached = file_pattern_pdf_match.group(1)
-                # print(file_attached)
-
-        # Apenas vai adicionar no contraint messageStore.is_valid
+        # Apenas vai adicionar no caso de messageStore.is_valid
         messageStore += (
             MessageData(**{
                 'Name': sender,
@@ -238,30 +230,6 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
 
     return messageStore.messages
 
-
-date_time_pattern = re.compile(r'(\d{2}/\d{2}/\d{2,4}),{0,1} (\d{2}:\d{2}) -')
-message_pattern = re.compile(r'- (.*?): (.*)')
-# Pode ser em qualquer língua, (file attached), (arquivo anexado), etc
-# a extensão se limita a 3-4 chars, caso queira algo por ex .md pra fazer
-# parsing especial, precisa alterar, é preciso fazer ou | no regex porque
-# lookbehind no python não suporta tamanho variável (apenas usando lib
-# externa)
-attachment_pattern_android = re.compile(
-    r'''
-    (?<=\.[A-Z,a-z,0-9]{3}\s) # Verifica se antes da string há .XXX, ex.: .jpg
-    \(.{3,25}?\) # Frase em qualquer língua entre parenteses ex.: (Arquivo Anexado)
-    | # Python não possui lookbehind com tamanho variável, agora ext com 4 dígitos
-    (?<=\.[A-Z,a-z,0-9]{4}\s) # ex.: .jpeg .webm, extensões com 4 dígitos
-    \(.{3,25}?\) # (Arquivo Anexado), (File attached), etc
-    ''',
-    re.VERBOSE)
-attachment_pattern_apple = re.compile(
-    r'''<.{3,25}:\s # <Anexado: <Attached: etc
-    (.*?\.[A-Z,a-z,0-9]{2,4}) # qualquercoisa.md, qualquercoisa.jpg, etc
-    >
-    ''')
-
-
 def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
     messageStore = MessagesStore()
     uniqueIds = UniqueIdsStore()
@@ -274,9 +242,8 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
         message: str = None
         file_attached: StrOrFalse = False
 
-        date, time = extract_datetime(date_time_pattern, line)
-        sender, message = extract_sender_message(message_pattern, line)
-        print(sender)
+        date, time = extract_datetime(datetime_pattern_android, line)
+        sender, message = extract_sender_message(message_pattern_android, line)
 
         if not (sender or message):
             continue
@@ -287,28 +254,26 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
         if uniqueIds.is_groupchat:
             return uniqueIds.unsupported_groupchat_err
 
-        attachment_test = re.split(attachment_pattern_android, message)
-        if len(attachment_test):
-            attachment_test[0] = attachment_test[0].strip()
-        has_attachment = len(
-            attachment_test) == 2 and attachment_test[0] in attachment_files
-        attached_filename: str = None
-        if has_attachment:
-            attached_filename = attachment_test[0]
-            message = ' (Arquivo Anexado) '.join(attachment_test)
+        attachment_test = re.split(attachment_pattern_android, message) or ()
+        if attachment_test:
+            file_attached = next(
+                (test[:255] for test in attachment_test if test[:255] in attachment_files),
+                None
+            )
+            if file_attached:
+                message = attached_message(file_attached)
 
         # print(f"attachment_test={attachment_test} attachment_files={attachment_files} has_attachment={has_attachment} attached_filename={attached_filename}")
-        filetype = parse_filetype(attached_filename)
+        filetype = parse_filetype(file_attached)
 
-        if filetype == FileParsingMethod.MEDIA:
-            file_attached = attached_filename
-        elif filetype == FileParsingMethod.OFFICE:
-            (file_attached, _) = remove_ext(attached_filename)
-            file_attached += '.pdf'
-        elif filetype == FileParsingMethod.PDF:
-            file_attached = attached_filename
+        match filetype:
+            # case w if w in (FileParsingMethod.MEDIA, FileParsingMethod.PDF):
+            case FileParsingMethod.OFFICE:
+                file_attached, _ = remove_ext(file_attached)
+                file_attached += '.pdf'
 
-        # Apenas vai adicionar no contraint messageStore.is_valid
+
+        # Apenas vai adicionar no caso de messageStore.is_valid
         messageStore += (
             MessageData(**{
                 'Name': sender,

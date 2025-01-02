@@ -14,11 +14,11 @@ def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> s
         else: 
             pattern = r'^\[\d{2}\/'
 
-    for index, line in enumerate(lines):
+    for line in lines:
         cleaned_line = line.strip()
         processed_lines.append(cleaned_line)
     
-    for index, line in enumerate(processed_lines):
+    for line in processed_lines:
         line = line.replace('\u200e', '')
         if line and not cleaned_line.isspace():
             processed_lines_clean.append(line)
