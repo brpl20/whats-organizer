@@ -51,7 +51,7 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
 
     # Extract main conversation
     whats_main_file = find_whats_key(file_obj_list)
-    whats_main_folder_file = os.path.join(final_work_folder, whats_main_file)
+    whats_main_folder_file: str = os.path.join(final_work_folder, whats_main_file)
     
     # Extract device info
     notify_callback('Extraindo Informações do Dispositivo...')
@@ -72,7 +72,7 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     fixed_file = process_file_fixer(whats_main_folder_file, dispositivo)
     
     attached_files: Tuple[str] = tuple(obj['name'] for obj in file_obj_list if obj.get('name'))
-    
+        
     # Extract info based on device type
     
     notify_extract: Callable[
@@ -95,9 +95,8 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     
     # Read the JSON file and return its contents
     with open(output_path, 'r') as f:
-        result = json.load(f)
+        result: List[TMessageData] = json.load(f)
     
-    print("????")
     # print(result)
     # print(jsonify(result))
     if os.path.exists(final_work_folder):

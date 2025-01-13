@@ -3,7 +3,6 @@ from typing import Literal, List
 # Juntar as linhas em branco 
 # Remover caracteres indesejados
 def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> str:
-    print(filename)
     with open(filename, 'r', errors="ignore") as file:
         lines = file.readlines()
         processed_lines: List[str] = []
@@ -24,7 +23,7 @@ def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> s
     regex_remove_text_order = re.compile(f'{unicode_left_to_right}|{unicode_right_to_left}')
     
     for line in processed_lines:
-        line = re.sub(regex_remove_text_order, unicode_left_to_right, '')
+        line = regex_remove_text_order.sub('', line)
         if line and not cleaned_line.isspace():
             processed_lines_clean.append(line)
 
