@@ -13,7 +13,7 @@ def extract_info_device(input_file: Union[str, bytes, PathLike]) -> Mobile:
     message_pattern_android = r'\d{2}/\d{2}/\d{2,4} \d{2}:\d{2} - '
 
 
-    with open(input_file, 'r', encoding='utf-8') as file:
+    with open(input_file, 'r', encoding='utf-8', errors='ignore') as file:
         lines = file.readlines(50)
 
     for line in lines:

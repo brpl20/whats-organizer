@@ -1,12 +1,12 @@
 import re
-from typing import Literal
+from typing import Literal, List
 # Juntar as linhas em branco 
 # Remover caracteres indesejados
 def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> str:
     print(filename)
     with open(filename, 'r') as file:
         lines = file.readlines()
-        processed_lines = []
+        processed_lines: List[str] = []
         processed_lines_clean = []
         processed_lines_final = []
         if device == 'android': 
@@ -17,9 +17,14 @@ def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> s
     for line in lines:
         cleaned_line = line.strip()
         processed_lines.append(cleaned_line)
+        
+    # indicação de caso o texto se leia da esquerda pra direita (Árabe é oposto)
+    unicode_left_to_right = '\u200e'
+    unicode_right_to_left = '\u200f'
+    regex_remove_text_order = re.compile(f'{unicode_left_to_right}|{unicode_right_to_left}')
     
     for line in processed_lines:
-        line = line.replace('\u200e', '')
+        line = re.sub(regex_remove_text_order, unicode_left_to_right, '')
         if line and not cleaned_line.isspace():
             processed_lines_clean.append(line)
 

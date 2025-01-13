@@ -164,7 +164,7 @@ attachment_pattern_android = re.compile(
 
 
 def read_file_lines(filename: FileLike) -> Iterator[str]:
-    with open(filename, 'r', encoding='utf-8') as file:
+    with open(filename, 'r', encoding='utf-8', errors='ignore') as file:
         lines = file.readlines()
 
     for line in lines:
