@@ -9,7 +9,7 @@ from list_files import list_files_in_directory
 from find_whats_key_data import find_whats_key
 from extract_device import extract_info_device, Mobile
 from file_fixer import process_file_fixer 
-from extract_objects_v2 import extract_info_iphone, extract_info_android, TMessageData
+from extract_objects import extract_info_iphone, extract_info_android, TMessageData
 from converter_mp3 import convert_opus_to_mp3
 from converter_pdf import process_pdf_folder
 from file_append import file_appending, file_appending_pdf
