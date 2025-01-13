@@ -4,7 +4,7 @@ from typing import Literal, List
 # Remover caracteres indesejados
 def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> str:
     print(filename)
-    with open(filename, 'r') as file:
+    with open(filename, 'r', errors="ignore") as file:
         lines = file.readlines()
         processed_lines: List[str] = []
         processed_lines_clean = []
