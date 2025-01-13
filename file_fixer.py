@@ -6,6 +6,7 @@ def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> s
     print(filename)
     with open(filename, 'r', errors="ignore") as file:
         lines = file.readlines()
+        print('8'+'='*40+'D', "LINES = {lines}")
         processed_lines: List[str] = []
         processed_lines_clean = []
         processed_lines_final = []
