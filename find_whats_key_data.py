@@ -8,4 +8,4 @@ def find_whats_key(data: list[FileObj]) -> str:
             case {'name': name} if 'chat' in name and name.endswith('.txt'):
                 return name
 
-    raise ValueError("Neither 'whats' nor 'chat' were found in any item name")
+    raise ValueError("Não encontrou arquivo de conversa")
