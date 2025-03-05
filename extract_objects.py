@@ -176,11 +176,11 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
     uniqueIds = UniqueIdsStore()
 
     for line in read_file_lines(input_file):
-        sender: str = None
-        sender_id: int = None
-        date: str = None
-        time: str = None
-        message: str = None
+        sender: Optional[str] = None
+        sender_id: Optional[int] = None
+        date: Optional[str] = None
+        time: Optional[str] = None
+        message: Optional[str] = None
         file_attached: StrOrFalse = False
 
         date, time = extract_datetime(datetime_pattern_apple, line)
@@ -235,11 +235,11 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
     uniqueIds = UniqueIdsStore()
 
     for line in read_file_lines(input_file):
-        sender: str = None
-        sender_id: int = None
-        date: str = None
-        time: str = None
-        message: str = None
+        sender: Optional[str] = None
+        sender_id: Optional[int] = None
+        date: Optional[str] = None
+        time: Optional[str] = None
+        message: Optional[str] = None
         file_attached: StrOrFalse = False
 
         date, time = extract_datetime(datetime_pattern_android, line)

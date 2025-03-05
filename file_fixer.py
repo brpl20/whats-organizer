@@ -1,49 +1,30 @@
 import re
-from typing import Literal, List
-# Juntar as linhas em branco 
-# Remover caracteres indesejados
-def process_file_fixer(filename: str, device: Literal["android", "iphone"]) -> str:
+from typing import List
+from extract_device import Mobile
+
+def process_file_fixer(filename: str, device: Mobile) -> str:
     with open(filename, 'r', errors="ignore") as file:
         lines = file.readlines()
-        processed_lines: List[str] = []
-        processed_lines_clean = []
-        processed_lines_final = []
-        if device == 'android': 
-            pattern = r'^\d{2}\/'
-        else: 
-            pattern = r'^\[\d{2}\/'
 
-    for line in lines:
-        cleaned_line = line.strip()
-        processed_lines.append(cleaned_line)
-        
-    # indicação de caso o texto se leia da esquerda pra direita (Árabe é oposto)
-    unicode_left_to_right = '\u200e'
-    unicode_right_to_left = '\u200f'
-    regex_remove_text_order = re.compile(f'{unicode_left_to_right}|{unicode_right_to_left}')
-    
-    for line in processed_lines:
-        line = regex_remove_text_order.sub('', line)
-        if line and not cleaned_line.isspace():
-            processed_lines_clean.append(line)
+    pattern = re.compile(r'^\d{2}\/' if device == 'android' else r'^\[\d{2}\/')
+    regex_remove_text_order = re.compile(r'[\u200e\u200f]')
 
-    for line in processed_lines_clean:
-        match = re.match(pattern, line)
-        if match:
-            processed_lines_final.append(line.strip())  # Append the matched line or its processed version
-
-        elif not re.match(pattern, line):
-            joiner = processed_lines_final[-1] + line
-            processed_lines_final.pop()
-            processed_lines_final.append(joiner)
-        else:
-            print("Error")
-
-    #for line in processed_lines_final:
-    #    print(line)
     newfile = filename + "_fixed.txt"
     with open(newfile, 'w') as file:
-        for line in processed_lines_final:
-            file.write(line + '\n')  # Add a newline character after each line
-    return newfile
+        previous_line = ''
+        for line in lines:
+            line = regex_remove_text_order.sub('', line).strip()
+            if not line:
+                continue
 
+            if pattern.match(line):
+                if previous_line:
+                    file.write(previous_line + '\n')
+                previous_line = line
+            else:
+                previous_line += line
+
+        if previous_line:
+            file.write(previous_line + '\n')
+
+    return newfile

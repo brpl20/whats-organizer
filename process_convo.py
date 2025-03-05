@@ -2,7 +2,7 @@ import uuid
 import json
 import os
 import shutil
-from typing import Callable, Mapping, List, Tuple, TypeAlias, Union
+from typing import Callable, Mapping, List, Optional, Tuple, TypeAlias, Union
 
 from handle_zip_file import handle_zip_file
 from list_files import list_files_in_directory
@@ -57,10 +57,10 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     notify_callback('Extraindo Informações do Dispositivo...')
     extract: Mapping[
         Mobile,
-        Callable[[], List[TMessageData]]
+        Callable[[str], List[TMessageData]]
     ] = {
-        "android": lambda: extract_info_android(fixed_file, attached_files),
-        "iphone": lambda: extract_info_iphone(fixed_file, attached_files),
+        "android": lambda fixed_file: extract_info_android(fixed_file, attached_files),
+        "iphone": lambda fixed_file: extract_info_iphone(fixed_file, attached_files),
     }
 
     dispositivo = extract_info_device(whats_main_folder_file)
@@ -70,8 +70,9 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     
     # Fix files
     fixed_file = process_file_fixer(whats_main_folder_file, dispositivo)
+    print(f'fixed_file = {fixed_file}')
     
-    attached_files: Tuple[str] = tuple(obj['name'] for obj in file_obj_list if obj.get('name'))
+    attached_files: Tuple[Optional[str], ...] = tuple(obj['name'] for obj in file_obj_list if obj.get('name'))
         
     # Extract info based on device type
     
@@ -81,7 +82,7 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     
     notify_extract(dispositivo)
     notify_callback('Processando Arquivos e Mídia...')
-    extracted_info = extract[dispositivo]()
+    extracted_info = extract[dispositivo](fixed_file)
     
     # Append files
     list_files = file_appending(extracted_info, transcriptions)
