@@ -5,6 +5,9 @@ Ver no front [todo](https://github.com/brpl20/whats-organizer-front/blob/master/
 ## Documentação na Wiki
 Ver [wiki](https://github.com/brpl20/whats-organizer/wiki)
 
+# Windows
+> Use wsl?
+
 
 # Env
 
@@ -36,6 +39,8 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose
 ```
 
 > Para não precisar reiniciar todos os containers no docker, gosto de subir prod no terminal, e o resto em background com `up -d`
+>
+> Se der problemas, tente remover o arquivo dev.yml, ele serve só para debugging do playwright em máquinas Linux
 
 
 ```bash
@@ -64,4 +69,21 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose
 > commit na main, com github actions, faz deploy no push
 > 
 > Verifique as logs de build, mesmo que esteja com "OK"
+
+
+## Como testar o playwright no linux?
+
+> Para testar o playwright, precisa usar Xorg server e passar permissões com xhost
+>
+> Permitir root acessar o ambiente gráfico
+
+```bash
+xhost local:root
+```
+
+E aí habilite a env do playwright
+```bash
+# False para mostrar o chromium ao imprimir
+HEADLESS=False
+```
 
