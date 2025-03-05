@@ -9,6 +9,7 @@ Ver [wiki](https://github.com/brpl20/whats-organizer/wiki)
 # Env
 
 > renomear arquivo `.env.example` para `.env`
+>
 > Na pasta infra também tem um .env
 
 # Iniciar projeto completo
@@ -61,6 +62,6 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose
 # Deploy
 
 > commit na main, com github actions, faz deploy no push
->
+> 
 > Verifique as logs de build, mesmo que esteja com "OK"
 
