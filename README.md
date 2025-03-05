@@ -54,7 +54,7 @@ Attaching to flask
 
 > Assim, se eu der ctrl-c, vai apenas finalizar o python, e aí eu posso subir apenas o flask novamente
 
-Pra fazer rebuild do flask:
+Pra fazer rebuild do flask caso tenha mudado algum arquivo:
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.prod.yml up flask --build
 ```
