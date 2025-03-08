@@ -27,19 +27,24 @@ def list_files_in_directory(directory_path: str):
             file_path = os.path.join(directory_path, file)
             if os.path.isfile(file_path):
                 file_size = os.path.getsize(file_path)
-                file_info = FileObj(name=file, size=file_size)
-                file_list.append(file_info)
+                whats: Optional[str] = None
+                name=file
 
-                # Check for WhatsApp chat
-                if file.endswith(".txt") and "WhatsApp" in file:
+
+                is_txt = file.endswith(".txt")
+                chat_android = "WhatsApp" in file
+                chat_ios = "_chat" in file
+                if is_txt and (chat_android or chat_ios):
                     whatsapp_chat_found = True
-                    file_info_whats = FileObj(whats=file)
-                    file_list.append(file_info_whats) 
+                    whats=file
+                
+                file_info = FileObj(size=file_size, whats=whats, name=name)
+                file_list.append(file_info)
 
     except FileNotFoundError:
         print(f"Error: Directory '{directory_path}' not found.")
 
-    # Print WhatsApp chat status after the loop
+    # why??
     if whatsapp_chat_found:
         print("WhatsApp chat found!")
     else:
