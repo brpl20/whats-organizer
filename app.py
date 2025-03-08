@@ -1,3 +1,7 @@
+# macaco adesivo gevent pra infra
+from gevent import monkey
+monkey.patch_all()
+
 from asyncio import new_event_loop, set_event_loop
 from typing import Awaitable, Callable, TypeVar
 from flask import Flask, request, jsonify, Response
@@ -41,6 +45,16 @@ def handle_connect():
 
 sock_send: Callable[[str], None] = lambda msg: socketio.emit('Smessage', {'data': msg})
 
+executor = ThreadPoolExecutor()
+def run_async(coroutine):
+    """Executa uma corotina assíncrona em uma nova thread com seu próprio loop de eventos."""
+    loop = new_event_loop()
+    set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coroutine)
+    finally:
+        loop.close()
+
 T = TypeVar('T')
 def run_coroutine_sync(coro: Awaitable[T]) -> T:
     """ Creates a new event loop to run asynchronous operations in a threaded environment """
@@ -57,7 +71,7 @@ def download_pdf():
     if not file:
         return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
     
-    pdf_bytes = executor.submit(run_coroutine_sync, print_page(file, sock_send)).result()
+    pdf_bytes = executor.submit(run_async, print_page(file, sock_send)).result()
     
     return Response(
         pdf_bytes,
@@ -82,8 +96,3 @@ def process_zip():
         return jsonify({"Erro": "Invalid file format"}), 400
     
     return process_convo(file, sock_send)
-
-
-
-if __name__ == '__main__':
-    socketio.run(app, debug=getenv("FLASK_ENV") == 'production')
