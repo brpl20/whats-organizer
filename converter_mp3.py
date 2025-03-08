@@ -4,7 +4,6 @@ import subprocess
 from subprocess import STDOUT, PIPE
 from typing import List, TypedDict, TypeAlias, cast
 from dotenv import load_dotenv 
-from openai import OpenAI
 from re import sub
 
 from sanitize import sanitize_path
@@ -21,13 +20,18 @@ class Transcription(TypedDict):
 TranscriptionList: TypeAlias = List[Transcription]
 
 def convert_opus_to_mp3(path: str) -> TranscriptionList:
+
+
     transcriptions_list: TranscriptionList = []
 
     if not os.path.isdir(path):
         print(f"The specified path {path} does not exist or is not a directory.")
         return transcriptions_list
     
-    client = OpenAI(api_key=api_key) if api_key else None 
+    if api_key:
+        # Import here so it works without a key hopefully :^)
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key) if api_key else None 
 
     for file_name in os.listdir(path):
         if file_name.endswith('.opus'):
