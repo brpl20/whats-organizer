@@ -44,7 +44,8 @@ server {
         proxy_send_timeout 180s;
         proxy_read_timeout 180s;
         client_max_body_size 70M;
-        proxy_cache off;
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
         proxy_pass http://${UPSTREAM}_upstream;
     }
 
@@ -74,8 +75,10 @@ server {
         proxy_send_timeout 60m;
     }
 
-        if ($host !~* ^(${NGINX_HOST})$) {
+
+    if ($host !~* ^(${NGINX_HOST})$) {
         return 444;
+    }
 
     location /download-pdf {
         # CORS for www or (root)
