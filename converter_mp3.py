@@ -31,7 +31,8 @@ def convert_opus_to_mp3(path: str) -> TranscriptionList:
     if api_key:
         # Import here so it works without a key hopefully :^)
         from openai import OpenAI
-        client = OpenAI(api_key=api_key) if api_key else None 
+        client = OpenAI(api_key=api_key)
+    else: client = None
 
     for file_name in os.listdir(path):
         if file_name.endswith('.opus'):
