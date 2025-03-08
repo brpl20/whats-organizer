@@ -12,7 +12,12 @@ upstream ${UPSTREAM}_upstream {
     # Use ip_hash em dev e hash em prod (Cloudflare)
     ip_hash;
     # hash $http_cf_connecting_ip consistent;
-    keepalive 64;
+    keepalive 60;
+}
+
+map $http_origin $cors_header {
+    default "";
+    "~*${ALLOWED_CORS}" "$http_origin";
 }
 
 server {
@@ -33,30 +38,10 @@ server {
 
     location / {
         # CORS for www or (root)
-        if ($http_origin ~* ${ALLOWED_CORS}) {
-            add_header Access-Control-Allow-Origin $http_origin;
-            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
-            add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
-            add_header Access-Control-Allow-Credentials "true";
-        }
-
-        proxy_connect_timeout 180s;
-        proxy_send_timeout 180s;
-        proxy_read_timeout 180s;
-        client_max_body_size 70M;
-        proxy_no_cache 1;
-        proxy_cache_bypass 1;
-        proxy_pass http://${UPSTREAM}_upstream;
-    }
-
-    location /process {
-        # CORS for www or (root)
-        if ($http_origin ~* ${ALLOWED_CORS}) {
-            add_header Access-Control-Allow-Origin $http_origin;
-            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
-            add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
-            add_header Access-Control-Allow-Credentials "true";
-        }
+        add_header Access-Control-Allow-Origin $cors_header always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
+        add_header Access-Control-Allow-Credentials "true";
 
         proxy_connect_timeout 180s;
         proxy_send_timeout 180s;
@@ -100,13 +85,10 @@ server {
     }
 
     location /download-pdf {
-        # CORS for www or (root)
-        if ($http_origin ~* ${ALLOWED_CORS}) {
-            add_header Access-Control-Allow-Origin $http_origin;
-            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
-            add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
-            add_header Access-Control-Allow-Credentials "true";
-        }
+        add_header Access-Control-Allow-Origin $cors_header always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
+        add_header Access-Control-Allow-Credentials "true";
 
         client_max_body_size 70M;
         proxy_cache off;
