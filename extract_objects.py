@@ -135,7 +135,7 @@ attached_message: Callable[[str], str] = lambda file: f'Arquivo Anexado: {file}'
 
 
 datetime_pattern_apple = re.compile(
-    r'\[(\d{2}/\d{2}/\d{2,4}), (\d{2}:\d{2}:\d{2})\]')
+    r'\[([0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}), ([0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2})\]')
 message_pattern_apple = re.compile(r'\] (.*?): (.*)')
 attachment_pattern_apple = re.compile(
     r'''<.{3,25}:\s # <Anexado: <Attached: etc
@@ -144,7 +144,7 @@ attachment_pattern_apple = re.compile(
     ''',
     re.VERBOSE) # <.{3,25}:\s(.{1,255}?\.[A-Za-z0-9]{2,4})>
 
-datetime_pattern_android = re.compile(r'(\d{2}/\d{2}/\d{2,4}),{0,1} (\d{2}:\d{2}) -')
+datetime_pattern_android = re.compile(r'([0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}),{0,1} ([0-9]{1,2}:[0-9]{1,2}) -')
 message_pattern_android = re.compile(r'- (.*?): (.*)')
 # Pode ser em qualquer língua, (file attached), (arquivo anexado), etc
 # a extensão se limita a 3-4 chars, caso queira algo por ex .md pra fazer
@@ -164,7 +164,7 @@ attachment_pattern_android = re.compile(
 
 
 def read_file_lines(filename: FileLike) -> Iterator[str]:
-    with open(filename, 'r', encoding='utf-8', errors='ignore') as file:
+    with open(filename, 'r', errors='ignore') as file:
         lines = file.readlines()
 
     for line in lines:
@@ -235,6 +235,7 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
     uniqueIds = UniqueIdsStore()
 
     for line in read_file_lines(input_file):
+        print(line)
         sender: Optional[str] = None
         sender_id: Optional[int] = None
         date: Optional[str] = None

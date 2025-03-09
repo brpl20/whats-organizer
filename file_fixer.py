@@ -6,10 +6,10 @@ def process_file_fixer(filename: str, device: Mobile) -> str:
     with open(filename, 'r', errors="ignore") as file:
         lines = file.readlines()
 
-    pattern = re.compile(r'^\d{2}\/' if device == 'android' else r'^\[\d{2}\/')
+    pattern = re.compile(r'^[0-9]{1,2}\/' if device == 'android' else r'^\[[0-9]{1,2}\/')
     regex_remove_text_order = re.compile(r'[\u200e\u200f]')
-
     newfile = filename + "_fixed.txt"
+
     with open(newfile, 'w') as file:
         previous_line = ''
         for line in lines:
@@ -21,8 +21,9 @@ def process_file_fixer(filename: str, device: Mobile) -> str:
                 if previous_line:
                     file.write(previous_line + '\n')
                 previous_line = line
-            else:
-                previous_line += line
+                continue
+            # else
+            previous_line += line
 
         if previous_line:
             file.write(previous_line + '\n')
