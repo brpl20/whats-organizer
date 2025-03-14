@@ -54,7 +54,7 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     whats_main_folder_file: str = os.path.join(final_work_folder, whats_main_file)
     
     # Extract device info
-    notify_callback('Extraindo Informações do Dispositivo...')
+    notify_callback('Detectando Modelo do Dispositivo...')
     extract: Mapping[
         Mobile,
         Callable[[str], List[TMessageData]]

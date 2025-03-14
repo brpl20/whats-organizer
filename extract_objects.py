@@ -34,6 +34,7 @@ class MessageData(TypedDict):
     Time: str
     Message: str
     FileAttached: StrOrFalse
+    IsApple: bool
 
 
 @dataclass
@@ -224,7 +225,8 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
                 'Date': date,
                 'Time': time,
                 'Message': message,
-                'FileAttached': file_attached
+                'FileAttached': file_attached,
+                'IsApple': True
             })
         )
 
@@ -282,7 +284,8 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
                 'Date': date,
                 'Time': time,
                 'Message': message,
-                'FileAttached': file_attached
+                'FileAttached': file_attached,
+                'IsApple': False,
             })
         )
 
