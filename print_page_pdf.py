@@ -1,14 +1,14 @@
 from os import getenv
 from json import dumps
-from typing import Callable, TypeAlias
+from typing import Callable, TypeAlias, cast
 
 from werkzeug.datastructures import FileStorage
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, PdfMargins
 from asyncio import sleep
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 
-async def print_page( file: FileStorage, notify_callback: Callable[[str], None] ) -> bytes:
+async def print_page_pdf( file: FileStorage, notify_callback: Callable[[str], None] ) -> bytes:
     playwright_headless = getenv("HEADLESS", "True") == "True"
 
     async with async_playwright() as p:
@@ -21,7 +21,7 @@ async def print_page( file: FileStorage, notify_callback: Callable[[str], None] 
         notify_callback("Carregando Chat")
         page = await browser.new_page()
         # page.add_init_script(script=f"window.messages = {messages}")
-        await page.goto("http://whatsorganizer.com.br")
+        await page.goto("https://whatsorganizer.com.br")
 
         injector_media_input = page.locator('[data-testid="playwright-inject-media"]')
         
@@ -58,10 +58,10 @@ async def print_page( file: FileStorage, notify_callback: Callable[[str], None] 
             format="A4",
             print_background=True,
             scale=1.2,
-            margin={
+            margin=cast(PdfMargins, {
                 **{y: '30' for y in ('top', 'bottom')},
                 **{x: '5' for x in ('right', 'left')},
-            },
+            }),
         )
         await browser.close()
     return pdf_bytes

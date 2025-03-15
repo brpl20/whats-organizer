@@ -1,16 +1,19 @@
 # macaco adesivo gevent pra infra
 from gevent import monkey
+
+from connection_handlers import handle_disconnect, handle_connect
 monkey.patch_all()
 
 from asyncio import new_event_loop, set_event_loop
-from typing import Awaitable, Callable, TypeVar
+from typing import Awaitable, Callable, TypeVar, Dict
 from flask import Flask, request, jsonify, Response
 from flask_socketio import SocketIO
 from os import getenv
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
+from uuid import uuid4
 
-from print_page import print_page
+from print_page_pdf import print_page_pdf
 from process_convo import process_convo
 
 load_dotenv(override=True)
@@ -40,8 +43,17 @@ socketio = SocketIO(app,
 executor = ThreadPoolExecutor()
 
 @socketio.on('connect')
-def handle_connect():
+def on_connect(sid: str, environ: Dict[str, str]):
     socketio.emit('Smessage', {'data': 'Enviando Arquivo...'})
+    handle_connect(sid, environ)
+
+@socketio.on('disconnect')
+@socketio.on('error')
+def on_disconnect(sid: str):
+    '''
+    Deletes all PERSONAL FILES LGPD (Most companies would sell this data for $)
+    '''
+    handle_disconnect(sid)
 
 sock_send: Callable[[str], None] = lambda msg: socketio.emit('Smessage', {'data': msg})
 
@@ -71,7 +83,7 @@ def download_pdf():
     if not file:
         return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
     
-    pdf_bytes = executor.submit(run_async, print_page(file, sock_send)).result()
+    pdf_bytes = executor.submit(run_async, print_page_pdf(file, sock_send)).result()
     
     return Response(
         pdf_bytes,
@@ -95,4 +107,6 @@ def process_zip():
     if not (file and file.filename.endswith('.zip')):
         return jsonify({"Erro": "Invalid file format"}), 400
     
-    return process_convo(file, sock_send)
+    unique_folder_name = str(uuid4())
+
+    return process_convo(file, unique_folder_name, sock_send)

@@ -19,10 +19,9 @@ from werkzeug.datastructures import FileStorage
 
 JsonResp: TypeAlias = Union[Tuple[Response, int], Response]
 
-def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> JsonResp:
+def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: Callable[[str], None]) -> JsonResp:
     # Create a unique working directory
     base_folder = "./zip_tests/"
-    unique_folder_name = str(uuid.uuid4())
     final_work_folder = os.path.join(base_folder, unique_folder_name)
     os.makedirs(final_work_folder, exist_ok=True)
     
@@ -100,15 +99,18 @@ def process_convo(file: FileStorage, notify_callback: Callable[[str], None]) -> 
     
     # print(result)
     # print(jsonify(result))
-    if os.path.exists(final_work_folder):
-        try:
-            # Delete the folder and all its contents
-            shutil.rmtree(final_work_folder)
-            print(f"Successfully deleted folder: {final_work_folder}")
-        except Exception as e:
-            print(f"Error deleting folder: {e}")
-    else:
-        print(f"Folder does not exist: {final_work_folder}")
+
+    # Movida para erro ou desconexão do socket
+
+    # if os.path.exists(final_work_folder):
+    #     try:
+    #         # Delete the folder and all its contents
+    #         shutil.rmtree(final_work_folder)
+    #         print(f"Successfully deleted folder: {final_work_folder}")
+    #     except Exception as e:
+    #         print(f"Error deleting folder: {e}")
+    # else:
+    #     print(f"Folder does not exist: {final_work_folder}")
     
     notify_callback('Processamento Finalizado!')
     return jsonify(result)
