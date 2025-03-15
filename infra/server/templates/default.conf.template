@@ -33,7 +33,7 @@ server {
     gzip_comp_level 8;
     gzip_types text/css application/javascript application/json image/svg+xml;
 
-    # Blocks all IPs outside cloudflare's network
+    # Blocks all IPs outuide cloudflare's network
     ${CLOUDFLARE_IPS_FIREWALL}
 
     location / {

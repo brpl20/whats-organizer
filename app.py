@@ -12,6 +12,7 @@ from os import getenv
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
+from globals import globals
 
 from print_page_pdf import print_page_pdf
 from process_convo import process_convo
@@ -43,17 +44,23 @@ socketio = SocketIO(app,
 executor = ThreadPoolExecutor()
 
 @socketio.on('connect')
-def on_connect(sid: str, environ: Dict[str, str]):
+def on_connect():
     socketio.emit('Smessage', {'data': 'Enviando Arquivo...'})
-    handle_connect(sid, environ)
+    handle_connect()
 
 @socketio.on('disconnect')
-@socketio.on('error')
-def on_disconnect(sid: str):
+def on_disconnect():
     '''
     Deletes all PERSONAL FILES LGPD (Most companies would sell this data for $)
     '''
-    handle_disconnect(sid)
+    handle_disconnect()
+
+@socketio.on('error')
+def on_error():
+    '''
+    Deletes all PERSONAL FILES LGPD (Most companies would sell this data for $)
+    '''
+    handle_disconnect()
 
 sock_send: Callable[[str], None] = lambda msg: socketio.emit('Smessage', {'data': msg})
 
@@ -100,13 +107,16 @@ def process_zip():
         return jsonify({"Erro": "Arquivo Não Encontrado"}), 400
     
     file = request.files['file']
+    uuid = request.args.get('uid')
+
     
-    if file.filename == '':
+    if not file.filename:
         return jsonify({"Erro": "Nome do Arquivo Incompatível"}), 400
     
     if not (file and file.filename.endswith('.zip')):
         return jsonify({"Erro": "Invalid file format"}), 400
     
-    unique_folder_name = str(uuid4())
+    task_id = str(uuid)
+    globals.create_task(task_id)
 
-    return process_convo(file, unique_folder_name, sock_send)
+    return process_convo(file, task_id, sock_send)

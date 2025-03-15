@@ -1,9 +1,9 @@
-from typing import Dict
-
+from flask import request
+from flask_socketio import disconnect
 from os.path import exists, join
 from shutil import rmtree
+from globals import globals
 
-active_tasks: Dict[str, Dict[str, str]] = {}
 
 def cleanup_files(unique_folder_name: str) -> None:
     base_folder = "./zip_tests/"
@@ -14,25 +14,30 @@ def cleanup_files(unique_folder_name: str) -> None:
         except Exception as e:
             print(f"Error deleting folder: {e}")
 
-def handle_connect(sid: str, environ: Dict[str, str]) -> None:
+def handle_connect() -> None:
     """
     Armazena SID para ELIMINAR arquivos
     Decore com @socketio.on('connect')
     """
-    query_string = environ.get('QUERY_STRING', '')
-    task_id = query_string.split('task_id=')[-1] if 'task_id=' in query_string else None
+    uid = request.args.get('uid')
     
-    if task_id:
-        active_tasks[sid] = {
-            'task_id': task_id,
-        }
+    if uid and uid in globals.active_tasks:
+        globals.active_tasks[uid]['uids'].add(uid)
+        return
+    # else
+    disconnect()
 
-def handle_disconnect(sid: str) -> None:
+def handle_disconnect() -> None:
     """
-    ELIMINA Arquivos
+    ELIMINA e ANIQUILA Arquivos
     Decore com @socketio.on('disconnect')
     """
-    if sid in active_tasks:
-        task_data = active_tasks[sid]
-        cleanup_files(task_data['task_id'])
-        del active_tasks[sid]
+    uid = request.args.get('uid')
+    for task_id, data in list(globals.active_tasks.items()):
+        if uid in data['uids']:
+            data['uids'].remove(uid)
+            if not data['uids']:
+                cleanup_files(task_id)
+                del globals.active_tasks[task_id]
+            break
+
