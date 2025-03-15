@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Necessary workaround to provide ssl in more than one port using free
-# cloudflare plan this blocks all IPS outside cloudflare's network, it
+# cloudflare plan this blocks all IPS outuide cloudflare's network, it
 # prevents deanonimization via SSL fingreprint (Censys, Shodan...)
 
 CF_IPV4_URL="https://www.cloudflare.com/ips-v4"
