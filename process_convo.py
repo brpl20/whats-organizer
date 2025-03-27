@@ -2,7 +2,7 @@ import uuid
 import json
 import os
 import shutil
-from typing import Callable, Mapping, List, Optional, Tuple, TypeAlias, Union
+from typing import Callable, Mapping, List, Optional, Tuple, TypeAlias, Union, Any
 
 from handle_zip_file import handle_zip_file
 from list_files import list_files_in_directory
@@ -13,13 +13,39 @@ from extract_objects import extract_info_iphone, extract_info_android, TMessageD
 from converter_mp3 import convert_opus_to_mp3
 from converter_pdf import process_pdf_folder
 from file_append import file_appending, file_appending_pdf
-from flask.app import Response
-from flask.json import jsonify
-from werkzeug.datastructures import FileStorage
 
-JsonResp: TypeAlias = Union[Tuple[Response, int], Response]
+# For offline mode, we don't need Flask dependencies
+try:
+    from flask.app import Response
+    from flask.json import jsonify
+    from werkzeug.datastructures import FileStorage
+    JsonResp: TypeAlias = Union[Tuple[Response, int], Response]
+    FLASK_AVAILABLE = True
+except ImportError:
+    FLASK_AVAILABLE = False
+    # Define fallback types for offline mode
+    class Response: pass
+    class FileStorage: pass
+    JsonResp: TypeAlias = Union[List[TMessageData], List[dict]]
+    def jsonify(x): return x
+
+def process_convo_offline(zip_file_path: str, unique_folder_name: str, notify_callback: Callable[[str], None]) -> List[TMessageData]:
+    """Process a conversation zip file in offline mode"""
+    # Create the working directory
+    base_folder = "./zip_tests/"
+    final_work_folder = os.path.join(base_folder, unique_folder_name)
+    os.makedirs(final_work_folder, exist_ok=True)
+    
+    # Copy the zip file to the working directory
+    notify_callback('Processing zip file...')
+    zip_path = os.path.join(final_work_folder, "uploaded.zip")
+    shutil.copy2(zip_file_path, zip_path)
+    
+    # Process the conversation using the common logic
+    return _process_conversation_common(zip_path, final_work_folder, notify_callback)
 
 def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: Callable[[str], None]) -> JsonResp:
+    """Process a conversation zip file in web mode (with Flask)"""
     # Create a unique working directory
     base_folder = "./zip_tests/"
     final_work_folder = os.path.join(base_folder, unique_folder_name)
@@ -30,6 +56,18 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
     zip_path = os.path.join(final_work_folder, "uploaded.zip")
     file.save(zip_path)
     
+    # Process the conversation using the common logic
+    result = _process_conversation_common(zip_path, final_work_folder, notify_callback)
+    
+    if FLASK_AVAILABLE:
+        if isinstance(result, list) and result and isinstance(result[0], dict) and "ERRO" in result[0]:
+            return jsonify(result), 400
+        return jsonify(result)
+    else:
+        return result
+
+def _process_conversation_common(zip_path: str, final_work_folder: str, notify_callback: Callable[[str], None]) -> List[TMessageData]:
+    """Common processing logic for both online and offline modes"""
     # Process the zip file
     notify_callback('Criando Pastas Provisórias...')
     handle_zip_file(zip_path, final_work_folder)
@@ -45,7 +83,6 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
     # Transform PDF into Images 
     notify_callback('Trabalhando com PDFs e Office...')
     print("Converter PDF, transformar em imagens e links")
-    # bucket_name = 'tempfilesprocessing'
     pdf_img_links = process_pdf_folder(final_work_folder)
 
     # Extract main conversation
@@ -54,6 +91,8 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
     
     # Extract device info
     notify_callback('Detectando Modelo do Dispositivo...')
+    attached_files: Tuple[Optional[str], ...] = tuple(obj['name'] for obj in file_obj_list if obj.get('name'))
+    
     extract: Mapping[
         Mobile,
         Callable[[str], List[TMessageData]]
@@ -65,16 +104,13 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
     dispositivo = extract_info_device(whats_main_folder_file)
     
     if dispositivo not in extract.keys():
-        return jsonify({"Erro": "Dispositivo desconhecido"}), 400
+        return [{"ERRO": "Dispositivo desconhecido"}]
     
     # Fix files
     fixed_file = process_file_fixer(whats_main_folder_file, dispositivo)
     print(f'fixed_file = {fixed_file}')
     
-    attached_files: Tuple[Optional[str], ...] = tuple(obj['name'] for obj in file_obj_list if obj.get('name'))
-        
     # Extract info based on device type
-    
     notify_extract: Callable[
         [Mobile],
     None] = lambda device: notify_callback(f'{device.title()} detectado!')
@@ -90,27 +126,12 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
 
     # Create JSON output
     output_path = os.path.join(final_work_folder, 'output.json')
-    with open(output_path, 'w') as f:
-        json.dump(list_files, f)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(list_files, f, indent=2, ensure_ascii=False)
     
     # Read the JSON file and return its contents
-    with open(output_path, 'r') as f:
+    with open(output_path, 'r', encoding='utf-8') as f:
         result: List[TMessageData] = json.load(f)
     
-    # print(result)
-    # print(jsonify(result))
-
-    # Movida para erro ou desconexão do socket
-
-    # if os.path.exists(final_work_folder):
-    #     try:
-    #         # Delete the folder and all its contents
-    #         shutil.rmtree(final_work_folder)
-    #         print(f"Successfully deleted folder: {final_work_folder}")
-    #     except Exception as e:
-    #         print(f"Error deleting folder: {e}")
-    # else:
-    #     print(f"Folder does not exist: {final_work_folder}")
-    
     notify_callback('Processamento Finalizado!')
-    return jsonify(result)
+    return result

@@ -10,18 +10,28 @@ import re
 import unicodedata 
 from docxtopdf import convert_to
 
-def process_pdf_aws(pdf_path, bucket_name):
+def process_pdf_local(pdf_path: str, output_dir: str) -> List[Dict[str, List[str]]]:
+    """Process PDF and save images locally instead of uploading to S3"""
     # Convert PDF to images
     images = convert_from_path(pdf_path, first_page=1, last_page=6)
 
     # Ensure we don't process more than 6 pages
     images = images[:6]
 
-    s3 = boto3.client('s3')
     links_list = []
     pdf_base_name = os.path.basename(pdf_path)
     file_entry = {'File': pdf_base_name, 'Links': []}
     links_list.append(file_entry)
+
+    # Prepare folder name for images
+    pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
+    pdf_name_normalized = unicodedata.normalize('NFKD', pdf_name)
+    pdf_name_ascii = pdf_name_normalized.encode('ASCII', 'ignore').decode('ASCII')
+    pdf_name_full = pdf_name_ascii.replace(" ", "")
+    
+    # Create directory for images
+    images_dir = os.path.join(output_dir, pdf_name_full)
+    os.makedirs(images_dir, exist_ok=True)
 
     for i, image in enumerate(images):
         # Determine orientation
@@ -36,45 +46,16 @@ def process_pdf_aws(pdf_path, bucket_name):
             image.thumbnail((1080, 1920))
             orientation = 'portrait'
 
-        page_orientation = orientation 
-
-        # Prepare file name
-        pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
-        print("PDF NAME:")
-        print(pdf_name)
-        print(type(pdf_name))
-
-        # Normalize Unicode characters
-        pdf_name_normalized = unicodedata.normalize('NFKD', pdf_name)
-        print(type(pdf_name_normalized))
-
-        # Remove any non-ASCII characters
-        pdf_name_ascii = pdf_name_normalized.encode('ASCII', 'ignore').decode('ASCII')
-        # pdf_name_cleaned = re.sub(r'[^\x20-\x7E]', ' ', pdf_name_ascii)
-        pdf_name_full = pdf_name_ascii.replace(" ", "")
-        # Replace any whitespace (including Unicode whitespace) with a single space and strip
-        # pdf_name_full = re.sub(r'\s+', ' ', pdf_name_cleaned)
+        # Save image locally
+        image_filename = f"page_{i+1}.png"
+        image_path = os.path.join(images_dir, image_filename)
+        image.save(image_path, format='PNG')
         
+        # Use file:// URL for local access
+        image_url = f"file://{os.path.abspath(image_path)}"
+        file_entry['Links'].append(image_url)
+        file_entry['Links'].append(orientation)
 
-        print("PDF NAME FIXED:")
-        print(pdf_name_full)
-        print(type(pdf_name_full))
-
-        full_image_key = f"{pdf_name_full}/page_{i+1}.png"
-
-        # Upload full image
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='PNG')
-        img_byte_arr = img_byte_arr.getvalue()
-        s3.put_object(Bucket=bucket_name, Key=full_image_key, Body=img_byte_arr, ContentType='image/png')
-
-        # Get public URL
-        full_url = f"https://{bucket_name}.s3.us-west-2.amazonaws.com/{full_image_key}"
-        file_entry['Links'].append(full_url)
-        file_entry['Links'].append(page_orientation)
-
-        #'ImageLink': full_url})
-        # links_list.append(full_url)
     return links_list
 
 def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
@@ -115,6 +96,7 @@ def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
 
 
 def process_pdf_folder(folder_path: str):
+    """Process all PDFs in a folder (offline version)"""
     all_results = []
 
     # First, convert all DOCX files to PDF
@@ -131,8 +113,10 @@ def process_pdf_folder(folder_path: str):
         if filename.lower().endswith('.pdf'):
             pdf_path = os.path.join(folder_path, filename)
             try:
-                #urls = process_pdf(pdf_path, bucket_name)
+                # Use base64 encoding for offline mode
                 urls = process_pdf_base64(pdf_path)
+                # Alternative: save images locally
+                # urls = process_pdf_local(pdf_path, folder_path)
                 all_results.extend(urls)
                 print(f"Processed {filename}")
             except Exception as e:
