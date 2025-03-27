@@ -46,7 +46,7 @@ server {
         proxy_connect_timeout 180s;
         proxy_send_timeout 180s;
         proxy_read_timeout 180s;
-        client_max_body_size 70M;
+        client_max_body_size 100M;
         proxy_no_cache 1;
         proxy_cache_bypass 1;
         proxy_pass http://${UPSTREAM}_upstream;
@@ -62,12 +62,11 @@ server {
         proxy_connect_timeout 180s;
         proxy_send_timeout 180s;
         proxy_read_timeout 180s;
-        client_max_body_size 70M;
+        client_max_body_size 100M;
         proxy_no_cache 1;
         proxy_cache_bypass 1;
         proxy_pass http://${UPSTREAM}_upstream;
     }
-
 
     location /socket.io/ {
         # CORS for www or (root)
@@ -78,7 +77,6 @@ server {
         #     add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
         #     add_header Access-Control-Allow-Credentials "true";
         # }
-        
 
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
@@ -95,7 +93,6 @@ server {
         proxy_send_timeout 60m;
     }
 
-
     if ($host !~* ^(${NGINX_HOST})$) {
         return 444;
     }
@@ -106,7 +103,7 @@ server {
         add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
         add_header Access-Control-Allow-Credentials "true";
 
-        client_max_body_size 70M;
+        client_max_body_size 100M;
         proxy_cache off;
         proxy_pass http://${UPSTREAM}_upstream;
 
