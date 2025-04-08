@@ -9,6 +9,13 @@ import hashlib
 import collections
 import re
 
+# Maximum size to allow for extracted content (10GB)
+MAX_EXTRACTED_SIZE = 10 * 1024 * 1024 * 1024
+# Max compression ratio to detect ZIP bombs (1:1000)
+MAX_COMPRESSION_RATIO = 1000
+# Max number of files to allow
+MAX_FILES = 10000
+
 def analyze_zip_file(zip_path):
     try:
         # Check if file exists
@@ -32,6 +39,10 @@ def analyze_zip_file(zip_path):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             # Get list of files
             file_list = zip_ref.namelist()
+            
+            # Check for ZIP bomb - too many files
+            if len(file_list) > MAX_FILES:
+                return f"SECURITY ALERT: Potential ZIP bomb detected - contains {len(file_list)} files, which exceeds the maximum allowed ({MAX_FILES})."
             
             # Get comment if any
             comment = zip_ref.comment.decode('utf-8', errors='replace') if zip_ref.comment else None
@@ -59,11 +70,33 @@ def analyze_zip_file(zip_path):
             path_depths = collections.defaultdict(int)
             username_patterns = []
             
+            # Collect WhatsApp conversation file names
+            whatsapp_contact_names = []
+            
+            # ZIP bomb checks
+            suspicious_files = []
+            
             for file in file_list:
                 info = zip_ref.getinfo(file)
                 compressed_size = info.compress_size
                 uncompressed_size = info.file_size
                 compression_method = info.compress_type
+                
+                # Check for ZIP bomb - single file ratio
+                if uncompressed_size > 0 and compressed_size > 0:
+                    ratio = uncompressed_size / compressed_size
+                    if ratio > MAX_COMPRESSION_RATIO:
+                        suspicious_files.append(f"{file} (ratio: {ratio:.1f})")
+                
+                # Check for ZIP bomb - total size
+                total_uncompressed_size += uncompressed_size
+                if total_uncompressed_size > MAX_EXTRACTED_SIZE:
+                    return f"SECURITY ALERT: Potential ZIP bomb detected - would expand to over {format_size(MAX_EXTRACTED_SIZE)}"
+                
+                # Extract WhatsApp contact names (specifically for Windows/DOS systems)
+                whatsapp_pattern = re.search(r'Conversa do WhatsApp com (.+)\.txt$', file)
+                if whatsapp_pattern:
+                    whatsapp_contact_names.append(whatsapp_pattern.group(1))
                 
                 # Get file extension
                 _, ext = os.path.splitext(file)
@@ -162,7 +195,10 @@ def analyze_zip_file(zip_path):
                 })
                 
                 total_compressed_size += compressed_size
-                total_uncompressed_size += uncompressed_size
+                
+            # Report if suspicious compression ratios found
+            if suspicious_files:
+                return f"SECURITY ALERT: Potential ZIP bomb detected - {len(suspicious_files)} files with suspicious compression ratios:\n" + "\n".join(suspicious_files)
                 
         # Check for embedded comments or strings that might reveal creator
         embedded_creators = extract_embedded_creators(zip_path)
@@ -177,6 +213,9 @@ def analyze_zip_file(zip_path):
         
         # Perform timestamp analysis
         timestamp_analysis = analyze_timestamps(timestamps)
+        
+        # Check for file insertion after creation
+        insertion_analysis = detect_file_insertion(timestamps, file_details)
         
         # Analyze username patterns
         username_analysis = ""
@@ -223,6 +262,16 @@ def analyze_zip_file(zip_path):
         result += f"SHA1 hash: {sha1_hash}\n"
         result += f"SHA256 hash: {sha256_hash}\n"
         
+        # Add WhatsApp contacts information (only for Windows/DOS system)
+        is_windows_dos = any(sys in [0, 10, 14] for sys in create_systems)
+        if whatsapp_contact_names and is_windows_dos:
+            result += "\nWhatsApp Contacts Found:\n"
+            for name in whatsapp_contact_names:
+                result += f"  - {name}\n"
+            result += f"Name extraction successful: {len(whatsapp_contact_names) > 0}\n"
+        elif not is_windows_dos and any('_chat.txt' in file for file in file_list):
+            result += "\nMac format WhatsApp backup detected - skipping name extraction\n"
+        
         # Add origin information
         result += "\nOrigin Analysis:\n"
         
@@ -242,6 +291,10 @@ def analyze_zip_file(zip_path):
             result += username_analysis
         
         result += timestamp_analysis
+        
+        # Add file insertion analysis
+        if insertion_analysis:
+            result += insertion_analysis
         
         # Add comment information
         if comment:
@@ -508,6 +561,54 @@ def analyze_timestamps(timestamps):
     
     return analysis
 
+def detect_file_insertion(timestamps, file_details):
+    """Detect potential file insertions after initial archive creation"""
+    if len(timestamps) < 3:
+        return None
+        
+    # Sort timestamps and get info
+    timestamp_file_map = {}
+    for file in file_details:
+        timestamp_file_map[file['modified']] = file['name']
+    
+    sorted_times = sorted(timestamps)
+    time_gaps = []
+    
+    # Find significant time gaps between files (possible insertion points)
+    for i in range(1, len(sorted_times)):
+        gap = (sorted_times[i] - sorted_times[i-1]).total_seconds()
+        if gap > 86400:  # 1 day gap
+            time_gaps.append((sorted_times[i-1], sorted_times[i], gap))
+    
+    # Check if majority of files were created within a close timeframe with outliers
+    main_cluster_end = None
+    outliers = []
+    
+    if time_gaps:
+        sorted_gaps = sorted(time_gaps, key=lambda x: x[2], reverse=True)
+        largest_gap = sorted_gaps[0]
+        
+        # Count files before and after the largest gap
+        files_before = sum(1 for t in timestamps if t <= largest_gap[0])
+        files_after = sum(1 for t in timestamps if t >= largest_gap[1])
+        
+        # If significant portion of files come after a big gap, might indicate insertion
+        if files_before > files_after and files_after / len(timestamps) < 0.3:
+            main_cluster_end = largest_gap[0]
+            for t in sorted_times:
+                if t > main_cluster_end and (t - main_cluster_end).total_seconds() > 86400:
+                    outliers.append((t, timestamp_file_map.get(t, "Unknown file")))
+    
+    if outliers:
+        result = "\nSuspicious File Insertion Analysis:\n"
+        result += f"  Most files were added before {main_cluster_end}\n"
+        result += "  The following files may have been inserted later:\n"
+        for date, filename in outliers:
+            result += f"    - {filename} (added on {date})\n"
+        return result
+    
+    return None
+
 def find_common_paths(path_parts):
     """Find common path elements that might indicate origin"""
     # Filter to keep only recurring elements (appearing at least twice)
@@ -576,10 +677,18 @@ def format_size(size_in_bytes):
 if __name__ == "__main__":
     import sys
     
-    if len(sys.argv) == 1:
-        print("Usage: python zip_analyzer.py <path_to_zip_file>")
+    if len(sys.argv) < 2:
+        print("Usage: python zip_analyzer.py <path_to_zip_file> [output_file]")
         sys.exit(1)
     
     zip_path = sys.argv[1]
     result = analyze_zip_file(zip_path)
-    print(result)
+    
+    # If output file is specified, write to file instead of console
+    if len(sys.argv) > 2:
+        output_file = sys.argv[2]
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(result)
+        print(f"Analysis written to {output_file}")
+    else:
+        print(result)
