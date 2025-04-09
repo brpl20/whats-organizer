@@ -2,7 +2,7 @@ from os import PathLike
 import re
 from typing import Literal, TypeAlias, Union
 
-Mobile: TypeAlias = Literal['andoid', 'iphone']
+Mobile: TypeAlias = Literal['android', 'iphone']
 
 def extract_info_device(input_file: Union[str, bytes, PathLike]) -> Mobile:
     
