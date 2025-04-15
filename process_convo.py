@@ -73,7 +73,6 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
         elif any(sys in system_info for sys in ["Macintosh", "OS X", "Darwin"]):
             detected_device = "iphone"
         else:
-            # Default to android if we can't determine from the ZIP analysis
             detected_device = "android"
             
         # Extract WhatsApp contact name (for Android)
@@ -152,16 +151,21 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
         Mobile,
         Callable[[str], List[TMessageData]]
     ] = {
-        "android": lambda fixed_file: extract_info_android(fixed_file, attached_files),
+        "android": lambda fixed_file: extract_info_android(whatsapp_contact, fixed_file, attached_files),
         "iphone": lambda fixed_file: extract_info_iphone(fixed_file, attached_files),
     }
-
+    
+    
     # Keep extract_info_device for reference but don't use it
     # Instead use the device detected from ZIP analysis
     # original_detected_device = extract_info_device(whats_main_folder_file)
     dispositivo = detected_device  # Use the device detected from ZIP analysis
     
     print(f"Using device type from ZIP analysis: {dispositivo}")
+    print("Nome do Contato")
+    print(whatsapp_contact)
+    print("Dispositivo")
+    print(detected_device)
     
     if dispositivo not in extract.keys():
         print(f"Warning: Unknown device type '{dispositivo}', defaulting to 'android'")

@@ -1,6 +1,7 @@
-# test_process.py
+# test_process_offline.py
 import os
 from process_convo import process_convo
+from flask import Flask
 
 class MockFileStorage:
     def __init__(self, path):
@@ -16,7 +17,7 @@ def mock_notify_callback(message):
 
 def test_process_convo():
     # Path to your test ZIP file
-    test_zip_path = "./zip_tests/WhatsApp Chat - Adriana - Ap Country Riachuelo.zip"
+    test_zip_path = "./zip_tests/android1.zip"
     
     # Create a unique folder name for testing
     test_folder_name = "test_run_1"
@@ -24,12 +25,22 @@ def test_process_convo():
     # Create mock file storage
     mock_file = MockFileStorage(test_zip_path)
     
-    # Process the file
-    result = process_convo(mock_file, test_folder_name, mock_notify_callback)
-    
-    # Print result or handle it as needed
-    print("\nRESULT:")
-    print(result)
+    # Create a Flask app context
+    app = Flask(__name__)
+    with app.app_context():
+        # Process the file
+        response = process_convo(mock_file, test_folder_name, mock_notify_callback)
+        
+        # Extract data from the Response object
+        result_data = response.get_json()
+        
+        # Print result
+        print("\nRESULT:")
+        if result_data:
+            print(result_data)
+        else:
+            print(f"Response: {response}")
+            print(f"Response data: {response.data}")
 
 if __name__ == "__main__":
     # Make sure you have a test_data directory with a WhatsApp ZIP file

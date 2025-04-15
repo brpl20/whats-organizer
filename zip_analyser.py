@@ -17,6 +17,24 @@ MAX_COMPRESSION_RATIO = 1000
 # Max number of files to allow
 MAX_FILES = 2000
 
+def extract_whatsapp_contact_name(file):
+    # Assert that file is a string
+    assert isinstance(file, str), "Input must be a string"
+    
+    # Check if file ends with .txt
+    assert file.endswith(".txt"), "Filename must end with .txt"
+    
+    # Check for the WhatsApp conversation pattern
+    whatsapp_pattern = re.search(r'Conversa do WhatsApp com (.+)\.txt$', file)
+    
+    # Check if there is content between "Conversa do WhatsApp com" and ".txt"
+    assert whatsapp_pattern and whatsapp_pattern.group(1).strip(), "Filename must contain text between 'Conversa do WhatsApp com' and '.txt'"
+    
+    # Return the extracted contact name if all assertions pass
+    if whatsapp_pattern:
+        return whatsapp_pattern.group(1)
+    return None
+
 def analyze_zip_file(zip_path):
     try:
         # Check if file exists

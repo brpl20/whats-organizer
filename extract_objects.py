@@ -232,7 +232,7 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
 
     return messageStore.messages
 
-def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
+def extract_info_android(whatsapp_contact, input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
     messageStore = MessagesStore()
     uniqueIds = UniqueIdsStore()
 
@@ -250,9 +250,15 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
 
         if not (sender or message):
             continue
-
+        # TODO DEBUGER AQUI E VER COMO ESTA ESSE OBJETO
         uniqueIds += sender
         sender_id = uniqueIds.unique_ids[sender]
+
+        if sender == whatsapp_contact:
+            sender_id = 2
+        else:
+            sender_id = uniqueIds.unique_ids[sender]
+
 
         if uniqueIds.is_groupchat:
             return uniqueIds.unsupported_groupchat_err
