@@ -232,7 +232,7 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
 
     return messageStore.messages
 
-def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
+def extract_info_android(input_file: FileLike, attachment_files: Tuple[str], contact_android:str) -> TMessageData:
     messageStore = MessagesStore()
     uniqueIds = UniqueIdsStore()
 
@@ -250,6 +250,11 @@ def extract_info_android(input_file: FileLike, attachment_files: Tuple[str]) -> 
 
         if not (sender or message):
             continue
+
+        if sender == contact_android:
+            sender_id = 2
+        else:
+            sender_id = 1
 
         uniqueIds += sender
         sender_id = uniqueIds.unique_ids[sender]

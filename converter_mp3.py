@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import aiohttp
 import json
 from sanitize import sanitize_path
+import concurrent.futures
 
 load_dotenv(override=True)
 api_key = os.getenv("OPENAI_API_KEY")
@@ -37,6 +38,33 @@ async def transcribe_file(session, mp3_file_path, file_name):
             print(transcript)
             return {'FileName': file_name, 'Transcription': transcript}
 
+def convert_single_file(opus_path, mp3_path):
+    """Convert a single opus file to mp3"""
+    command = ['ffmpeg', '-i', opus_path, '-acodec', 'libmp3lame', '-q:a', '2', mp3_path]
+    process = subprocess.run(command, stdout=PIPE, stderr=STDOUT, text=True)
+    return process.returncode == 0
+
+async def process_file_async(session, file_name, path):
+    """Process a single file: convert then transcribe"""
+    cwd = os.path.dirname(__file__)
+    opus_file_path = abspath(os.path.join(cwd, path, file_name))
+    mp3_file_path = abspath(opus_file_path.replace('.opus', '.mp3'))
+    opus_file_path = sanitize_path(opus_file_path)
+    mp3_file_path = sanitize_path(mp3_file_path)
+    
+    # Use ProcessPoolExecutor for CPU-bound ffmpeg conversion
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        success = await asyncio.get_event_loop().run_in_executor(
+            pool, convert_single_file, opus_file_path, mp3_file_path)
+    
+    if not success:
+        print(f"Failed to convert {file_name}")
+        return None
+    
+    # Now transcribe the file
+    result = await transcribe_file(session, mp3_file_path, file_name)
+    return result
+
 async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
     """Convert opus files to mp3 and transcribe them concurrently"""
     transcriptions_list: TranscriptionList = []
@@ -49,39 +77,16 @@ async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
         print("Não foi detectada uma chave OPENAI")
         return []
 
-    # First convert all opus files to mp3
-    conversion_tasks = []
-    file_info = []
+    # Get all opus files
+    opus_files = [f for f in os.listdir(path) if f.endswith('.opus')]
     
-    for file_name in os.listdir(path):
-        if file_name.endswith('.opus'):
-            cwd = os.path.dirname(__file__)
-            opus_file_path = abspath(os.path.join(cwd, path, file_name))
-            mp3_file_path = abspath(opus_file_path.replace('.opus', '.mp3'))
-            opus_file_path = sanitize_path(opus_file_path)
-            mp3_file_path = sanitize_path(mp3_file_path)
-            
-            command = ['ffmpeg', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
-            process = subprocess.Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
-            conversion_tasks.append(process)
-            file_info.append((file_name, mp3_file_path))
-    
-    # Wait for all conversions to complete
-    for process in conversion_tasks:
-        stdout, stderr = process.communicate()
-        if int(process.returncode or 0):
-            print(f"[{process.returncode}] Failed to convert a file.\n\n{stdout}\n\n{stderr}")
-            return transcriptions_list
-    
-    # Now transcribe all mp3 files concurrently
     async with aiohttp.ClientSession() as session:
-        transcription_tasks = []
-        for file_name, mp3_file_path in file_info:
-            task = transcribe_file(session, mp3_file_path, file_name)
-            transcription_tasks.append(task)
+        # Process each file (convert and transcribe) concurrently
+        tasks = [process_file_async(session, file_name, path) for file_name in opus_files]
+        results = await asyncio.gather(*tasks)
         
-        transcriptions = await asyncio.gather(*transcription_tasks)
-        transcriptions_list.extend(transcriptions)
+        # Filter out None results (failed conversions)
+        transcriptions_list = [result for result in results if result]
     
     return transcriptions_list
 
