@@ -19,6 +19,9 @@ paulochat_fixed.txt
 /zip_tests/
 env
 
+# Mac
+.DS_Store
+
 # Ignore Python files
 *.pyc
 __pycache__/

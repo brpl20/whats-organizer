@@ -1,15 +1,15 @@
+# NEW CONVO 
 import uuid
 import json
 import os
 import shutil
-from typing import Callable, Dict, List, Optional, Tuple, TypeAlias, Union, Any
+from typing import Callable, Dict, List, Optional, Tuple, TypeAlias, Union, Any, Mapping
 
 # Import the zip_analyser functions
 from zip_analyser import analyze_zip_file, MAX_EXTRACTED_SIZE, MAX_COMPRESSION_RATIO, MAX_FILES
 from handle_zip_file import handle_zip_file
 from list_files import list_files_in_directory
 from find_whats_key_data import find_whats_key
-# Import but don't use extract_info_device (keeping for reference)
 from extract_device import extract_info_device, Mobile
 from file_fixer import process_file_fixer 
 from extract_objects import extract_info_iphone, extract_info_android, TMessageData
@@ -33,22 +33,18 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
     
     # Storage for ZIP analysis results
     zip_analysis_data: ZipAnalysisData = {}
-    
-    # Create security checks
-    notify_callback('Fazendo Verificações de Segurança...')
-    
+        
     # Save the uploaded file
     notify_callback('Recebendo Arquivo zip...')
     zip_path = os.path.join(final_work_folder, "uploaded.zip")
     file.save(zip_path)
-    
+     
+    # Run ZIP analysis
     # Check file size before processing
+    notify_callback('Analisando arquivo ZIP para segurança...')
     file_size = os.path.getsize(zip_path)
     if file_size > MAX_EXTRACTED_SIZE:
         return jsonify({"Erro": f"Arquivo muito grande: {file_size} bytes. Máximo permitido: {MAX_EXTRACTED_SIZE} bytes."}), 400
-    
-    # Run ZIP analysis
-    notify_callback('Analisando arquivo ZIP para segurança...')
     detected_device = None  # Default to None
     whatsapp_contact = None
     
@@ -155,21 +151,11 @@ def process_convo(file: FileStorage, unique_folder_name: str, notify_callback: C
         "iphone": lambda fixed_file: extract_info_iphone(fixed_file, attached_files),
     }
     
-    
-    # Keep extract_info_device for reference but don't use it
-    # Instead use the device detected from ZIP analysis
-    # original_detected_device = extract_info_device(whats_main_folder_file)
-    dispositivo = detected_device  # Use the device detected from ZIP analysis
-    
-    print(f"Using device type from ZIP analysis: {dispositivo}")
-    print("Nome do Contato")
-    print(whatsapp_contact)
-    print("Dispositivo")
-    print(detected_device)
+    # Use the device detected from ZIP analysis instead of extract_info_device
+    dispositivo = detected_device
     
     if dispositivo not in extract.keys():
-        print(f"Warning: Unknown device type '{dispositivo}', defaulting to 'android'")
-        dispositivo = "android"  # Default to android if unknown
+        return jsonify({"Erro": "Dispositivo desconhecido"}), 400
     
     # Fix files
     try:
