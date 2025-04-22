@@ -5,6 +5,21 @@ Ver no front [todo](https://github.com/brpl20/whats-organizer-front/blob/master/
 ## Documentação na Wiki
 Ver [wiki](https://github.com/brpl20/whats-organizer/wiki)
 
+# Pip (Dependências python)
+> Para compatibilidade, rode sempre o pip dentro do docker, usando sh, você pode habilitar os scripts utilitários para criar uma função pip que roda dentro do docker.
+>
+> Exemplo: Fazer freeze
+```bash
+┌──(.venv)─(skid㉿gentoo)-[~/My_Code/whats-organizer]
+└─$ . ./scripts/aliases.sh        
+┌──(.venv)─(skid㉿gentoo)-[~/My_Code/whats-organizer]
+└─$ pip3 freeze > requirements.txt                                     
+[+] Running 3/3
+ ✔ Container rabbitmq-socketio           Running0.0s 
+ ✔ Container flask                       Running0.0s 
+ ✔ Container nginx-whats-organizer_back  Running0.0s
+```
+
 # Windows
 > Use wsl?
 
