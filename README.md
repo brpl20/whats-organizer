@@ -11,7 +11,7 @@ Ver [wiki](https://github.com/brpl20/whats-organizer/wiki)
 > Exemplo: Fazer freeze
 ```bash
 ┌──(.venv)─(skid㉿gentoo)-[~/My_Code/whats-organizer]
-└─$ . ./scripts/aliases.sh        
+└─$ . ./scripts/aliases.sh        # Dessa forma, todos os comandos pip estarão sendo redirecionados pro docker
 ┌──(.venv)─(skid㉿gentoo)-[~/My_Code/whats-organizer]
 └─$ pip3 freeze > requirements.txt                                     
 [+] Running 3/3
