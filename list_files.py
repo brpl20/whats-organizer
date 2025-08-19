@@ -1,8 +1,6 @@
-from dataclasses import dataclass
 import os
 from typing import List, Optional, TypedDict
 
-@dataclass(unsafe_hash=True)
 class FileObj(TypedDict):
     name: Optional[str]
     size: Optional[int]

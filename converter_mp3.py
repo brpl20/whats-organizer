@@ -4,13 +4,10 @@ from os.path import abspath
 import subprocess
 from subprocess import STDOUT, PIPE
 from typing import List, TypedDict, TypeAlias, cast
-from dotenv import load_dotenv
 import aiohttp
 import json
 from sanitize import sanitize_path
-
-load_dotenv(override=True)
-api_key = os.getenv("OPENAI_API_KEY")
+from config import config
 
 class Transcription(TypedDict):
     FileName: str
@@ -22,7 +19,7 @@ async def transcribe_file(session, mp3_file_path, file_name):
     """Transcribe a single file using OpenAI Whisper API"""
     url = "https://api.openai.com/v1/audio/transcriptions"
     headers = {
-        "Authorization": f"Bearer {api_key}"
+        "Authorization": f"Bearer {config.OPENAI_API_KEY}"
     }
     
     with open(mp3_file_path, 'rb') as f:
@@ -45,7 +42,7 @@ async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
         print(f"The specified path {path} does not exist or is not a directory.")
         return transcriptions_list
     
-    if not api_key:
+    if not config.OPENAI_API_KEY:
         print("Não foi detectada uma chave OPENAI")
         return []
 

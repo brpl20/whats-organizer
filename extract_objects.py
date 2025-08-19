@@ -26,7 +26,6 @@ RePattern: TypeAlias = str | Pattern[str]
 ExtractTwoGroups: TypeAlias = Callable[[RePattern, str], Tuple[str, str]]
 
 
-@dataclass(unsafe_hash=True)
 class MessageData(TypedDict):
     Name: str
     ID: int
