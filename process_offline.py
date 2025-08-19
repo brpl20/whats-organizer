@@ -1,7 +1,9 @@
 import uuid
 import json
 import os
+import re
 import shutil
+from datetime import datetime
 from typing import Callable, Dict, List, Optional, Tuple, TypeAlias, Union, Any, Mapping
 
 # Import the zip_analyser functions
@@ -131,6 +133,8 @@ def process_convo(file_path: str, unique_folder_name: str) -> Dict[str, Any]:
         
         # Store analysis data
         zip_analysis_data["analysis"] = analysis_result
+        print("---Analysis Result---")
+        print(analysis_result)
         
         # Check for ZIP bomb and other security issues
         if "SECURITY ALERT" in analysis_result:
@@ -148,12 +152,11 @@ def process_convo(file_path: str, unique_folder_name: str) -> Dict[str, Any]:
         if any(sys in system_info for sys in ["MS-DOS", "OS/2", "Windows", "NTFS", "VFAT", "UNIX"]):
             detected_device = "android"
             print(detected_device)
-        elif any(sys in system_info for sys in ["Macintosh", "OS X", "Darwin"]):
+        elif any(sys in system_info for sys in ["Macintosh", "OS X", "Darwin", "Z-System"]):
             detected_device = "iphone"
             print(detected_device)
         else:
-            detected_device = "android"
-            print(detected_device)
+            raise ValueError(f"Sistema operacional não reconhecido: {system_info}. Não é possível determinar se é Android ou iPhone.")
             
         # Extract WhatsApp contact name (for Android)
         if detected_device == "android" and "WhatsApp Contacts Found:" in analysis_result:
@@ -205,6 +208,29 @@ def process_convo(file_path: str, unique_folder_name: str) -> Dict[str, Any]:
         file_obj_list = list_files_in_directory(final_work_folder)
     except Exception as e:
         return {"Erro": f"Erro ao listar arquivos: {str(e)}"}
+    
+    # Extract WhatsApp contact name for iPhone (needs to be done after extraction)
+    if detected_device == "iphone" and not whatsapp_contact:
+        chat_file_path = os.path.join(final_work_folder, "_chat.txt")
+        
+        if os.path.exists(chat_file_path):
+            try:
+                with open(chat_file_path, 'r', encoding='utf-8') as f:
+                    # Read first few lines to find the first message
+                    for line in f:
+                        # iPhone format: [dd/mm/yyyy, hh:mm:ss] Contact Name: message
+                        # Pattern to match: [date, time] Contact Name: 
+                        match = re.match(r'\[(\d{2}/\d{2}/\d{4}), (\d{2}:\d{2}:\d{2})\] ([^:]+):', line)
+                        if match:
+                            # Extract the contact name (group 3)
+                            whatsapp_contact = match.group(3).strip()
+                            # Update the zip_analysis_data with the contact
+                            zip_analysis_data["whatsapp_contact"] = whatsapp_contact
+                            print("---WhatsAppContact (iPhone)---")
+                            print(whatsapp_contact)
+                            break
+            except Exception as e:
+                print(f"Aviso: Não foi possível extrair o nome do contato do iPhone: {str(e)}")
 
     # Convert MP3 and transcribe
     print('Convertendo MP3 e Transcrevendo Áudios...')
@@ -301,10 +327,21 @@ def main():
     """Função principal para executar o processamento offline"""
     
     # Caminho do arquivo conforme especificado
-    file_path = "/home/brpl/code/whats-organizer-testing/iphone/teste-conversa-simples-sem-nada-bruno-iphone-comeca.zip"
+    android = "/home/brpl/code/whats-organizer-testing/android/"
+    iphone = "/home/brpl/code/whats-organizer-testing/iphone/" 
+
+    # file_path = iphone + " teste-conversa-simples-sem-nada-bruno-android-comeca.zip"
     
-    # Gerar um nome único para a pasta de trabalho
-    unique_folder_name = f"processing_{uuid.uuid4().hex[:8]}"
+    
+    
+    #file_path = android + "teste-audio-curto-uma-imagem.zip"
+    file_path = android + "teste-conversa-media.zip"
+    
+
+    # Gerar um nome único para a pasta de trabalho com timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_id = uuid.uuid4().hex[:8]
+    unique_folder_name = f"{timestamp}_processing_{unique_id}"
     
     print(f"Iniciando processamento do arquivo: {file_path}")
     print(f"Pasta de trabalho: {unique_folder_name}")
@@ -322,6 +359,29 @@ def main():
                 print(f"📱 Dispositivo detectado: {resultado['analise']['detected_device']}")
             if resultado.get('analise', {}).get('whatsapp_contact'):
                 print(f"👤 Contato: {resultado['analise']['whatsapp_contact']}")
+            
+            # Mostrar o caminho do arquivo final e primeiras mensagens
+            output_path = os.path.join("./zip_tests/", unique_folder_name, "output.json")
+            print("\n" + "=" * 50)
+            print(f"📁 Arquivo gerado em: {output_path}")
+            print("=" * 50)
+            
+            # Mostrar prévia do conteúdo
+            if os.path.exists(output_path):
+                print("\n📋 PRÉVIA DO CONTEÚDO (primeiras 3 mensagens):")
+                print("-" * 50)
+                with open(output_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for i, msg in enumerate(data[:3], 1):
+                        print(f"\nMensagem {i}:")
+                        print(f"  Nome: {msg.get('Name', 'N/A')}")
+                        print(f"  Data: {msg.get('Date', 'N/A')} {msg.get('Time', 'N/A')}")
+                        print(f"  Mensagem: {msg.get('Message', 'N/A')[:100]}...")
+                        if msg.get('FileAttached'):
+                            print(f"  Arquivo: {msg.get('FileAttached')}")
+                
+                print("\n" + "-" * 50)
+                print(f"💾 Para ver o arquivo completo, abra: {output_path}")
                 
     except Exception as e:
         print(f"❌ ERRO INESPERADO: {str(e)}")

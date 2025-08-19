@@ -77,7 +77,7 @@ def process_pdf_aws(pdf_path, bucket_name):
         # links_list.append(full_url)
     return links_list
 
-def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
+def process_pdf_to_images(pdf_path: str) -> List[Dict[str, List[str]]]:
     images = convert_from_path(pdf_path, first_page=1, last_page=6)
     images = images[:6]
 
@@ -86,7 +86,13 @@ def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
     file_entry = {'File': pdf_base_name, 'Links': []}
     links_list.append(file_entry)
 
-    for image in images:
+    # Create a subdirectory for PDF images if it doesn't exist
+    pdf_dir = os.path.dirname(pdf_path)
+    pdf_name_without_ext = os.path.splitext(pdf_base_name)[0]
+    images_dir = os.path.join(pdf_dir, f"pdf_images_{pdf_name_without_ext}")
+    os.makedirs(images_dir, exist_ok=True)
+
+    for i, image in enumerate(images):
         width, height = image.size
         is_landscape = width > height
         landscape_size = (1080, 1920)
@@ -100,14 +106,15 @@ def process_pdf_base64(pdf_path: str) -> List[Dict[str, List[str]]]:
         size, orientation = orientation_landscape[is_landscape]
         image.thumbnail(size)
 
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='PNG')
-        img_byte_arr = img_byte_arr.getvalue()
-
-        base64_image = b64encode(img_byte_arr).decode('utf-8')
-        base64_url = f"data:image/png;base64,{base64_image}"
+        # Save image as file instead of base64
+        image_filename = f"page_{i+1}.png"
+        image_path = os.path.join(images_dir, image_filename)
+        image.save(image_path, format='PNG')
         
-        file_entry['Links'].append(base64_url)
+        # Store the relative path instead of base64
+        relative_path = os.path.relpath(image_path, pdf_dir)
+        
+        file_entry['Links'].append(relative_path)
         file_entry['Links'].append(orientation)
 
     return links_list
@@ -132,7 +139,7 @@ def process_pdf_folder(folder_path: str):
             pdf_path = os.path.join(folder_path, filename)
             try:
                 #urls = process_pdf(pdf_path, bucket_name)
-                urls = process_pdf_base64(pdf_path)
+                urls = process_pdf_to_images(pdf_path)
                 all_results.extend(urls)
                 print(f"Processed {filename}")
             except Exception as e:
