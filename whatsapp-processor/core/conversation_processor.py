@@ -76,6 +76,9 @@ class ConversationProcessor:
                 "analise": self.analysis_data.to_dict()
             }
             
+        except SecurityError as e:
+            # Security errors should be returned as-is to trigger special frontend handling
+            return {"Erro": str(e)}
         except Exception as e:
             return {"Erro": str(e)}
     
@@ -106,8 +109,11 @@ class ConversationProcessor:
             self.analysis_data = self.zip_analyzer.analyze_file(self.zip_path)
             print("---Analysis Result---")
             print(self.analysis_data.analysis)
+        except SecurityError:
+            # Re-raise security errors - these should stop processing
+            raise
         except Exception as e:
-            # Fallback to default device type if analysis fails
+            # Fallback to default device type if analysis fails for other reasons
             print(f"Warning: ZIP analysis failed: {str(e)}. Using default device type: android")
             self.analysis_data.detected_device = DeviceType.ANDROID.value
     

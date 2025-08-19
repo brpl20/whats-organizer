@@ -92,6 +92,12 @@ def process_pdf_to_images(pdf_path: str) -> List[Dict[str, List[str]]]:
     images_dir = os.path.join(pdf_dir, f"pdf_images_{pdf_name_without_ext}")
     os.makedirs(images_dir, exist_ok=True)
 
+    # Add the original PDF file URL first
+    pdf_relative_path = os.path.relpath(pdf_path, pdf_dir)
+    pdf_backend_url = f"http://localhost:5000/media/{pdf_relative_path}"
+    file_entry['Links'].append(pdf_backend_url)
+    file_entry['Links'].append('pdf')  # Mark as PDF file
+
     for i, image in enumerate(images):
         width, height = image.size
         is_landscape = width > height
@@ -111,10 +117,13 @@ def process_pdf_to_images(pdf_path: str) -> List[Dict[str, List[str]]]:
         image_path = os.path.join(images_dir, image_filename)
         image.save(image_path, format='PNG')
         
-        # Store the relative path instead of base64
+        # Store the relative path and convert to backend URL
         relative_path = os.path.relpath(image_path, pdf_dir)
         
-        file_entry['Links'].append(relative_path)
+        # Create backend URL for the image
+        backend_url = f"http://localhost:5000/media/{relative_path}"
+        
+        file_entry['Links'].append(backend_url)
         file_entry['Links'].append(orientation)
 
     return links_list

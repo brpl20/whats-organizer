@@ -110,19 +110,40 @@ class ZipAnalyzer:
     
     def _check_malicious_files(self, analysis_result: str) -> None:
         """Check for potentially malicious files"""
-        file_list_section = ""
+        suspicious_files = []
+        suspicious_extensions = [".sh", ".bat", ".cmd", ".ps1", ".vbs", ".js", ".exe", ".dll", ".so"]
+        
+        # Extract file names from detailed file list
         if "Detailed File List:" in analysis_result:
             file_list_section = analysis_result.split("Detailed File List:")[1]
+            lines = file_list_section.split('\n')
+            
+            for line in lines:
+                line = line.strip()
+                # Look for filename lines (they don't start with spaces and contain file info)
+                if line and not line.startswith(' ') and not line.startswith('\t'):
+                    filename = line.split()[0] if line.split() else ""
+                    
+                    # Check for malicious extensions
+                    for ext in suspicious_extensions:
+                        if filename.lower().endswith(ext.lower()):
+                            suspicious_files.append(filename)
+                            print(f"🚨 SECURITY ALERT: Malicious file detected: {filename}")
+                            break
         
-        suspicious_files = []
-        for pattern in MALICIOUS_PATTERNS:
-            if pattern.lower() in file_list_section.lower():
-                suspicious_files.append(pattern)
+        # Also check for malicious content patterns in file content analysis
+        malicious_content = ["DROP TABLE", "DELETE FROM", "INSERT INTO", "SELECT ", 
+                           "shell", "exec(", "system(", "eval(", "<script", "<?php"]
+        
+        for pattern in malicious_content:
+            if pattern.lower() in analysis_result.lower():
+                suspicious_files.append(f"content:{pattern}")
         
         if suspicious_files:
             self.analysis_data.suspicious_files = suspicious_files
             raise SecurityError(
-                f"Potentially malicious files detected: {', '.join(suspicious_files)}"
+                f"🚨 ARQUIVO MALICIOSO DETECTADO! Arquivos perigosos encontrados: {', '.join(suspicious_files)}. "
+                f"Por segurança, o processamento foi interrompido."
             )
     
     def extract_iphone_contact(self, chat_file_path: str) -> Optional[str]:

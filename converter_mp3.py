@@ -58,7 +58,7 @@ async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
             opus_file_path = sanitize_path(opus_file_path)
             mp3_file_path = sanitize_path(mp3_file_path)
             
-            command = ['ffmpeg', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
+            command = ['ffmpeg', '-y', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
             process = subprocess.Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
             conversion_tasks.append(process)
             file_info.append((file_name, mp3_file_path))

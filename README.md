@@ -102,3 +102,30 @@ E aí habilite a env do playwright
 HEADLESS=False
 ```
 
+## ⏱️ Timeouts e Limites do Sistema
+
+### Conexão WebSocket
+- **Backend (SocketIO)**: `ping_timeout=80` segundos
+- **Frontend**: 
+  - Timeout de conexão inicial: `5 segundos`
+  - Tentativas de reconexão: `5 tentativas automáticas`
+  - Transports: websocket, polling, webtransport
+
+### Limites de Upload
+- **Tamanho na memória**: `50MB` (MAX_FORM_MEMORY_SIZE)
+- **Tamanho total**: Sem limite (MAX_CONTENT_LENGTH = None)
+- **ZIP extraído**: Máximo `500MB`
+- **Arquivos por ZIP**: Máximo `10.000` arquivos
+- **Taxa de compressão**: Máximo `10:1`
+
+### Segurança
+- **Detecção de malware**: Bloqueia arquivos `.sh`, `.bat`, `.exe`, `.dll`, etc.
+- **Directory traversal**: Proteção contra `../` em nomes de arquivo
+- **CORS**: Configurado para domínios específicos
+
+### Limitações Conhecidas
+- Grupos do WhatsApp não são suportados
+- Tamanho máximo recomendado: 40MB
+- Não há garantia de autenticidade dos arquivos
+- Processamento pode demorar para arquivos grandes (sem timeout específico)
+
