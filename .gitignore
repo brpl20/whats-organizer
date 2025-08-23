@@ -18,6 +18,9 @@ paulochat_fixed.txt
 /whats/
 /zip_tests/
 env
+/output/
+/tests/node_modules/
+
 
 # Mac
 .DS_Store

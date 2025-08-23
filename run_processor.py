@@ -6,7 +6,7 @@ import sys
 import os
 
 # Adicionar o diretório whatsapp-processor ao path
-processor_dir = os.path.join(os.path.dirname(__file__), 'whatsapp-processor')
+processor_dir = os.path.join(os.path.dirname(__file__), 'backend')
 sys.path.insert(0, processor_dir)
 
 # Importar e executar o main

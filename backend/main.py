@@ -21,7 +21,7 @@ from exceptions.custom_exceptions import WhatsAppProcessorError
 class WhatsAppProcessor:
     """Main WhatsApp Processor application class"""
     
-    def __init__(self, base_folder: str = "./zip_tests/"):
+    def __init__(self, base_folder: str = "./output/"):
         self.logger = setup_logging()
         self.processor = ConversationProcessor(base_folder)
         self.base_folder = base_folder
