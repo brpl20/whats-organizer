@@ -4,7 +4,7 @@ ZIP file analysis module
 import os
 import re
 from typing import Optional, List, Tuple
-from models.zip_analysis import ZipAnalysisData
+from .zip_analysis import ZipAnalysisData
 from models.device import DeviceType
 from exceptions.custom_exceptions import ZipAnalysisError, SecurityError
 

@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from models.message import MessageData
-from models.zip_analysis import ZipAnalysisData
+from .zip_analysis import ZipAnalysisData
 from models.device import DeviceType
 from exceptions.custom_exceptions import (
     FileProcessingError,
@@ -121,10 +121,10 @@ class ConversationProcessor:
         """Extract ZIP file contents"""
         print('Creating temporary folders...')
         try:
-            from handle_zip_file import handle_zip_file
+            from .zip_handler import handle_zip_file
             handle_zip_file(self.zip_path, self.working_folder)
         except ImportError as e:
-            raise FileProcessingError(f"Failed to import handle_zip_file: {e}")
+            raise FileProcessingError(f"Failed to import zip_handler: {e}")
         except Exception as e:
             raise FileProcessingError(f"Error extracting ZIP file: {str(e)}")
     

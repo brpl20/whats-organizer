@@ -24,7 +24,7 @@ class MediaProcessor:
             MediaProcessingError: If audio processing fails
         """
         try:
-            from converter_mp3 import convert_opus_to_mp3
+            from utils.converter_mp3 import convert_opus_to_mp3
             self.transcriptions = convert_opus_to_mp3(self.working_folder)
             return self.transcriptions
         except ImportError as e:
@@ -62,7 +62,7 @@ class MediaProcessor:
             Messages with transcriptions appended
         """
         try:
-            from file_append import file_appending
+            from utils.file_append import file_appending
             return file_appending(messages, self.transcriptions)
         except ImportError as e:
             raise MediaProcessingError(f"Failed to import file appending: {e}")
@@ -80,7 +80,7 @@ class MediaProcessor:
             Messages with PDF images appended
         """
         try:
-            from file_append import file_appending_pdf
+            from utils.file_append import file_appending_pdf
             return file_appending_pdf(messages, self.pdf_images)
         except ImportError as e:
             raise MediaProcessingError(f"Failed to import PDF appending: {e}")

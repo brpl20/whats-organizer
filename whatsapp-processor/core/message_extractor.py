@@ -27,7 +27,7 @@ class MessageExtractor:
             MessageExtractionError: If chat file is not found
         """
         try:
-            from find_whats_key_data import find_whats_key
+            from utils.find_whats_key_data import find_whats_key
             return find_whats_key(file_list)
         except ImportError as e:
             raise MessageExtractionError(f"Failed to import find_whats_key_data: {e}")
@@ -49,7 +49,7 @@ class MessageExtractor:
             MessageExtractionError: If file fixing fails
         """
         try:
-            from file_fixer import process_file_fixer
+            from utils.file_fixer import process_file_fixer
             return process_file_fixer(chat_file_path, device_type)
         except ImportError as e:
             raise MessageExtractionError(f"Failed to import file_fixer: {e}")
@@ -77,7 +77,7 @@ class MessageExtractor:
             MessageExtractionError: If extraction fails
         """
         try:
-            from extract_objects import extract_info_android
+            from utils.extract_objects import extract_info_android
             return extract_info_android(whatsapp_contact, fixed_file, attached_files)
         except ImportError as e:
             raise MessageExtractionError(f"Failed to import extract_objects: {e}")
@@ -103,7 +103,7 @@ class MessageExtractor:
             MessageExtractionError: If extraction fails
         """
         try:
-            from extract_objects import extract_info_iphone
+            from utils.extract_objects import extract_info_iphone
             return extract_info_iphone(fixed_file, attached_files)
         except ImportError as e:
             raise MessageExtractionError(f"Failed to import extract_objects: {e}")
@@ -164,7 +164,7 @@ class MessageExtractor:
             MessageExtractionError: If device type is unsupported
         """
         try:
-            from extract_objects import extract_info_android, extract_info_iphone
+            from utils.extract_objects import extract_info_android, extract_info_iphone
             
             extract_functions = {
                 DeviceType.ANDROID.value: lambda fixed_file, attached_files, contact=None: 

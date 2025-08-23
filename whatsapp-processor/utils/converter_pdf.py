@@ -8,7 +8,7 @@ from botocore.exceptions import NoCredentialsError
 import io
 import re
 import unicodedata 
-from docxtopdf import convert_to
+from .docxtopdf import convert_to
 
 def process_pdf_aws(pdf_path, bucket_name):
     # Convert PDF to images
