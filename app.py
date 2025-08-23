@@ -2,10 +2,11 @@
 New Flask application using the refactored WhatsApp processor
 Maintains API compatibility while using the new modular system
 """
-# Gevent monkey patching for infrastructure
+# Gevent monkey patching for infrastructure - MUST be first
 from gevent import monkey
-from connection_handlers import handle_disconnect, handle_connect
 monkey.patch_all()
+
+from backend.utils.connection_handlers import handle_disconnect, handle_connect
 
 from asyncio import new_event_loop, set_event_loop
 from typing import Awaitable, Callable, TypeVar
@@ -16,14 +17,14 @@ from os import getenv, path
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
-from globals import globals
+from backend.utils.globals import globals
 import os
 
 # Import new API
 from api.whatsapp_api import create_whatsapp_api
 
 # Import legacy PDF functionality (keep for compatibility)
-from print_page_pdf import print_page_pdf
+from backend.utils.print_page_pdf import print_page_pdf
 
 load_dotenv(override=True)
 prod = getenv("FLASK_ENV")

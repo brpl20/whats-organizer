@@ -9,7 +9,7 @@ from flask import request, jsonify, Response
 from werkzeug.datastructures import FileStorage
 
 # Add whatsapp-processor to path
-processor_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'whatsapp-processor')
+processor_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'backend')
 sys.path.insert(0, processor_dir)
 
 from core.conversation_processor import ConversationProcessor
@@ -21,7 +21,7 @@ JsonResp = Union[Tuple[Response, int], Response]
 class WhatsAppAPI:
     """New API class using the refactored processor"""
     
-    def __init__(self, base_folder: str = "./zip_tests/"):
+    def __init__(self, base_folder: str = "./output/"):
         self.base_folder = base_folder
         self.processor = ConversationProcessor(base_folder)
     
