@@ -125,7 +125,19 @@ HEADLESS=False
 
 ### Limitações Conhecidas
 - Grupos do WhatsApp não são suportados
-- Tamanho máximo recomendado: 40MB
+- Tamanho máximo: 100MB
 - Não há garantia de autenticidade dos arquivos
 - Processamento pode demorar para arquivos grandes (sem timeout específico)
 
+# TD
+- Backend: Ajustar tamanho máximo para 100mb e melhorar timeout
+- Backend: Organizar melhor estrutura do /backend
+- Frontend: Informar versões de dispositivos testados e aprovados: Android XYZ, Iphone XYZ;
+- Frontend: Adicionar vídeo educacional
+- Frontend: Ajustar mensagem de erro
+- Frontend: Trazer repositório do frontend
+- Documentação: Revisar documentação em geral
+- DevOps: Arrumar servidor e hospedagem
+- Testes: Criar mais arquivos de testes
+- Testes: Remover testes sensíveis (add to .ignore)
+- Testes: Automatizar e criar logger / mensageria de testes
