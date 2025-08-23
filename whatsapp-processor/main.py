@@ -128,7 +128,8 @@ def main():
     
     # Choose test file
     # file_path = android_folder + "teste-audio-curto-uma-imagem.zip"
-    file_path = iphone_folder + "pdf.zip"
+    file_path = iphone_folder + "docx.zip"
+    # file_path = android_folder + "docx.zip"
     
     # Initialize processor
     processor = WhatsAppProcessor()

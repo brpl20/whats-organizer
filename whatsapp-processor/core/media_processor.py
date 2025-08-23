@@ -43,7 +43,7 @@ class MediaProcessor:
             MediaProcessingError: If PDF processing fails
         """
         try:
-            from converter_pdf import process_pdf_folder
+            from utils.converter_pdf import process_pdf_folder
             self.pdf_images = process_pdf_folder(self.working_folder)
             return self.pdf_images
         except ImportError as e:

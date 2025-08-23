@@ -202,6 +202,18 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
             len(attachment_test) > filename_group and 
             attachment_test[filename_group] in attachment_files
         )
+        
+        # DEBUG iPhone DOCX
+        if 'FORMULÁRIO' in message and 'docx' in message:
+            print(f"🔍 DEBUG iPhone DOCX:")
+            print(f"  Message: {message}")
+            print(f"  attachment_test: {attachment_test}")
+            print(f"  attachment_files: {attachment_files}")
+            print(f"  has_attachment: {has_attachment}")
+            if attachment_test:
+                print(f"  Captured filename: {attachment_test[filename_group]}")
+                print(f"  Filename in files? {attachment_test[filename_group] in attachment_files}")
+        
         if has_attachment:
             file_attached = attachment_test[filename_group] or None
             if file_attached:
