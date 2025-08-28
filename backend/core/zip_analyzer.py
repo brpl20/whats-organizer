@@ -4,7 +4,7 @@ ZIP file analysis module
 import os
 import re
 from typing import Optional, List, Tuple
-from .zip_analysis import ZipAnalysisData
+from models.zip_analysis import ZipAnalysisData
 from models.device import DeviceType
 from exceptions.custom_exceptions import ZipAnalysisError, SecurityError
 
@@ -53,8 +53,8 @@ class ZipAnalyzer:
         
         try:
             # Import the existing analyze_zip_file function
-            from zip_analyser import analyze_zip_file
-            analysis_result = analyze_zip_file(zip_path)
+            from core import audit_zip
+            analysis_result = audit_zip(zip_path)
             
             self.analysis_data.analysis = analysis_result
             
@@ -77,7 +77,7 @@ class ZipAnalyzer:
             return self.analysis_data
             
         except ImportError as e:
-            raise ZipAnalysisError(f"Failed to import zip_analyser: {e}")
+            raise ZipAnalysisError(f"Failed to import zip_analyzer: {e}")
         except Exception as e:
             if isinstance(e, (SecurityError, ZipAnalysisError)):
                 raise
@@ -91,13 +91,13 @@ class ZipAnalyzer:
             self.analysis_data.creation_system = system_info
         
         # Determine device type
+        self.analysis_data.detected_device = DeviceType.ANDROID.value
+
         if any(sys in system_info for sys in ["MS-DOS", "OS/2", "Windows", "NTFS", "VFAT", "UNIX"]):
             self.analysis_data.detected_device = DeviceType.ANDROID.value
         elif any(sys in system_info for sys in ["Macintosh", "OS X", "Darwin", "Z-System"]):
             self.analysis_data.detected_device = DeviceType.IPHONE.value
-        else:
-            self.analysis_data.detected_device = DeviceType.UNKNOWN.value
-    
+
     def _extract_contact(self, analysis_result: str) -> None:
         """Extract WhatsApp contact name from analysis"""
         if self.analysis_data.detected_device == DeviceType.ANDROID.value:

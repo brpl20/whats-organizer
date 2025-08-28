@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from models.message import MessageData
-from .zip_analysis import ZipAnalysisData
+from models.zip_analysis import ZipAnalysisData
 from models.device import DeviceType
 from exceptions.custom_exceptions import (
     FileProcessingError,
@@ -104,18 +104,9 @@ class ConversationProcessor:
         """Analyze the ZIP file for security and metadata"""
         print('Analyzing ZIP file for security...')
         self.zip_analyzer = ZipAnalyzer()
-        
-        try:
-            self.analysis_data = self.zip_analyzer.analyze_file(self.zip_path)
-            print("---Analysis Result---")
-            print(self.analysis_data.analysis)
-        except SecurityError:
-            # Re-raise security errors - these should stop processing
-            raise
-        except Exception as e:
-            # Fallback to default device type if analysis fails for other reasons
-            print(f"Warning: ZIP analysis failed: {str(e)}. Using default device type: android")
-            self.analysis_data.detected_device = DeviceType.ANDROID.value
+
+        self.analysis_data = self.zip_analyzer.analyze_file(self.zip_path)
+        self.analysis_data.detected_device = self.analysis_data.detected_device or DeviceType.ANDROID.value
     
     def _extract_zip_contents(self) -> None:
         """Extract ZIP file contents"""
@@ -173,8 +164,8 @@ class ConversationProcessor:
         # Get detected device type
         device_type = self.analysis_data.detected_device or DeviceType.ANDROID.value
         
-        if device_type not in [DeviceType.ANDROID.value, DeviceType.IPHONE.value]:
-            raise DeviceDetectionError("Unknown device type")
+        if device_type not in (DeviceType.ANDROID.value, DeviceType.IPHONE.value):
+            raise DeviceDetectionError("Erro: Não é possível detectar modelo de celular")
         
         # Extract messages
         self.message_extractor = MessageExtractor(self.working_folder)

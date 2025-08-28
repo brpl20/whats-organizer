@@ -148,7 +148,7 @@ class MessageExtractor:
             print('iPhone detected!')
             return self.extract_iphone_messages(fixed_file, attached_files)
         else:
-            raise MessageExtractionError(f"Unknown device type: {device_type}")
+            raise MessageExtractionError("Erro: Não é possível detectar modelo de celular")
     
     def get_extraction_function(self, device_type: str) -> Callable:
         """

@@ -1,6 +1,3 @@
-"""
-ZIP analysis data model
-"""
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 

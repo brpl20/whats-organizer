@@ -10,7 +10,7 @@ from backend.utils.connection_handlers import handle_disconnect, handle_connect
 
 from asyncio import new_event_loop, set_event_loop
 from typing import Awaitable, Callable, TypeVar
-from flask import Flask, request, jsonify, send_file, abort
+from flask import Flask, request, jsonify, send_file, abort, app
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from os import getenv, path
@@ -20,14 +20,17 @@ from uuid import uuid4
 from backend.utils.globals import globals
 import os
 
-# Import new API
 from api.whatsapp_api import create_whatsapp_api
 
-# Import legacy PDF functionality (keep for compatibility)
 from backend.utils.print_page_pdf import print_page_pdf
 
 load_dotenv(override=True)
-prod = getenv("FLASK_ENV")
+
+prod_env = getenv("FLASK_ENV")
+port_env = getenv("FLASK_PORT")
+
+prod = (prod_env or "").lower() in ("prod", "production") 
+port = int(port_env or 5000)
 
 app = Flask(__name__)
 MEGABYTE = (2 ** 10) ** 2
@@ -212,7 +215,7 @@ if __name__ == '__main__':
     
     if prod:
         print("🌐 Production mode with RabbitMQ")
-        socketio.run(app, host='0.0.0.0', port=5000)
+        socketio.run(app, host='0.0.0.0', port=int(port or 5000))
     else:
         print("🔧 Development mode")
-        socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+        app.run(port=int(port or 5000), debug=True)

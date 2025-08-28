@@ -16,7 +16,7 @@ MAX_COMPRESSION_RATIO = 1000
 # Max number of files to allow
 MAX_FILES = 10000
 
-def analyze_zip_file(zip_path):
+def audit_zip(zip_path):
     try:
         # Check if file exists
         if not os.path.exists(zip_path):
@@ -78,6 +78,26 @@ def analyze_zip_file(zip_path):
             
             for file in file_list:
                 info = zip_ref.getinfo(file)
+                S_IFMT = 0o170000
+                S_IFLNK = 0o120000
+                S_ISUID = 0o4000
+                S_ISGID = 0o2000
+                S_ISVTX = 0o1000
+                S_IXUSR = 0o100
+                S_IXGRP = 0o10
+                S_IXOTH = 0o1
+
+                mode = info.external_attr >> 16
+
+                file_type = mode & S_IFMT
+                is_symlink = (file_type == S_IFLNK)
+                is_exe = bool(mode & (S_IXUSR | S_IXGRP | S_IXOTH))
+                is_suid = bool(mode & S_ISUID)
+                is_sgid = bool(mode & S_ISGID)
+                is_sticky = bool(mode & S_ISVTX)
+                if any((is_symlink, is_exe, is_suid, is_sgid, is_sticky)):
+                    print(f"SECURITY ALERT: Permission abuse {is_symlink=}, {is_exe=}, {is_suid=}, {is_sgid=}, {is_sticky=}")
+                    return f"SECURITY ALERT: Permission abuse {is_symlink=}, {is_exe=}, {is_suid=}, {is_sgid=}, {is_sticky=}"
                 compressed_size = info.compress_size
                 uncompressed_size = info.file_size
                 compression_method = info.compress_type
@@ -183,6 +203,11 @@ def analyze_zip_file(zip_path):
                     'modified': modified_date,
                     'is_dir': is_dir,
                     'is_encrypted': is_encrypted,
+                    'is_symlink': is_symlink,
+                    'is_exe': is_exe,
+                    'is_suid': is_suid,
+                    'is_sgid': is_sgid,
+                    'is_sticky': is_sticky,
                     'crc': crc,
                     'header_offset': header_offset,
                     'extra': extra,
@@ -191,7 +216,7 @@ def analyze_zip_file(zip_path):
                     'create_system': info.create_system,
                     'extract_version': info.extract_version,
                     'flag_bits': info.flag_bits,
-                    'volume': info.volume,
+                    'volume': info.volume
                 })
                 
                 total_compressed_size += compressed_size
@@ -309,6 +334,8 @@ def analyze_zip_file(zip_path):
         
         result += "\nDetailed File List:\n"
         for item in file_details:
+            print(f"{'='*10+'>'} you are in the right place")
+            print(item)
             prefix = "[DIR] " if item['is_dir'] else ""
             result += f"\n{prefix}{item['name']}\n"
             if not item['is_dir']:
