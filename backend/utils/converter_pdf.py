@@ -10,6 +10,8 @@ import re
 import unicodedata 
 from .docxtopdf import convert_to
 
+API_URL = os.getenv("API_URL")
+
 def process_pdf_aws(pdf_path, bucket_name):
     # Convert PDF to images
     images = convert_from_path(pdf_path, first_page=1, last_page=6)
@@ -94,7 +96,7 @@ def process_pdf_to_images(pdf_path: str) -> List[Dict[str, List[str]]]:
 
     # Add the original PDF file URL first
     pdf_relative_path = os.path.relpath(pdf_path, pdf_dir)
-    pdf_backend_url = f"http://localhost:5000/media/{pdf_relative_path}"
+    pdf_backend_url = f"{API_URL}/media/{pdf_relative_path}"
     file_entry['Links'].append(pdf_backend_url)
     file_entry['Links'].append('pdf')  # Mark as PDF file
 
@@ -121,7 +123,7 @@ def process_pdf_to_images(pdf_path: str) -> List[Dict[str, List[str]]]:
         relative_path = os.path.relpath(image_path, pdf_dir)
         
         # Create backend URL for the image
-        backend_url = f"http://localhost:5000/media/{relative_path}"
+        backend_url = f"{API_URL}/media/{relative_path}"
         
         file_entry['Links'].append(backend_url)
         file_entry['Links'].append(orientation)
