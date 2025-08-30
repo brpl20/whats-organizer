@@ -53,8 +53,8 @@ class ZipAnalyzer:
         
         try:
             # Import the existing analyze_zip_file function
-            from core import audit_zip
-            analysis_result = audit_zip(zip_path)
+            from utils.zip_analyser import analyze_zip_file
+            analysis_result = analyze_zip_file(zip_path)
             
             self.analysis_data.analysis = analysis_result
             
@@ -77,7 +77,7 @@ class ZipAnalyzer:
             return self.analysis_data
             
         except ImportError as e:
-            raise ZipAnalysisError(f"Failed to import zip_analyzer: {e}")
+            raise ZipAnalysisError(f"Failed to import zip_analyser: {e}")
         except Exception as e:
             if isinstance(e, (SecurityError, ZipAnalysisError)):
                 raise

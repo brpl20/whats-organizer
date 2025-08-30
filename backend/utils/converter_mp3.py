@@ -50,13 +50,18 @@ async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
     conversion_tasks = []
     file_info = []
     
+    print(f"Searching for audio files in: {path}")
+    
     for file_name in os.listdir(path):
         if file_name.endswith('.opus'):
-            cwd = os.path.dirname(__file__)
-            opus_file_path = abspath(os.path.join(cwd, path, file_name))
-            mp3_file_path = abspath(opus_file_path.replace('.opus', '.mp3'))
+            # Use the path directly without adding cwd
+            opus_file_path = os.path.join(path, file_name)
+            mp3_file_path = opus_file_path.replace('.opus', '.mp3')
             opus_file_path = sanitize_path(opus_file_path)
             mp3_file_path = sanitize_path(mp3_file_path)
+            
+            print(f"Found audio file: {file_name}")
+            print(f"Converting {opus_file_path} to {mp3_file_path}")
             
             command = ['ffmpeg', '-y', '-i', opus_file_path, '-acodec', 'libmp3lame', mp3_file_path]
             process = subprocess.Popen(command, stdout=PIPE, stderr=STDOUT, text=True)
@@ -70,7 +75,12 @@ async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
             print(f"[{process.returncode}] Failed to convert a file.\n\n{stdout}\n\n{stderr}")
             return transcriptions_list
     
+    if not file_info:
+        print("No .opus audio files found to transcribe")
+        return transcriptions_list
+    
     # Now transcribe all mp3 files concurrently
+    print(f"Transcribing {len(file_info)} audio files...")
     async with aiohttp.ClientSession() as session:
         transcription_tasks = []
         for file_name, mp3_file_path in file_info:
@@ -80,6 +90,7 @@ async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
         transcriptions = await asyncio.gather(*transcription_tasks)
         transcriptions_list.extend(transcriptions)
     
+    print(f"Successfully transcribed {len(transcriptions_list)} files")
     return transcriptions_list
 
 def convert_opus_to_mp3(path: str) -> TranscriptionList:

@@ -10,15 +10,15 @@ class MediaProcessor:
     
     def __init__(self, working_folder: str):
         self.working_folder = working_folder
-        self.transcriptions: Dict[str, str] = {}
+        self.transcriptions: List[Dict[str, str]] = []  # Changed to list of dicts
         self.pdf_images: Dict[str, List[str]] = {}
     
-    def process_audio_files(self) -> Dict[str, str]:
+    def process_audio_files(self) -> List[Dict[str, str]]:
         """
         Convert audio files and generate transcriptions
         
         Returns:
-            Dictionary of filename to transcription text
+            List of dictionaries with FileName and Transcription keys
             
         Raises:
             MediaProcessingError: If audio processing fails
@@ -87,12 +87,12 @@ class MediaProcessor:
         except Exception as e:
             raise MediaProcessingError(f"Failed to append PDF images: {str(e)}")
     
-    def process_all_media(self) -> tuple[Dict[str, str], Dict[str, List[str]]]:
+    def process_all_media(self) -> tuple[List[Dict[str, str]], Dict[str, List[str]]]:
         """
         Process all media files (audio and PDF)
         
         Returns:
-            Tuple of (transcriptions, pdf_images)
+            Tuple of (transcriptions list, pdf_images dict)
             
         Raises:
             MediaProcessingError: If media processing fails

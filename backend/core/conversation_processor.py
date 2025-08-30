@@ -152,7 +152,7 @@ class ConversationProcessor:
                     print("---WhatsAppContact (iPhone)---")
                     print(contact)
     
-    def _process_media(self) -> tuple[Dict[str, str], Dict[str, List[str]]]:
+    def _process_media(self) -> tuple[List[Dict[str, str]], Dict[str, List[str]]]:
         """Process all media files"""
         self.media_processor = MediaProcessor(self.working_folder)
         return self.media_processor.process_all_media()
@@ -176,9 +176,9 @@ class ConversationProcessor:
         )
     
     def _append_media_to_messages(
-        self, 
-        messages: List[MessageData], 
-        transcriptions: Dict[str, str],
+        self,
+        messages: List[MessageData],
+        transcriptions: List[Dict[str, str]],
         pdf_images: Dict[str, List[str]]
     ) -> List[MessageData]:
         """Append media files to messages"""

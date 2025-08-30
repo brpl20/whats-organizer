@@ -123,13 +123,13 @@ class WhatsAppProcessor:
 def main():
     """Main function for running the processor"""
     # File paths for testing
-    android_folder = "/home/brpl/code/whats-organizer-testing/android/"
-    iphone_folder = "/home/brpl/code/whats-organizer-testing/iphone/"
+    android_folder = "/home/brpl/code/whats-organizer/tests/android/"
+    iphone_folder = "/home/brpl/code/whats-organizer/tests/iphone/"
     
     # Choose test file
     # file_path = android_folder + "teste-audio-curto-uma-imagem.zip"
-    file_path = iphone_folder + "docx.zip"
-    # file_path = android_folder + "docx.zip"
+    # file_path = iphone_folder + "audio-video-docx.zip"
+    file_path = android_folder + "teste-audio-curto-uma-imagem.zip"
     
     # Initialize processor
     processor = WhatsAppProcessor()
