@@ -8,12 +8,13 @@ from asyncio import sleep
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 
-async def print_page_pdf( file: FileStorage, notify_callback: Callable[[str], None] ) -> bytes:
-    playwright_headless = getenv("HEADLESS", "True") == "True"
+playwright_headless_env = getenv("HEADLESS", "True") == "True"
+front_url_env = getenv("FRONT_URL", "https://whatsorganizer.com.br")
 
+async def print_page_pdf( file: FileStorage, notify_callback: Callable[[str], None] ) -> bytes:
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            headless=playwright_headless,
+            headless=playwright_headless_env,
             args=['--allow-file-access-from-files'],
             # https://github.com/microsoft/playwright/issues/4585
             executable_path='/usr/bin/google-chrome-stable'
@@ -21,7 +22,7 @@ async def print_page_pdf( file: FileStorage, notify_callback: Callable[[str], No
         notify_callback("Carregando Chat")
         page = await browser.new_page()
         # page.add_init_script(script=f"window.messages = {messages}")
-        await page.goto("https://whatsorganizer.com.br")
+        await page.goto(front_url_env)
 
         injector_media_input = page.locator('[data-testid="playwright-inject-media"]')
         
