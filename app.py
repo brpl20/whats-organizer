@@ -40,7 +40,10 @@ app.config['MAX_FORM_MEMORY_SIZE'] = 50 * MEGABYTE
 cors_origins = [
     "https://whatsorganizer.com.br",
     "https://www.whatsorganizer.com.br",
-    "http://localhost:5173"
+    *([
+    "http://localhost:5173",
+    "http://localhost:1337"
+    ] if prod else [])
 ]
 
 # Enable CORS for the Flask app
