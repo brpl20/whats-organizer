@@ -17,28 +17,48 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           export PROJECT=back
-          export PROJECT_DIR="/root/whats-organizer-${PROJECT}"
-          export ENV_DIR=/root/envs/${PROJECT}
+          export HOME="/home/Pellizzetti"
+          export PROJECT_DIR="${HOME}/whats-organizer-${PROJECT}"
+          export ENV_DIR="${HOME}/env/${PROJECT}"
           export ERROR=false
           export DISK_USAGE=$(df -h / | egrep -o "[0-9]+%" | cut -d "%" -f 1)
           export MESSAGE="Whats-Organizer-${PROJECT}:"
-          if [ ! -d ${PROJECT_DIR} ]; then
-            mkdir ${PROJECT_DIR}
-            cd ${PROJECT_DIR}
-            git clone https://github.com/${{ github.repository }} ${PROJECT_DIR}
-          else
-            cd ${PROJECT_DIR}
-            git reset --hard origin
-            git pull
+          export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          if ! command -v git >/dev/null 2>&1; then
+              if command -v pacman >/dev/null 2>&1; then
+                pacman --noconfirm -S git
+              fi
           fi
-          cp ${ENV_DIR}/.env .
-          cp ${ENV_DIR}/nginx.env ./infra/server/.env
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml build || \
-            export ERROR=true
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d || \
-            export ERROR=true
-          docker image prune --force
-          docker container prune --force
+          if [ ! -d ${PROJECT_DIR}/.git ]; then
+            rm -rf "${PROJECT_DIR}"
+            mkdir -p "${PROJECT_DIR}"
+            cd ${PROJECT_DIR}
+            git clone ${GIT_URL} .
+          else
+            cd "${PROJECT_DIR}"
+            git remote set-url origin ${GIT_URL}
+            git fetch origin main
+            git reset --hard origin/main
+          fi
+          if [ -f "${ENV_DIR}/.env" ]; then
+            cp "${ENV_DIR}/.env" .
+          fi
+          if [ -f "${ENV_DIR}/nginx.env" ]; then
+            cp "${ENV_DIR}/nginx.env" ./infra/server/.env
+          fi
+          mkdir -p zip_tests && chown python:python zip_tests
+          if [ ! -d .venv]; then
+            python3 -m venv .venv  
+            . ./.venv/bin/activate || export ERROR=true
+            export PATH="/home/python/.local/bin:${PATH}"
+            pip3 install -r requirements.txt || export ERROR=true
+            pip3 install playwright==1.49.1 || export ERROR=true
+            python3 -m compileall || export ERROR=true
+          fi
+          source .env
+          sh -c "for FLASK_PORT in $(seq ${FLASK_PORT_START} ${FLASK_PORT_END}); do \
+            gunicorn --preload -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:${FLASK_PORT} app:app --timeout 1000 --limit-request-line 0 & && disown \
+          done
           if [ ${ERROR} = true ]; then
             export MESSAGE="${MESSAGE} Falhou ao Subir Imagem de Docker!"
           else
