@@ -5,8 +5,7 @@ After=network.target
 [Service]
 User=back
 Group=back
-WorkingDirectory=home/back/backend
-# EnvironmentFile=home/back/backend/.env
+WorkingDirectory=/home/back/backend
 ExecStart=/usr/bin/gunicorn --preload -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:%i app:app --timeout 1000 --limit-request-line 0
 Restart=always
 NoNewPrivileges=true
