@@ -43,7 +43,7 @@ cors_origins = [
     *([
     "http://localhost:5173",
     "http://localhost:1337"
-    ] if prod else [])
+    ] if not prod else [])
 ]
 
 # Enable CORS for the Flask app
