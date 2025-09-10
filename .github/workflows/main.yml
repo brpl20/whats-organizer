@@ -30,39 +30,40 @@ jobs:
                 pacman --noconfirm -S git
               fi
           fi
-
-          if [ ! -d ${PROJECT_DIR}/.git ]; then
+          sudo -u back bash <<EOF
+          if [ ! -d "${PROJECT_DIR}/.git" ]; then
             rm -rf "${PROJECT_DIR}"
             mkdir -p "${PROJECT_DIR}"
-            cd ${PROJECT_DIR}
-            git clone ${GIT_URL} .
+            cd "${PROJECT_DIR}"
+            git clone "${GIT_URL}" .
           else
             cd "${PROJECT_DIR}"
-            git remote set-url origin ${GIT_URL}
+            git remote set-url origin "${GIT_URL}"
             git fetch origin master
             git reset --hard origin/master
           fi
+          EOF
 
+          mkdir -p zip_tests && chown back:back zip_tests
+
+          sudo -u back bash <<EOF
+          cd "${PROJECT_DIR}"
           if [ -f "${ENV_DIR}/.env" ]; then
             cp "${ENV_DIR}/.env" .
           fi
-          if [ -f "${ENV_DIR}/nginx.env" ]; then
-            cp "${ENV_DIR}/nginx.env" ./infra/server/.env
-          fi
-
-          mkdir -p zip_tests && chown back:back zip_tests
           if [ ! -d .venv ]; then
-            python3 -m venv .venv  
-            . ./.venv/bin/activate || export ERROR=true
-            export PATH="${HOME}/.local/bin:${PATH}"
-            pip3 install -r requirements.txt || export ERROR=true
-            pip3 install playwright==1.49.1 || export ERROR=true
-            python3 -m compileall || export ERROR=true
+            python3 -m venv .venv
+            source .venv/bin/activate
+            pip3 install -r requirements.txt
+            pip3 install playwright==1.49.1
+            python3 -m compileall
           fi
+          EOF
 
-          source .env
-          cp infra/back@.service /etc/systemd/system/back@.service
+
+          cp "${PROJECT_DIR}infra/back@.service" /etc/systemd/system/back@.service
           systemctl daemon-reload
+          source .env
           systemctl restart back@$(seq ${FLASK_PORT_START} ${FLASK_PORT_END})
           systemctl enable back@$(seq ${FLASK_PORT_START} ${FLASK_PORT_END})
 
