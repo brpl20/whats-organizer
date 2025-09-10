@@ -15,6 +15,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
         script: |
           export PROJECT=back
           export HOME="/home/back"
