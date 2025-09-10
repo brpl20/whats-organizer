@@ -53,15 +53,15 @@ jobs:
           fi
           if [ ! -d .venv ]; then
             python3 -m venv .venv
-            source .venv/bin/activate
-            pip3 install -r requirements.txt
-            pip3 install playwright==1.49.1
-            python3 -m compileall
           fi
+          source .venv/bin/activate
+          pip3 install -r requirements.txt
+          pip3 install playwright==1.49.1
+          python3 -m compileall
           EOF
 
 
-          cp "${PROJECT_DIR}infra/back@.service" /etc/systemd/system/back@.service
+          cp "${PROJECT_DIR}/infra/back@.service" /etc/systemd/system/back@.service
           systemctl daemon-reload
           source .env
           systemctl restart back@$(seq ${FLASK_PORT_START} ${FLASK_PORT_END})
