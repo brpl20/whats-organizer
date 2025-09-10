@@ -1,0 +1,18 @@
+[Unit]
+Description=Backend on port %i
+After=network.target
+
+[Service]
+User=back
+Group=back
+WorkingDirectory=home/back/backend
+# EnvironmentFile=home/back/backend/.env
+ExecStart=/usr/bin/gunicorn --preload -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b 0.0.0.0:%i app:app --timeout 1000 --limit-request-line 0
+Restart=always
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
