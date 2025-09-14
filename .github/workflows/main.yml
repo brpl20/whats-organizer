@@ -17,56 +17,94 @@ jobs:
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
         script: |
-          export PROJECT=back
-          export HOME="/home/back"
+          export PROJECT="back"
+          export BRANCH="master"
+          export USER="${PROJECT}"
+          export GROUP="${USER}"
+          export HOME="/home/${USER}"
           export PROJECT_DIR="${HOME}/whats-organizer-${PROJECT}"
           export ENV_DIR="${HOME}"
+          export SERVICE="back@.service"
           export ERROR=false
           export DISK_USAGE=$(df -h / | grep -E -o "[0-9]+%" | cut -d "%" -f 1)
           export MESSAGE="Whats-Organizer-${PROJECT}:"
           export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          export ENOENT=127
+          readonly PROJECT BRANCH USER GROUP HOME PROJECT_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
+
+          if ! getent group "${GROUP}" >/dev/null; then
+            groupadd -r "${GROUP}"
+          fi
+
+          if ! id -u "${USER}" >/dev/null 2>&1; then
+            useradd -m -d "${HOME}" -g "${GROUP}" -s /bin/bash "${USER}"
+          fi
 
           if ! command -v git >/dev/null 2>&1; then
-              if command -v pacman >/dev/null 2>&1; then
-                pacman --noconfirm -S git
-              fi
+            if command -v pacman >/dev/null 2>&1; then
+              pacman --noconfirm -S git
+            fi
           fi
-          sudo -u back bash <<EOF
+
+          sudo -u "${USER}" bash <<EOF
           if [ ! -d "${PROJECT_DIR}/.git" ]; then
-            rm -rf "${PROJECT_DIR}"
+            [ -d "${PROJECT_DIR}" ] && rm -rf "${PROJECT_DIR}"
             mkdir -p "${PROJECT_DIR}"
             cd "${PROJECT_DIR}"
             git clone "${GIT_URL}" .
           else
             cd "${PROJECT_DIR}"
             git remote set-url origin "${GIT_URL}"
-            git fetch origin master
-            git reset --hard origin/master
+            git fetch origin "${BRANCH}"
+            git reset --hard "origin/${BRANCH}"
           fi
           EOF
 
-          mkdir -p zip_tests && chown back:back zip_tests
+          mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
 
-          sudo -u back bash <<EOF
+          sudo -u "${USER}" bash <<EOF
           cd "${PROJECT_DIR}"
           if [ -f "${ENV_DIR}/.env" ]; then
             cp "${ENV_DIR}/.env" .
+          else
+            echo "Erro: Falta o arquivo de segredos .env em ${ENV_DIR}/.env"
+            exit ${ENOENT}
           fi
+
           if [ ! -d .venv ]; then
             python3 -m venv .venv
           fi
           source .venv/bin/activate
           pip3 install -r requirements.txt
           pip3 install playwright==1.49.1
-          python3 -m compileall
+          python3 -m compileall .
           EOF
 
+          readonly STATUS=$?
+          if [ ${STATUS} -ne 0 ]; then
+            if [ ${STATUS} -eq ${ENOENT} ]; then
+              exit ${STATUS}
+            fi
+            # else
+            export ERROR=true
+          fi
 
-          cp "${PROJECT_DIR}/infra/back@.service" /etc/systemd/system/back@.service
-          systemctl daemon-reload
-          source .env
-          systemctl restart back@$(seq ${FLASK_PORT_START} ${FLASK_PORT_END})
-          systemctl enable back@$(seq ${FLASK_PORT_START} ${FLASK_PORT_END})
+          cp "${PROJECT_DIR}/infra/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
+            export ERROR=true
+          systemctl daemon-reload || export ERROR=true
+
+          set -a
+          source "${ENV_DIR}/.env" || export ERROR=true
+          set +a
+  
+          if [ "$(</etc/hostname)" != "$HOST" ]; then
+            hostnamectl set-hostname "${HOST}"
+          fi
+
+          systemctl restart $(seq ${FLASK_PORT_START} ${FLASK_PORT_END} | xargs -I{} systemd-escape --template="${SERVICE}" {}) ||
+            export ERROR=true
+          systemctl enable $(seq ${FLASK_PORT_START} ${FLASK_PORT_END} | xargs -I{} systemd-escape --template="${SERVICE}" {}) ||
+            export ERROR=true
 
           if [ ${ERROR} = true ]; then
             export MESSAGE="${MESSAGE} Falhou ao Subir Imagem de Docker!"
