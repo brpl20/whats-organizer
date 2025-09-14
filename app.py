@@ -28,9 +28,11 @@ load_dotenv(override=True)
 
 prod_env = getenv("FLASK_ENV")
 port_env = getenv("FLASK_PORT")
+host_env = getenv("HOST")
 
 prod = (prod_env or "").lower() in ("prod", "production") 
 port = int(port_env or 5000)
+host = host_env or "0.0.0.0"
 
 app = Flask(__name__)
 MEGABYTE = (2 ** 10) ** 2
@@ -218,7 +220,7 @@ if __name__ == '__main__':
     
     if prod:
         print("🌐 Production mode with RabbitMQ")
-        socketio.run(app, host='0.0.0.0', port=int(port or 5000))
+        socketio.run(app, host=host, port=int(port or 5000))
     else:
         print("🔧 Development mode")
-        app.run(port=int(port or 5000), debug=True)
+        app.run(host=host, port=int(port or 5000), debug=True)
