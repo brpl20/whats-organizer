@@ -1,0 +1,2020 @@
+diff --git a/.env.example b/.env.example
+index c157e30..5370bd8 100644
+--- a/.env.example
++++ b/.env.example
+@@ -1,3 +1,3 @@
+ DOMAIN=whatsorganizer.com.br
+ PUBLIC_API_URL=https://api.whatsorganizer.com.br:8443
+-
++PUBLIC_NODE_ENV=dev
+diff --git a/docs/Componentes.md b/docs/Componentes.md
+new file mode 100644
+index 0000000..223b73d
+--- /dev/null
++++ b/docs/Componentes.md
+@@ -0,0 +1,32 @@
++## Documentação de Componentes em Uso:
++
++O fluxo do código inicia em Main (Main é onde contém todo o código e lógica genérica).
++
++Main: Lógica principal de chat/ Apresentação
++    -> Títulos, cabeçalho, container de chat
++    -> Mensagem, bolha de mensagem, Mensagem de Mídia
++    -> Instruções, Modal de LGPD, Modal de Limitações
++    -> Lógica de upload/ gerar chat
++
++UploadButton: Botão de upload de arquivos/ carregando
++    -> Lógica de arrastar (drag and drop)
++    -> Propaga uma atualização do state de arquivos para o componente pai (notifica upload pronto)
++
++
++Toast: Notificação
++    -> Toast de carregamento (Fazendo requisição)
++    -> Toast Personalizável (Ícone e cor)
++
++ChatComponents: Componentes menores do chat
++    -> Audio: Contém um elemento html5 de áudio e customizações do chrome
++    -> Video: Contém um elemento html5 de vídeos, um pré renderizador de minitura (thumbnail ou thumb), o renderizador serve pra mostrar as minituras quando gera o pdf
++    -> Ambos componentes possuem lógica de renderização integrada no playwright para esperar carregar mídias antes de gerar o PDF
++
++SVG: SVGs são adicionados como componentes Svelte puros
++    -> PrinterSVG: Ícone da toast gerando PDF
++    -> TranscribeSVG: Ícone da toast gerando PDF (transcrevendo áudios)
++    -> ErrorSVG: Ícone da toast de Erro
++    -> CloseSVG: Ícone de fechar a toast
++
++
++
+diff --git a/package.json b/package.json
+index 2499d22..601b0e6 100644
+--- a/package.json
++++ b/package.json
+@@ -36,13 +36,16 @@
+ 	"type": "module",
+ 	"dependencies": {
+ 		"@fontsource/alfa-slab-one": "^5.0.20",
++		"@tailwindcss/vite": "^4.1.12",
+ 		"amplify-adapter": "^0.1.2",
+ 		"jszip": "^3.10.1",
+ 		"lamejs": "^1.2.1",
++		"lucide-svelte": "^0.540.0",
+ 		"mammoth": "^1.8.0",
+ 		"pdfjs-dist": "^4.6.82",
+ 		"react-pdf": "^9.1.0",
+ 		"socket.io-client": "^4.8.0",
+-		"svelte-youtube-lite": "^0.5.1"
++		"svelte-youtube-lite": "^0.5.1",
++		"tailwindcss": "^4.1.12"
+ 	}
+ }
+diff --git a/src/app.css b/src/app.css
+new file mode 100644
+index 0000000..a461c50
+--- /dev/null
++++ b/src/app.css
+@@ -0,0 +1 @@
++@import "tailwindcss";
+\ No newline at end of file
+diff --git a/src/lib/Main.svelte b/src/lib/Main.svelte
+index 09441f2..f7cc723 100644
+--- a/src/lib/Main.svelte
++++ b/src/lib/Main.svelte
+@@ -1,6 +1,6 @@
+ <script>
+ 	import { fade } from 'svelte/transition';
+-	import { PUBLIC_API_URL } from '$env/static/public';
++	import { PUBLIC_API_URL, PUBLIC_NODE_ENV } from '$env/static/public';
+ 	import UploadButton from './UploadButton.svelte';
+ 	import { onDestroy } from 'svelte';
+ 	import Video from './ChatComponents/Video.svelte';
+@@ -9,6 +9,8 @@
+ 	import TranscribeSvg from './TranscribeSvg.svelte';
+ 	import PrintSvg from './PrinterSvg.svelte';
+ 	import ErrorSvg from './ErrorSvg.svelte';
++	import { MessageCircle, Upload, Zap, Shield, Info, Smartphone, Apple, FileText } from "lucide-svelte";
++
+ 	/**
+ 	 * @typedef {import('./types/toast.type.js').ToastTypes} ToastTypes
+ 	 * @typedef {import('./types/toast.type.js').ToastProps} ToastProps
+@@ -18,6 +20,8 @@
+ 	 * @typedef {import('socket.io-client').Socket<DefaultEventsMap, DefaultEventsMap>=} SocketType
+ 	 */
+ 
++	 const prod = (PUBLIC_NODE_ENV || '').toLowerCase() in ['prod', 'production'];
++
+ 	/** Timeout caso o socketio não consiga conectar */
+ 	const socketConnTimeout = 5000;
+ 
+@@ -121,7 +125,7 @@
+ 	/** @type {SocketType} */
+ 	let socket = null;
+ 
+-	onDestroy(() => socket?.disconnect?.());
++	onDestroy(() => prod ? socket?.disconnect?.() : () => undefined);
+ 
+ 	const toggleLimitacoesModal = () => (showLimitacoesModal = !showLimitacoesModal);
+ 
+@@ -278,6 +282,7 @@
+ 		});
+ 
+ 	async function connectSocket() {
++		if (!prod) return;
+ 		/**
+ 		 * Socket.active, if socket still retrying to connect
+ 		 * Socket.connected if the socket is currently connected
+@@ -551,532 +556,210 @@
+ </script>
+ 
+ <Toast {...toastProps} />
+-<main>
+-	<h1>WhatsOrganizer</h1>
+-
+-	<p class="subtitle">
+-		Organize suas conversas de WhatsApp<br />
+-		e transcreva áudios de forma rápida e<br />
+-		segura de uma única vez
+-	</p>
+-	<form class="file-zip" on:submit={handleSubmit}>
+-		<UploadButton on:update={updateFiles} {loading} />
+-		<button type="submit" disabled={loading}>
+-			{loading ? 'Processando...' : 'Enviar'}
+-		</button>
+-	</form>
+-
+-	<input
+-		data-testid="playwright-inject-media"
+-		type="file"
+-		accept=".zip"
+-		on:change={handleBackendFileInjection}
+-	/>
+-
+-	{#if messages?.length}
+-		<div class="chat-container" data-testid="playwright-chat" bind:this={chatContainer}>
+-			{#each messages as message}
+-				{@const attachedPdfMsg = message.FileAttached && message.links}
+-				{@const isLongMessage = message?.links?.length > 4 || message?.Message?.length > 900}
+-				<div
+-					class="message-wrapper {getSideByDevice(isApple)[(message?.ID || 1) - 1]} {!isLongMessage
+-						? 'avoid-pdf-break'
+-						: ''}"
+-				>
+-					<div class="message-bubble">
+-						<div class="message-header">
+-							<span class="message-name">{message.Name}</span>
+-							<span class="message-time">{message.Date} {message.Time}</span>
+-						</div>
+-						{#if message.FileAttached}
+-							{#if attachedPdfMsg}
+-								<div class="filename">{getFileName(message.FileAttached)}</div>
+-								
+-								<!-- Show PDF page thumbnails -->
+-								{#each message.links as link, index}
+-									{#if !(index % 2) && message.links[index + 1] !== 'pdf'}
+-										<img
+-											src={link}
+-											alt="Página do Documento Anexado"
+-											class="thumbnail-pdf avoid-pdf-break {message.links[index + 1] === 'landscape'
+-												? 'landscape'
+-												: 'portrait'}"
+-										/>
+-									{/if}
+-								{/each}
+-								<span class="small-description">
+-									Imagens apenas ilustrativas, confira os arquivos originais. Demonstrando no máximo 6 miniaturas. 
+-									{#if message.links && message.links.length >= 2 && message.links[1] === 'pdf'}
+-										Use <b><a href={message.links[0]} target="_blank" rel="noopener noreferrer" class="pdf-inline-link">este link</a></b> para baixar o PDF completo.
+-									{/if}
+-								</span>
+-							{/if}
+-							{#if isAudioFile(message.FileAttached)}
+-								<Audio
+-									filename={getFileName(message.FileAttached)}
+-									fileUrl={message.FileURL}
+-									audioTranscription={message.AudioTranscription}
+-								/>
+-							{:else if isImgFile(message.FileAttached)}
+-								<div class="filename">{getFileName(message.FileAttached)}</div>
+-								<img src={message.FileURL} alt="Mídia na Conversa" class="image-preview" />
+-							{:else if isVideoFile(message.FileAttached)}
+-								<Video fileURL={message.FileURL} />
+-							{:else if isWordFile(message.FileAttached)}
+-								<div class="filename">{getFileName(message.FileAttached)}</div>
++<main class="min-h-screen bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 relative overflow-hidden">
++	<!-- Fundo decorativo -->
++	<div class="absolute inset-0 bg-black/5"></div>
++	<div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
++	<div class="absolute bottom-20 right-10 w-96 h-96 bg-emerald-300/20 rounded-full blur-3xl"></div>
++
++	<div class="relative z-10 container mx-auto px-4 py-12">
++		<!-- Header -->
++		<div class="text-center mb-16 animate-fade-in">
++			<div class="text-center mb-16 animate-fade-in">
++          <div class="flex justify-center items-center mb-6">
++            <div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/30">
++              <MessageCircle class="w-12 h-12 text-white" />
++            </div>
++          </div>
++			<h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">WhatsOrganizer</h1>
++			<p class="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed font-light">
++				Organize suas conversas de WhatsApp e transcreva áudios de forma rápida e segura
++			</p>
++		</div>
++
++		<!-- Upload Card -->
++		<div class="max-w-2xl mx-auto mb-12">
++			<!-- <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-8 md:p-12"> -->
++			<div class="">
++				<form class="file-zip space-y-6" on:submit={handleSubmit}>
++					<UploadButton on:update={updateFiles} {loading} />
++
++					<!-- <button
++						type="submit"
++						class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-12 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg"
++						disabled={loading}
++					>
++						{loading ? 'Processando...' : 'Enviar'}
++					</button> -->
++				</form>
++			</div>
++		</div>
++
++		<!-- Chat renderizado -->
++		{#if messages?.length}
++			<div
++				class="chat-container bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-6 mb-12 max-h-[70vh] overflow-y-auto"
++				data-testid="playwright-chat"
++				bind:this={chatContainer}
++			>
++				{#each messages as message}
++					{@const attachedPdfMsg = message.FileAttached && message.links}
++					{@const isLongMessage = message?.links?.length > 4 || message?.Message?.length > 900}
++
++					<div class="flex flex-col mb-4 {getSideByDevice(true)[(message?.ID || 1) - 1]}">
++						<div class="max-w-[70%] p-4 rounded-2xl shadow bg-white">
++							<div class="flex justify-between items-center mb-2 text-xs text-gray-600">
++								<span class="font-bold">{message.Name}</span>
++								<span>{message.Date} {message.Time}</span>
++							</div>
++
++							{#if message.FileAttached}
++								{#if attachedPdfMsg}
++									<div class="text-sm text-gray-500 mb-2">{getFileName(message.FileAttached)}</div>
++									<div class="flex flex-wrap gap-2">
++										{#each message.links as link, index}
++											{#if !(index % 2) && message.links[index + 1] !== 'pdf'}
++												<img
++													src={link}
++													alt="Página do Documento Anexado"
++													class="rounded-md shadow-md max-w-[150px] hover:scale-150 transition-transform"
++												/>
++											{/if}
++										{/each}
++									</div>
++									<p class="mt-2 text-xs text-gray-500 italic">
++										Imagens ilustrativas, confira os arquivos originais.
++										{#if message.links && message.links.length >= 2 && message.links[1] === 'pdf'}
++											<a
++												href={message.links[0]}
++												target="_blank"
++												rel="noopener noreferrer"
++												class="text-blue-500 underline ml-1"
++												>Baixar PDF completo</a
++											>
++										{/if}
++									</p>
++								{/if}
++
++								{#if isAudioFile(message.FileAttached)}
++									<Audio
++										filename={getFileName(message.FileAttached)}
++										fileUrl={message.FileURL}
++										audioTranscription={message.AudioTranscription}
++									/>
++								{:else if isImgFile(message.FileAttached)}
++									<img
++										src={message.FileURL}
++										alt="Mídia"
++										class="max-w-[150px] rounded-md shadow-md hover:scale-150 transition-transform"
++									/>
++								{:else if isVideoFile(message.FileAttached)}
++									<Video fileURL={message.FileURL} />
++								{:else if isWordFile(message.FileAttached)}
++									<div class="text-sm text-gray-500">{getFileName(message.FileAttached)}</div>
++								{/if}
++							{:else}
++								<p class="text-gray-800">{message.Message}</p>
+ 							{/if}
+-							<!--
+-							@TODO Verificar se foto com legenda funciona
+-						    https://github.com/brpl20/whats-organizer-front/issues/5
+-							Acho que a mídia faz com que não apareça legenda
+-						 -->
+-						{:else}
+-							<p class="message-text">{message.Message}</p>
+-						{/if}
++						</div>
+ 					</div>
++				{/each}
++			</div>
++		{/if}
++
++		<!-- Instruções -->
++		<div class="max-w-3xl mx-auto mb-12">
++			<div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8">
++				<h3 class="text-xl font-bold text-gray-800 mb-3">Como usar o WhatsOrganizer</h3>
++				<p class="text-gray-600 leading-relaxed">
++					Faça o upload do seu arquivo exportado do WhatsApp em formato <b>.zip</b>.
++				</p>
++				<div class="flex justify-center gap-6 mt-6">
++					<a
++						href="https://faq.whatsapp.com/1180414079177245/?cms_platform=iphone&helpref=platform_switcher"
++						class="bg-gray-200 p-4 rounded-full hover:bg-emerald-100 transition"
++					>
++						<img src="/apple.png" alt="Apple" class="w-8 h-8" />
++					</a>
++					<a
++						href="https://faq.whatsapp.com/1180414079177245/?helpref=uf_share"
++						class="bg-gray-200 p-4 rounded-full hover:bg-emerald-100 transition"
++					>
++						<img src="/android.png" alt="Android" class="w-8 h-8" />
++					</a>
+ 				</div>
+-			{/each}
++			</div>
+ 		</div>
+-	{/if}
+ 
+-	<p class="instructions">
+-		Faça o upload do seu arquivo exportado do WhatsApp<br />
+-		ele estará no formato .zip, confira como fazer:
+-	</p>
+-	<div class="platform-icons">
+-		<a
+-			href="https://faq.whatsapp.com/1180414079177245/?cms_platform=iphone&helpref=platform_switcher"
+-			class="platform-icon"
+-		>
+-			<img src="/apple.png" alt="Apple icon" class="icon-image icon-apple" />
+-		</a>
+-		<a href="https://faq.whatsapp.com/1180414079177245/?helpref=uf_share" class="platform-icon">
+-			<img src="/android.png" alt="Android icon" class="icon-image icon-android" />
+-		</a>
+-	</div>
+-	<div class="buttons">
+-		<button class="secondary" on:click={toggleLimitacoesModal}>Limitações</button>
+-		<button class="secondary" on:click={toggleLGPDModal}>LGPD</button>
++		<!-- Botões extra -->
++		<div class="text-center space-x-4">
++			<button
++				class="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 transition-all duration-300 hover:scale-105"
++				on:click={toggleLimitacoesModal}
++			>
++				Limitações
++			</button>
++			<button
++				class="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 transition-all duration-300 hover:scale-105"
++				on:click={toggleLGPDModal}
++			>
++				LGPD
++			</button>
++		</div>
++
++		<!-- Floating PDF download -->
++		{#if messages?.length}
++			<button
++				class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold py-4 px-10 rounded-2xl shadow-lg hover:scale-105 transition transform"
++				on:click={generatePDF}
++				disabled={loading}
++			>
++				{#if printLoading}
++					<span class="animate-spin inline-block mr-2 w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
++				{/if}
++				Download PDF
++			</button>
++		{/if}
+ 	</div>
+ 
+-	{#if messages?.length}
+-		<button class="floating-button loading-button" on:click={generatePDF} disabled={loading}>
+-			{#if printLoading}
+-				<div class="spinner-container sm-spinner-container">
+-					<div class="spinner sm-spinner" />
+-				</div>
+-			{/if}
+-			Download PDF
+-		</button>
++	<!-- Modais -->
++	{#if showLimitacoesModal}
++		<div class="fixed inset-0 bg-black/60 flex justify-center items-center z-50" on:click={toggleLimitacoesModal}>
++			<div class="bg-white rounded-xl p-8 max-w-md shadow-2xl" on:click|stopPropagation>
++				<h2 class="text-2xl font-bold mb-4">Limitações</h2>
++				<ul class="list-disc list-inside text-gray-700 space-y-2">
++					<li>Grupos não suportados</li>
++					<li>Tamanho máximo dos arquivos: 40 Mb</li>
++					<li>Não confere garantia de autenticidade</li>
++				</ul>
++			</div>
++		</div>
+ 	{/if}
+-</main>
+ 
+-{#if showLimitacoesModal}
+-	<div
+-		class="modal-backdrop"
+-		role="button"
+-		tabindex="0"
+-		aria-label="Fechar modal de limitações"
+-		on:click={toggleLimitacoesModal}
+-		on:keydown={(e) => toggleLimitacoesModal()}
+-	>
+-		<div class="modal" transition:fade>
+-			<h2>Limitações</h2>
+-			<ul>
+-				<li>- Grupos não suportados</li>
+-				<li>- Tamanho máximo dos arquivos: 40 Mb</li>
+-				<li>- Não confere garantia de autenticidade</li>
+-			</ul>
++	{#if showLGPDModal}
++		<div class="fixed inset-0 bg-black/60 flex justify-center items-center z-50" on:click={toggleLGPDModal}>
++			<div class="bg-white rounded-xl p-8 max-w-md shadow-2xl" on:click|stopPropagation>
++				<h2 class="text-2xl font-bold mb-4">LGPD</h2>
++				<p class="text-gray-700">
++					Não coletamos nenhum dado e todos os arquivos são destruídos após o uso.
++				</p>
++			</div>
+ 		</div>
+-	</div>
+-{/if}
+-
+-{#if showLGPDModal}
+-	<div
+-		class="modal-backdrop"
+-		role="button"
+-		tabindex="0"
+-		aria-label="Fechar modal de LGPD"
+-		on:click={toggleLGPDModal}
+-		on:keydown={(e) => toggleLGPDModal()}
+-	>
+-		<div class="modal" transition:fade>
+-			<h2>LGPD</h2>
+-			<p>
+-				Não coletamos nenhum dado e todos os arquivos são totalmente destruídos após as etapas do
+-				organizador serem concluídas.
+-			</p>
+-		</div>
+-	</div>
+-{/if}
++	{/if}
++</main>
+ 
+ <style>
+-	@media print {
+-		@page {
+-			size: A4;
+-			margin: 1cm 0;
+-			/* background-color: #e5ddd5; */
+-		}
+-
+-		* {
+-			-webkit-print-color-adjust: exact !important;
+-			print-color-adjust: exact !important;
+-			color-adjust: exact !important;
+-		}
+-
+-		main > :not(.chat-container) {
+-			display: none !important;
+-		}
+-
+-		main {
+-			margin: 0 auto !important;
+-			padding: 0 !important;
+-			background-color: unset !important;
+-		}
+-
+-		.chat-container {
+-			margin: 0 !important;
+-		}
+-
+-		.avoid-pdf-break {
+-			break-inside: avoid;
++	@keyframes fade-in {
++		from {
++			opacity: 0;
++			transform: translateY(20px);
+ 		}
+-
+-		[data-testid='playwright-inject-media'] {
+-			display: none !important;
+-		}
+-	}
+-
+-	[data-testid='playwright-inject-media'] {
+-		display: none;
+-	}
+-
+-	* {
+-		font-family: Arial, sans-serif;
+-		list-style-type: none;
+-	}
+-
+-	.spinner-container,
+-	.file-zip :global(.spinner-container) {
+-		display: flex;
+-		align-items: center;
+-		justify-content: center;
+-		gap: 10px;
+-		text-align: center;
+-	}
+-	.spinner,
+-	.file-zip :global(.spinner) {
+-		width: 50px;
+-		aspect-ratio: 1;
+-		display: grid;
+-		border: 4px solid #0000;
+-		border-radius: 50%;
+-		border-right-color: #005c4b;
+-		animation: l15 1s infinite linear;
+-	}
+-	.spinner::before,
+-	.spinner::after,
+-	.file-zip :global(.spinner::after),
+-	.file-zip :global(.spinner::before) {
+-		content: '';
+-		grid-area: 1/1;
+-		margin: 2px;
+-		border: inherit;
+-		border-radius: 50%;
+-		animation: l15 2s infinite;
+-	}
+-	.spinner::after,
+-	.file-zip :global(.spinner::after) {
+-		margin: 8px;
+-		animation-duration: 3s;
+-	}
+-
+-	.sm-spinner-container {
+-		height: 10px;
+-		width: 44px;
+-		margin: 0 12px 0 0;
+-	}
+-
+-	.sm-spinner::after {
+-		margin: 0px;
+-		animation-duration: 2s;
+-	}
+-	@keyframes l15 {
+-		100% {
+-			transform: rotate(1turn);
+-		}
+-	}
+-
+-	@keyframes spin {
+ 		to {
+-			transform: rotate(360deg);
++			opacity: 1;
++			transform: translateY(0);
+ 		}
+ 	}
+-	main {
+-		max-width: 600px;
+-		margin: 0 auto;
+-		padding: 20px;
+-		text-align: center;
+-		background-color: #58f1c4;
+-		color: #1c1c1c;
+-		border-radius: 10px;
+-	}
+-
+-	h1 {
+-		font-size: 3em;
+-		margin-bottom: 10px;
+-		font-family: 'Alfa Slab One', system-ui;
+-		font-weight: 700;
+-		text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+-		color: #005c4b;
+-	}
+-
+-	.subtitle,
+-	.instructions {
+-		margin-bottom: 20px;
+-		color: #005c4b;
+-	}
+-
+-	button {
+-		padding: 18px 30px;
+-		border: none;
+-		border-radius: 5px;
+-		background-color: #1c1c1c;
+-		color: white;
+-		cursor: pointer;
+-		font-size: 15px;
+-	}
+-
+-	.platform-icons {
+-		display: flex;
+-		justify-content: center;
+-		gap: 1rem;
+-		align-items: center;
+-		margin: 15px;
+-	}
+-
+-	.platform-icon {
+-		display: flex;
+-		justify-content: center;
+-		align-items: center;
+-		width: 40px;
+-		height: 40px;
+-		border-radius: 50%;
+-		background-color: #f0f0f0;
+-		transition: background-color 0.3s ease;
+-	}
+-
+-	.platform-icon:hover {
+-		background-color: #145c4b;
+-	}
+-
+-	.icon-image {
+-		width: 24px;
+-		height: 24px;
+-		object-fit: contain;
+-	}
+-
+-	.buttons {
+-		display: flex;
+-		justify-content: center;
+-		gap: 20px;
+-		margin-bottom: 20px;
+-	}
+-
+-	.modal-backdrop {
+-		position: fixed;
+-		top: 0;
+-		left: 0;
+-		width: 100%;
+-		height: 100%;
+-		background-color: rgba(0, 0, 0, 0.5);
+-		display: flex;
+-		justify-content: center;
+-		align-items: center;
+-		color: #1c1c1c;
+-	}
+-
+-	.modal {
+-		background-color: white;
+-		padding: 20px;
+-		border-radius: 5px;
+-		max-width: 400px;
+-		text-align: left;
+-		border-top: 3px solid;
+-		border-image: linear-gradient(to right, #00f38d, #00b4f3) 1;
+-		font-size: 18px;
+-	}
+-
+-	.modal h2 {
+-		margin-top: 0;
+-	}
+-
+-	.modal ul {
+-		padding-left: 20px;
+-		list-style-type: none;
+-	}
+-
+-	.chat-container {
+-		max-width: 100%;
+-		margin: 20px 0;
+-		padding: 20px 20px 25px 20px;
+-		background-color: #e5ddd5;
+-		border-radius: 10px;
+-		text-align: left;
+-	}
+-
+-	.message-wrapper {
+-		display: flex;
+-		flex-direction: column;
+-		padding: 12px 0 0 0;
+-	}
+-
+-	.left {
+-		align-items: flex-start;
+-	}
+-
+-	.right {
+-		align-items: flex-end;
+-	}
+-
+-	.message-bubble {
+-		max-width: 70%;
+-		padding: 10px;
+-		border-radius: 10px;
+-		background-color: white;
+-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+-	}
+-
+-	.left .message-bubble {
+-		background-color: #ffffff;
+-	}
+-
+-	.right .message-bubble {
+-		background-color: #dcf8c6;
+-	}
+-
+-	.message-header {
+-		display: flex;
+-		justify-content: space-between;
+-		align-items: baseline;
+-		margin-bottom: 5px;
+-		font-size: 0.8em;
+-	}
+-
+-	.message-name {
+-		font-weight: bold;
+-	}
+-
+-	.message-time {
+-		color: #999;
+-		padding-left: 0.3em;
+-	}
+-
+-	.message-text {
+-		margin: 0;
+-		hyphens: auto;
+-		-moz-hyphens: auto;
+-		word-wrap: break-word;
+-	}
+-
+-	.filename {
+-		font-size: 0.8em;
+-		color: #666;
+-		margin-bottom: 5px;
+-	}
+-
+-	.image-preview {
+-		width: 100px;
+-		height: auto;
+-		transition: transform 0.3s ease;
+-	}
+-
+-	.image-preview:hover {
+-		transform: scale(3.5);
+-		z-index: 9;
+-	}
+-
+-	.thumbnail-pdf {
+-		width: 200px;
+-		height: 200px;
+-		object-fit: cover;
+-		padding: 5px;
+-	}
+-
+-	.thumbnail-pdf.landscape {
+-		width: 300px;
+-		height: 150px;
+-		transition: transform 0.3s ease;
+-	}
+-
+-	.thumbnail-pdf.portrait {
+-		width: 150px;
+-		height: 200px;
+-		transition: transform 0.3s ease;
+-	}
+-
+-	.thumbnail-pdf.landscape:hover {
+-		transform: scale(3.5);
+-		z-index: 9;
+-	}
+-
+-	.thumbnail-pdf.portrait:hover {
+-		transform: scale(3.5);
+-		z-index: 9;
+-	}
+-
+-	.small-description {
+-		font-size: 12px;
+-		color: #666;
+-		font-style: italic;
+-		line-height: 1.4;
+-		max-width: 300px;
+-		padding: 8px 12px;
+-		background-color: #f5f5f5;
+-		border-left: 3px solid #ccc;
+-		margin: 10px 0;
+-		display: inline-block;
+-	}
+-
+-	.pdf-inline-link {
+-		color: #007bff;
+-		text-decoration: underline;
+-		transition: color 0.3s ease;
+-	}
+-
+-	.pdf-inline-link:hover {
+-		color: #0056b3;
+-		text-decoration: underline;
+-	}
+-
+-	.pdf-inline-link:visited {
+-		color: #007bff;
+-	}
+-
+-	.loading-button {
+-		display: flex;
+-	}
+-
+-	.floating-button {
+-		z-index: 1;
+-		position: fixed;
+-		bottom: 20px;
+-		left: 40vw;
+-		background-color: #1c1c1c;
+-		color: white;
+-		border: none;
+-		border-radius: 5%;
+-		padding: 25px;
+-		cursor: pointer;
+-		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+-		font-size: 17px;
+-	}
+-
+-	@media (min-width:320px)  {
+-		.floating-button {
+-			top: 90vh;
+-			bottom: unset;
+-			margin: -20px 28px;
+-		}
++	.animate-fade-in {
++		animation: fade-in 0.8s ease-out;
+ 	}
+-</style>
++</style>
+\ No newline at end of file
+diff --git a/src/lib/UploadButton.svelte b/src/lib/UploadButton.svelte
+index 3df632d..028d69b 100644
+--- a/src/lib/UploadButton.svelte
++++ b/src/lib/UploadButton.svelte
+@@ -50,208 +50,109 @@
+ 	};
+ </script>
+ 
+-<div class="upload-container">
+-	<button
+-		class="drop-area {isDragging ? 'dragging' : ''}"
+-		on:dragover|preventDefault={handleDragOver}
+-		on:dragleave={handleDragLeave}
+-		on:drop|preventDefault={handleDrop}
+-		aria-label="Drop files here or click to upload"
+-		tabindex="0"
+-		on:click={triggerFileInput}
+-		type="button"
++<!-- Main Upload Card -->
++<div class="max-w-2xl mx-auto mb-12">
++	<div
++		class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-8 md:p-12"
+ 	>
+-		<div class="fade-container">
+-			{#if loading}
+-				<div class="spinner-container" transition:fade>
+-					<div class="spinner" aria-label="Carregando"></div>
++		<!-- Upload Area -->
++		<button
++			class={`w-full  rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer group
++        ${isDragging
++				? "border-emerald-500 bg-emerald-50 scale-105"
++				: "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"}`}
++			on:dragover|preventDefault={handleDragOver}
++			on:dragleave={handleDragLeave}
++			on:drop|preventDefault={handleDrop}
++			on:click={triggerFileInput}
++			type="button"
++			aria-label="Drop files here or click to upload"
++		>
++			<div class="flex flex-col items-center space-y-4">
++				<!-- Ícone / Spinner -->
++				<div
++					class={`p-6 rounded-full transition-all duration-300
++          ${isDragging
++						? "bg-emerald-500 scale-110"
++						: "bg-gray-200 group-hover:bg-emerald-100"}`}
++				>
++					{#if loading}
++						<div class="spinner-container" transition:fade>
++							<div
++								class="spinner border-4 border-emerald-500 border-t-transparent rounded-full w-12 h-12 animate-spin"
++								aria-label="Carregando"
++							></div>
++						</div>
++					{:else}
++						<UploadIcon
++							class={`w-12 h-12 transition-colors duration-300
++              ${isDragging
++								? "text-white"
++								: "text-gray-600 group-hover:text-emerald-600"}`}
++						/>
++					{/if}
+ 				</div>
+-			{:else}
+-				<div class="icon-container" transition:fade>
+-					<UploadIcon />
+-				</div>
+-			{/if}
+-		</div>
+-		Arraste seu Arquivo
+-		<br />
+-		Ou
+-		<br />
+-		<span class="underline">Clique para fazer Upload</span>
+-		<svg class="box-animation" viewBox={`0 0 100 ${svgY}`} preserveAspectRatio="none">
+-			<line x1="0" y1="0" x2="100" y2="0" />
+-			<line x1="100" y1="0" x2="100" y2={`${svgY}`} />
+-			<line x1="100" y1={`${svgY}`} x2="0" y2={`${svgY}`} />
+-			<line x1="0" y1={`${svgY}`} x2="0" y2="0" />
+-		</svg>
+ 
+-		{#if files.length > 0}
+-			<div class="file-list">
+-				<h4>Arquivos:</h4>
+-				<ul>
+-					{#each files as file}
+-						<li>{file.name}</li>
+-					{/each}
+-				</ul>
++				<!-- Texto / Lista -->
++				{#if files.length > 0}
++					<div class="text-center">
++						<p class="text-lg font-semibold text-emerald-600 mb-2">
++							Arquivos selecionados:
++						</p>
++						<ul class="space-y-2">
++							{#each files as file}
++								<li
++									class="text-gray-700 bg-emerald-50 px-4 py-2 rounded-lg inline-block text-sm"
++								>
++									{file.name}
++								</li>
++							{/each}
++						</ul>
++					</div>
++				{:else}
++					<div class="text-center">
++						<p class="text-xl font-semibold text-gray-700 mb-2">
++							Arraste seu arquivo aqui
++						</p>
++						<p class="text-gray-500 mb-4">ou clique para selecionar</p>
++						<p class="text-sm text-gray-400">
++							Suporta arquivos .zip exportados do WhatsApp
++						</p>
++					</div>
++				{/if}
+ 			</div>
+-		{/if}
+-	</button>
+-	<div class="hidden">
+-		<input
+-			class="file-input"
+-			type="file"
+-			bind:this={fileInput}
+-			accept=".zip"
+-			on:change={(e) => {
+-				if (fileInput?.files) {
+-					const dataTransfer = new DataTransfer();
+-					Array.from(fileInput.files).forEach((file) => dataTransfer.items.add(file));
+-					files = Array.from(dataTransfer.files);
+-				}
+-			}}
+-		/>
++
++			<!-- Input escondido -->
++			<input
++				class="hidden"
++				type="file"
++				bind:this={fileInput}
++				accept=".zip"
++				on:change={(e) => {
++					if (fileInput?.files) {
++						files = Array.from(fileInput.files);
++					}
++				}}
++			/>
++		</button>
++
++		<!-- Action Button -->
++		<div class="mt-8 text-center">
++			<button
++				class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-12 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg"
++			>
++				<div class="flex items-center space-x-3">
++					<span>Processar Arquivo</span>
++				</div>
++			</button>
++		</div>
+ 	</div>
+ </div>
+ 
+ <style>
+-	.upload-container {
+-		display: flex;
+-		flex-direction: column;
+-		align-items: center;
+-		gap: 20px;
+-		font-family: Arial, sans-serif;
+-		margin-bottom: 20px;
+-	}
+-
+-	.drop-area {
+-		position: relative;
+-		display: flex;
+-		align-items: center;
+-		flex-direction: column;
+-		border-radius: 10px;
+-		padding: 30px;
+-		text-align: center;
+-		color: #005c4b;
+-		cursor: pointer;
+-		width: 100%;
+-		max-width: 400px;
+-		border: 0.2px solid #bbb;
+-		transition:
+-			border-color 0.3s ease,
+-			box-shadow 0.3s ease;
+-		overflow: hidden;
+-		background-color: #f0f8ff;
+-	}
+-
+-	.drop-area > span {
+-		color: #001cdd;
+-	}
+-
+-	.drop-area:is(.dragging, :hover) {
+-		box-shadow: 0 0 5px #aaa;
+-		border-style: inset;
+-		border-width: 0.5px;
+-	}
+-
+-	@media (hover: none) {
+-		.drop-area:is(.dragging, :active, :focus) {
+-			box-shadow: 0 0 5px #aaa;
+-			border-style: inset;
+-			border-width: 0.5px;
+-		}
+-
+-		.drop-area:is(.dragging, :active, :focus) line {
+-			stroke-dashoffset: 0;
+-		}
+-	}
+-
+-	.box-animation {
+-		width: 100%;
+-		height: 100%;
+-		position: absolute;
+-		top: 0;
+-		left: 0;
+-		pointer-events: none;
+-	}
+-
+-	.box-animation line {
+-		stroke: #007bff;
+-		stroke-width: 0.8px;
+-		fill: none;
+-		stroke-dasharray: 400;
+-		stroke-dashoffset: 400;
+-		transition: stroke-dashoffset 1.4s linear;
+-	}
+-
+-	.drop-area:is(.dragging, :hover) line {
+-		stroke-dashoffset: 0;
+-	}
+-
+-	.file-list {
+-		margin-top: 20px;
+-		text-align: left;
+-		max-width: 400px;
+-		width: 100%;
+-	}
+-
+-	.file-list h4 {
+-		padding-left: 9px;
+-	}
+-
+-	.file-list ul {
+-		list-style: none;
+-		padding: 0;
+-		margin: 0;
+-	}
+-
+-	.file-list li {
+-		background-color: #fff;
+-		margin-bottom: 5px;
+-		padding: 10px;
+-		border: 1px solid #ddd;
+-		border-radius: 5px;
+-		font-size: 0.9rem;
+-		animation: slide-in 0.5s ease;
+-	}
+-
+-	.hidden {
+-		display: none;
+-	}
+-
+-	.underline {
+-		text-decoration-line: underline;
+-	}
+-
+-	.spinner {
+-		height: 90px !important;
+-		width: 90px !important;
+-	}
+-
+-	@keyframes slide-in {
+-		0% {
+-			transform: scale(0.5);
+-			opacity: 0;
+-		}
+-		100% {
+-			transform: scale(1);
+-			opacity: 1;
+-		}
+-	}
+-
+-	.fade-container {
+-		position: relative;
+-		width: 96px;
+-		height: 96px;
+-		margin-top: -5px;
+-		margin-bottom: 5px;
+-	}
+-
+-	.spinner-container,
+-	.icon-container {
+-		position: absolute;
+-		width: 100%;
+-		height: 100%;
++	.spinner-container {
+ 		display: flex;
+ 		justify-content: center;
+ 		align-items: center;
+ 	}
+-</style>
++</style>
+\ No newline at end of file
+diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
+new file mode 100644
+index 0000000..881d2ba
+--- /dev/null
++++ b/src/routes/+layout.svelte
+@@ -0,0 +1,5 @@
++<script>
++  import "../app.css";
++</script>
++
++<slot />
+diff --git a/vite.config.js b/vite.config.js
+index 6c0c099..c64a705 100644
+--- a/vite.config.js
++++ b/vite.config.js
+@@ -1,8 +1,9 @@
+ import { sveltekit } from '@sveltejs/kit/vite';
+ import { defineConfig } from 'vite';
++import tailwindcss from '@tailwindcss/vite';
+ 
+ export default defineConfig({
+-  plugins: [sveltekit()],
++  plugins: [sveltekit(), tailwindcss()],
+   optimizeDeps: {
+     include: ['mammoth']
+   },
+diff --git a/yarn.lock b/yarn.lock
+index d1f3f5b..9e967b5 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -10,21 +10,43 @@
+     "@jridgewell/gen-mapping" "^0.3.5"
+     "@jridgewell/trace-mapping" "^0.3.24"
+ 
++"@emnapi/core@^1.4.3", "@emnapi/core@^1.4.5":
++  version "1.4.5"
++  resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.4.5.tgz#bfbb0cbbbb9f96ec4e2c4fd917b7bbe5495ceccb"
++  integrity sha512-XsLw1dEOpkSX/WucdqUhPWP7hDxSvZiY+fsUC14h+FtQ2Ifni4znbBt8punRX+Uj2JG/uDb8nEHVKvrVlvdZ5Q==
++  dependencies:
++    "@emnapi/wasi-threads" "1.0.4"
++    tslib "^2.4.0"
++
++"@emnapi/runtime@^1.4.3", "@emnapi/runtime@^1.4.5":
++  version "1.4.5"
++  resolved "https://registry.yarnpkg.com/@emnapi/runtime/-/runtime-1.4.5.tgz#c67710d0661070f38418b6474584f159de38aba9"
++  integrity sha512-++LApOtY0pEEz1zrd9vy1/zXVaVJJ/EbAF3u0fXIzPJEDtnITsBGbbK0EkM72amhl/R5b+5xx0Y/QhcVOpuulg==
++  dependencies:
++    tslib "^2.4.0"
++
++"@emnapi/wasi-threads@1.0.4", "@emnapi/wasi-threads@^1.0.4":
++  version "1.0.4"
++  resolved "https://registry.yarnpkg.com/@emnapi/wasi-threads/-/wasi-threads-1.0.4.tgz#703fc094d969e273b1b71c292523b2f792862bf4"
++  integrity sha512-PJR+bOmMOPH8AtcTGAyYNiuJ3/Fcoj2XN/gBEWzDIKh254XO+mM9XoXHk5GNEhodxeMznbg7BlRojVbKN+gC6g==
++  dependencies:
++    tslib "^2.4.0"
++
+ "@esbuild/aix-ppc64@0.21.5":
+   version "0.21.5"
+   resolved "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.21.5.tgz"
+   integrity sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==
+ 
+-"@esbuild/android-arm@0.21.5":
+-  version "0.21.5"
+-  resolved "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.21.5.tgz"
+-  integrity sha512-vCPvzSjpPHEi1siZdlvAlsPxXl7WbOVUBBAowWug4rJHb68Ox8KualB+1ocNvT5fjv6wpkX6o/iEpbDrf68zcg==
+-
+ "@esbuild/android-arm64@0.21.5":
+   version "0.21.5"
+   resolved "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.21.5.tgz"
+   integrity sha512-c0uX9VAUBQ7dTDCjq+wdyGLowMdtR/GoC2U5IYk/7D1H1JYC0qseD7+11iMP2mRLN9RcCMRcjC4YMclCzGwS/A==
+ 
++"@esbuild/android-arm@0.21.5":
++  version "0.21.5"
++  resolved "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.21.5.tgz"
++  integrity sha512-vCPvzSjpPHEi1siZdlvAlsPxXl7WbOVUBBAowWug4rJHb68Ox8KualB+1ocNvT5fjv6wpkX6o/iEpbDrf68zcg==
++
+ "@esbuild/android-x64@0.21.5":
+   version "0.21.5"
+   resolved "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.21.5.tgz"
+@@ -50,16 +72,16 @@
+   resolved "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.21.5.tgz"
+   integrity sha512-J95kNBj1zkbMXtHVH29bBriQygMXqoVQOQYA+ISs0/2l3T9/kj42ow2mpqerRBxDJnmkUDCaQT/dfNXWX/ZZCQ==
+ 
+-"@esbuild/linux-arm@0.21.5":
+-  version "0.21.5"
+-  resolved "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.21.5.tgz"
+-  integrity sha512-bPb5AHZtbeNGjCKVZ9UGqGwo8EUu4cLq68E95A53KlxAPRmUyYv2D6F0uUI65XisGOL1hBP5mTronbgo+0bFcA==
+-
+ "@esbuild/linux-arm64@0.21.5":
+   version "0.21.5"
+   resolved "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.21.5.tgz"
+   integrity sha512-ibKvmyYzKsBeX8d8I7MH/TMfWDXBF3db4qM6sy+7re0YXya+K1cem3on9XgdT2EQGMu4hQyZhan7TeQ8XkGp4Q==
+ 
++"@esbuild/linux-arm@0.21.5":
++  version "0.21.5"
++  resolved "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.21.5.tgz"
++  integrity sha512-bPb5AHZtbeNGjCKVZ9UGqGwo8EUu4cLq68E95A53KlxAPRmUyYv2D6F0uUI65XisGOL1hBP5mTronbgo+0bFcA==
++
+ "@esbuild/linux-ia32@0.21.5":
+   version "0.21.5"
+   resolved "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.21.5.tgz"
+@@ -198,6 +220,13 @@
+   resolved "https://registry.npmjs.org/@humanwhocodes/retry/-/retry-0.3.0.tgz"
+   integrity sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==
+ 
++"@isaacs/fs-minipass@^4.0.0":
++  version "4.0.1"
++  resolved "https://registry.yarnpkg.com/@isaacs/fs-minipass/-/fs-minipass-4.0.1.tgz#2d59ae3ab4b38fb4270bfa23d30f8e2e86c7fe32"
++  integrity sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==
++  dependencies:
++    minipass "^7.0.4"
++
+ "@jridgewell/gen-mapping@^0.3.5":
+   version "0.3.5"
+   resolved "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.5.tgz"
+@@ -207,6 +236,14 @@
+     "@jridgewell/sourcemap-codec" "^1.4.10"
+     "@jridgewell/trace-mapping" "^0.3.24"
+ 
++"@jridgewell/remapping@^2.3.4":
++  version "2.3.5"
++  resolved "https://registry.yarnpkg.com/@jridgewell/remapping/-/remapping-2.3.5.tgz#375c476d1972947851ba1e15ae8f123047445aa1"
++  integrity sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==
++  dependencies:
++    "@jridgewell/gen-mapping" "^0.3.5"
++    "@jridgewell/trace-mapping" "^0.3.24"
++
+ "@jridgewell/resolve-uri@^3.1.0":
+   version "3.1.2"
+   resolved "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz"
+@@ -245,6 +282,15 @@
+     semver "^7.3.5"
+     tar "^6.1.11"
+ 
++"@napi-rs/wasm-runtime@^0.2.12":
++  version "0.2.12"
++  resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz#3e78a8b96e6c33a6c517e1894efbd5385a7cb6f2"
++  integrity sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==
++  dependencies:
++    "@emnapi/core" "^1.4.3"
++    "@emnapi/runtime" "^1.4.3"
++    "@tybys/wasm-util" "^0.10.0"
++
+ "@nodelib/fs.scandir@2.1.5":
+   version "2.1.5"
+   resolved "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz"
+@@ -553,7 +599,7 @@
+     "@rollup/plugin-node-resolve" "^16.0.0"
+     rollup "^4.9.5"
+ 
+-"@sveltejs/kit@^1.0.0 || ^2.0.0", "@sveltejs/kit@^2.0.0", "@sveltejs/kit@^2.4.0", "@sveltejs/kit@^2.7.1":
++"@sveltejs/kit@^2.7.1":
+   version "2.33.1"
+   resolved "https://registry.npmjs.org/@sveltejs/kit/-/kit-2.33.1.tgz"
+   integrity sha512-q2jnchZAG3+DvaEB3/SDF4hqjWPhWE8HRuQPEp+6v2r9n0PpsFH+Ea0EJQPPzzlqlMRO6+t58INhbjshevHE8A==
+@@ -579,7 +625,7 @@
+   dependencies:
+     debug "^4.3.4"
+ 
+-"@sveltejs/vite-plugin-svelte@^3.0.0", "@sveltejs/vite-plugin-svelte@^3.0.0 || ^4.0.0-next.1 || ^5.0.0 || ^6.0.0-next.0":
++"@sveltejs/vite-plugin-svelte@^3.0.0":
+   version "3.1.2"
+   resolved "https://registry.npmjs.org/@sveltejs/vite-plugin-svelte/-/vite-plugin-svelte-3.1.2.tgz"
+   integrity sha512-Txsm1tJvtiYeLUVRNqxZGKR/mI+CzuIQuc2gn+YCs9rMTowpNZ2Nqt53JdL8KF9bLhAf2ruR/dr9eZCwdTriRA==
+@@ -592,6 +638,123 @@
+     svelte-hmr "^0.16.0"
+     vitefu "^0.2.5"
+ 
++"@tailwindcss/node@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/node/-/node-4.1.12.tgz#9099c7c9a6b719b2cae265fecbb37e08ed3fd2a2"
++  integrity sha512-3hm9brwvQkZFe++SBt+oLjo4OLDtkvlE8q2WalaD/7QWaeM7KEJbAiY/LJZUaCs7Xa8aUu4xy3uoyX4q54UVdQ==
++  dependencies:
++    "@jridgewell/remapping" "^2.3.4"
++    enhanced-resolve "^5.18.3"
++    jiti "^2.5.1"
++    lightningcss "1.30.1"
++    magic-string "^0.30.17"
++    source-map-js "^1.2.1"
++    tailwindcss "4.1.12"
++
++"@tailwindcss/oxide-android-arm64@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-android-arm64/-/oxide-android-arm64-4.1.12.tgz#27920fe61fa2743afe8a8ca296fa640b609d17d5"
++  integrity sha512-oNY5pq+1gc4T6QVTsZKwZaGpBb2N1H1fsc1GD4o7yinFySqIuRZ2E4NvGasWc6PhYJwGK2+5YT1f9Tp80zUQZQ==
++
++"@tailwindcss/oxide-darwin-arm64@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-darwin-arm64/-/oxide-darwin-arm64-4.1.12.tgz#e8bd4798f26ec1d012bf0683aeb77449f71505cd"
++  integrity sha512-cq1qmq2HEtDV9HvZlTtrj671mCdGB93bVY6J29mwCyaMYCP/JaUBXxrQQQm7Qn33AXXASPUb2HFZlWiiHWFytw==
++
++"@tailwindcss/oxide-darwin-x64@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-darwin-x64/-/oxide-darwin-x64-4.1.12.tgz#8ddb7e5ddfd9b049ec84a2bda99f2b04a86859f5"
++  integrity sha512-6UCsIeFUcBfpangqlXay9Ffty9XhFH1QuUFn0WV83W8lGdX8cD5/+2ONLluALJD5+yJ7k8mVtwy3zMZmzEfbLg==
++
++"@tailwindcss/oxide-freebsd-x64@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-freebsd-x64/-/oxide-freebsd-x64-4.1.12.tgz#da1c0b16b7a5f95a1e400f299a3ec94fb6fd40ac"
++  integrity sha512-JOH/f7j6+nYXIrHobRYCtoArJdMJh5zy5lr0FV0Qu47MID/vqJAY3r/OElPzx1C/wdT1uS7cPq+xdYYelny1ww==
++
++"@tailwindcss/oxide-linux-arm-gnueabihf@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-linux-arm-gnueabihf/-/oxide-linux-arm-gnueabihf-4.1.12.tgz#34e558aa6e869c6fe9867cb78ed7ba651b9fcaa4"
++  integrity sha512-v4Ghvi9AU1SYgGr3/j38PD8PEe6bRfTnNSUE3YCMIRrrNigCFtHZ2TCm8142X8fcSqHBZBceDx+JlFJEfNg5zQ==
++
++"@tailwindcss/oxide-linux-arm64-gnu@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-linux-arm64-gnu/-/oxide-linux-arm64-gnu-4.1.12.tgz#0a00a8146ab6215f81b2d385056c991441bf390e"
++  integrity sha512-YP5s1LmetL9UsvVAKusHSyPlzSRqYyRB0f+Kl/xcYQSPLEw/BvGfxzbH+ihUciePDjiXwHh+p+qbSP3SlJw+6g==
++
++"@tailwindcss/oxide-linux-arm64-musl@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-linux-arm64-musl/-/oxide-linux-arm64-musl-4.1.12.tgz#b138f494068884ae0d8c343dc1904b22f5e98dc6"
++  integrity sha512-V8pAM3s8gsrXcCv6kCHSuwyb/gPsd863iT+v1PGXC4fSL/OJqsKhfK//v8P+w9ThKIoqNbEnsZqNy+WDnwQqCA==
++
++"@tailwindcss/oxide-linux-x64-gnu@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-linux-x64-gnu/-/oxide-linux-x64-gnu-4.1.12.tgz#5b9d5f23b15cdb714639f5b9741c0df5d610f794"
++  integrity sha512-xYfqYLjvm2UQ3TZggTGrwxjYaLB62b1Wiysw/YE3Yqbh86sOMoTn0feF98PonP7LtjsWOWcXEbGqDL7zv0uW8Q==
++
++"@tailwindcss/oxide-linux-x64-musl@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-linux-x64-musl/-/oxide-linux-x64-musl-4.1.12.tgz#f68ec530d3ca6875ea9015bcd5dd0762ee5e2f5d"
++  integrity sha512-ha0pHPamN+fWZY7GCzz5rKunlv9L5R8kdh+YNvP5awe3LtuXb5nRi/H27GeL2U+TdhDOptU7T6Is7mdwh5Ar3A==
++
++"@tailwindcss/oxide-wasm32-wasi@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-wasm32-wasi/-/oxide-wasm32-wasi-4.1.12.tgz#9fd15a1ebde6076c42c445c5e305c31673ead965"
++  integrity sha512-4tSyu3dW+ktzdEpuk6g49KdEangu3eCYoqPhWNsZgUhyegEda3M9rG0/j1GV/JjVVsj+lG7jWAyrTlLzd/WEBg==
++  dependencies:
++    "@emnapi/core" "^1.4.5"
++    "@emnapi/runtime" "^1.4.5"
++    "@emnapi/wasi-threads" "^1.0.4"
++    "@napi-rs/wasm-runtime" "^0.2.12"
++    "@tybys/wasm-util" "^0.10.0"
++    tslib "^2.8.0"
++
++"@tailwindcss/oxide-win32-arm64-msvc@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-win32-arm64-msvc/-/oxide-win32-arm64-msvc-4.1.12.tgz#938bcc6a82e1120ea4fe2ce94be0a8cdf3ae92c7"
++  integrity sha512-iGLyD/cVP724+FGtMWslhcFyg4xyYyM+5F4hGvKA7eifPkXHRAUDFaimu53fpNg9X8dfP75pXx/zFt/jlNF+lg==
++
++"@tailwindcss/oxide-win32-x64-msvc@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide-win32-x64-msvc/-/oxide-win32-x64-msvc-4.1.12.tgz#b1ee2ed0ef2c4095ddec3684a1987e2b3613af36"
++  integrity sha512-NKIh5rzw6CpEodv/++r0hGLlfgT/gFN+5WNdZtvh6wpU2BpGNgdjvj6H2oFc8nCM839QM1YOhjpgbAONUb4IxA==
++
++"@tailwindcss/oxide@4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/oxide/-/oxide-4.1.12.tgz#13a6f806aafa9c83629c9a04acd92031aef83f1c"
++  integrity sha512-gM5EoKHW/ukmlEtphNwaGx45fGoEmP10v51t9unv55voWh6WrOL19hfuIdo2FjxIaZzw776/BUQg7Pck++cIVw==
++  dependencies:
++    detect-libc "^2.0.4"
++    tar "^7.4.3"
++  optionalDependencies:
++    "@tailwindcss/oxide-android-arm64" "4.1.12"
++    "@tailwindcss/oxide-darwin-arm64" "4.1.12"
++    "@tailwindcss/oxide-darwin-x64" "4.1.12"
++    "@tailwindcss/oxide-freebsd-x64" "4.1.12"
++    "@tailwindcss/oxide-linux-arm-gnueabihf" "4.1.12"
++    "@tailwindcss/oxide-linux-arm64-gnu" "4.1.12"
++    "@tailwindcss/oxide-linux-arm64-musl" "4.1.12"
++    "@tailwindcss/oxide-linux-x64-gnu" "4.1.12"
++    "@tailwindcss/oxide-linux-x64-musl" "4.1.12"
++    "@tailwindcss/oxide-wasm32-wasi" "4.1.12"
++    "@tailwindcss/oxide-win32-arm64-msvc" "4.1.12"
++    "@tailwindcss/oxide-win32-x64-msvc" "4.1.12"
++
++"@tailwindcss/vite@^4.1.12":
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/@tailwindcss/vite/-/vite-4.1.12.tgz#f2839180aa7ba938a5247114e32ee9d57215e7f8"
++  integrity sha512-4pt0AMFDx7gzIrAOIYgYP0KCBuKWqyW8ayrdiLEjoJTT4pKTjrzG/e4uzWtTLDziC+66R9wbUqZBccJalSE5vQ==
++  dependencies:
++    "@tailwindcss/node" "4.1.12"
++    "@tailwindcss/oxide" "4.1.12"
++    tailwindcss "4.1.12"
++
++"@tybys/wasm-util@^0.10.0":
++  version "0.10.0"
++  resolved "https://registry.yarnpkg.com/@tybys/wasm-util/-/wasm-util-0.10.0.tgz#2fd3cd754b94b378734ce17058d0507c45c88369"
++  integrity sha512-VyyPYFlOMNylG45GoAe0xDoLwWuowvf92F9kySqzYh8vmYm7D2u4iUJKa1tOUpS70Ku13ASrOkS4ScXFsTaCNQ==
++  dependencies:
++    tslib "^2.4.0"
++
+ "@types/cookie@^0.6.0":
+   version "0.6.0"
+   resolved "https://registry.npmjs.org/@types/cookie/-/cookie-0.6.0.tgz"
+@@ -605,7 +768,7 @@
+     "@types/estree" "*"
+     "@types/json-schema" "*"
+ 
+-"@types/estree@*", "@types/estree@^1.0.0", "@types/estree@^1.0.1", "@types/estree@^1.0.6", "@types/estree@1.0.8":
++"@types/estree@*", "@types/estree@1.0.8", "@types/estree@^1.0.0", "@types/estree@^1.0.1", "@types/estree@^1.0.6":
+   version "1.0.8"
+   resolved "https://registry.npmjs.org/@types/estree/-/estree-1.0.8.tgz"
+   integrity sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==
+@@ -649,7 +812,7 @@
+     estree-walker "^3.0.3"
+     magic-string "^0.30.11"
+ 
+-"@vitest/pretty-format@^2.1.1", "@vitest/pretty-format@2.1.1":
++"@vitest/pretty-format@2.1.1", "@vitest/pretty-format@^2.1.1":
+   version "2.1.1"
+   resolved "https://registry.npmjs.org/@vitest/pretty-format/-/pretty-format-2.1.1.tgz"
+   integrity sha512-SjxPFOtuINDUW8/UkElJYQSFtnWX7tMksSGW0vfjxMneFqxVr8YJ979QpMbDW7g+BIiq88RAGDjf7en6rvLPPQ==
+@@ -673,7 +836,7 @@
+     magic-string "^0.30.11"
+     pathe "^1.1.2"
+ 
+-"@vitest/spy@^2.1.0-beta.1", "@vitest/spy@2.1.1":
++"@vitest/spy@2.1.1", "@vitest/spy@^2.1.0-beta.1":
+   version "2.1.1"
+   resolved "https://registry.npmjs.org/@vitest/spy/-/spy-2.1.1.tgz"
+   integrity sha512-ZM39BnZ9t/xZ/nF4UwRH5il0Sw93QnZXd9NAZGRpIgj0yvVwPpLd702s/Cx955rGaMlyBQkZJ2Ir7qyY48VZ+g==
+@@ -704,7 +867,7 @@ acorn-jsx@^5.3.2:
+   resolved "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz"
+   integrity sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==
+ 
+-"acorn@^6.0.0 || ^7.0.0 || ^8.0.0", acorn@^8.10.0, acorn@^8.12.0, acorn@^8.14.1, acorn@^8.9.0:
++acorn@^8.10.0, acorn@^8.12.0, acorn@^8.14.1, acorn@^8.9.0:
+   version "8.15.0"
+   resolved "https://registry.npmjs.org/acorn/-/acorn-8.15.0.tgz"
+   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
+@@ -906,6 +1069,11 @@ chownr@^2.0.0:
+   resolved "https://registry.npmjs.org/chownr/-/chownr-2.0.0.tgz"
+   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
+ 
++chownr@^3.0.0:
++  version "3.0.0"
++  resolved "https://registry.yarnpkg.com/chownr/-/chownr-3.0.0.tgz#9855e64ecd240a9cc4267ce8a4aa5d24a1da15e4"
++  integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
++
+ clsx@^2.0.0:
+   version "2.1.1"
+   resolved "https://registry.npmjs.org/clsx/-/clsx-2.1.1.tgz"
+@@ -986,7 +1154,7 @@ cssesc@^3.0.0:
+   resolved "https://registry.npmjs.org/cssesc/-/cssesc-3.0.0.tgz"
+   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
+ 
+-debug@^4.3.1, debug@^4.3.2, debug@^4.3.4, debug@^4.3.6, debug@~4.3.1, debug@~4.3.2, debug@4:
++debug@4, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4, debug@^4.3.6, debug@~4.3.1, debug@~4.3.2:
+   version "4.3.7"
+   resolved "https://registry.npmjs.org/debug/-/debug-4.3.7.tgz"
+   integrity sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==
+@@ -1035,6 +1203,11 @@ detect-libc@^2.0.0:
+   resolved "https://registry.npmjs.org/detect-libc/-/detect-libc-2.0.3.tgz"
+   integrity sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw==
+ 
++detect-libc@^2.0.3, detect-libc@^2.0.4:
++  version "2.0.4"
++  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.4.tgz#f04715b8ba815e53b4d8109655b6508a6865a7e8"
++  integrity sha512-3UDv+G9CsCKO1WKMGw9fwq/SWJYbI0c5Y7LU1AXYoDdbhE2AHQ6N6Nb34sG8Fj7T5APy8qXDCKuuIHd1BR0tVA==
++
+ devalue@^5.1.0:
+   version "5.1.1"
+   resolved "https://registry.npmjs.org/devalue/-/devalue-5.1.1.tgz"
+@@ -1073,6 +1246,14 @@ engine.io-parser@~5.2.1:
+   resolved "https://registry.npmjs.org/engine.io-parser/-/engine.io-parser-5.2.3.tgz"
+   integrity sha512-HqD3yTBfnBxIrbnM1DoD6Pcq8NECnh8d4As1Qgh0z5Gg3jRRIqijury0CL3ghu/edArpUYiYqQiDUQBIs4np3Q==
+ 
++enhanced-resolve@^5.18.3:
++  version "5.18.3"
++  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.18.3.tgz#9b5f4c5c076b8787c78fe540392ce76a88855b44"
++  integrity sha512-d4lC8xfavMeBjzGr2vECC3fsGXziXZQyJxD868h2M/mBI3PwAuODxAkLkq5HYuvrPYcUtiLzsTo8U3PgX3Ocww==
++  dependencies:
++    graceful-fs "^4.2.4"
++    tapable "^2.2.0"
++
+ es6-promise@^3.1.2:
+   version "3.3.1"
+   resolved "https://registry.npmjs.org/es6-promise/-/es6-promise-3.3.1.tgz"
+@@ -1157,12 +1338,7 @@ eslint-scope@^8.0.2:
+     esrecurse "^4.3.0"
+     estraverse "^5.2.0"
+ 
+-eslint-visitor-keys@^3.3.0:
+-  version "3.4.3"
+-  resolved "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz"
+-  integrity sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==
+-
+-eslint-visitor-keys@^3.4.1, eslint-visitor-keys@^3.4.3:
++eslint-visitor-keys@^3.3.0, eslint-visitor-keys@^3.4.1, eslint-visitor-keys@^3.4.3:
+   version "3.4.3"
+   resolved "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz"
+   integrity sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==
+@@ -1172,7 +1348,7 @@ eslint-visitor-keys@^4.0.0:
+   resolved "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-4.0.0.tgz"
+   integrity sha512-OtIRv/2GyiF6o/d8K7MYKKbXrOUBIK6SfkIRM4Z0dY3w+LiQ0vy3F57m0Z71bjbyeiWFiHJ8brqnmE6H6/jEuw==
+ 
+-"eslint@^6.0.0 || ^7.0.0 || >=8.0.0", "eslint@^7.0.0 || ^8.0.0-0 || ^9.0.0-0", eslint@^9.0.0, eslint@>=6.0.0, eslint@>=7.0.0:
++eslint@^9.0.0:
+   version "9.11.1"
+   resolved "https://registry.npmjs.org/eslint/-/eslint-9.11.1.tgz"
+   integrity sha512-MobhYKIoAO1s1e4VUrgx1l1Sk2JBR/Gqjjgw8+mfgoLE2xwsHur4gdfTxyTgShrhvdVFTaJSgMiQBl1jv/AWxg==
+@@ -1262,14 +1438,7 @@ estree-walker@^2.0.2:
+   resolved "https://registry.npmjs.org/estree-walker/-/estree-walker-2.0.2.tgz"
+   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
+ 
+-estree-walker@^3.0.0:
+-  version "3.0.3"
+-  resolved "https://registry.npmjs.org/estree-walker/-/estree-walker-3.0.3.tgz"
+-  integrity sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==
+-  dependencies:
+-    "@types/estree" "^1.0.0"
+-
+-estree-walker@^3.0.3:
++estree-walker@^3.0.0, estree-walker@^3.0.3:
+   version "3.0.3"
+   resolved "https://registry.npmjs.org/estree-walker/-/estree-walker-3.0.3.tgz"
+   integrity sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==
+@@ -1355,7 +1524,7 @@ fs.realpath@^1.0.0:
+   resolved "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
+   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
+ 
+-fsevents@~2.3.2, fsevents@2.3.2:
++fsevents@2.3.2, fsevents@~2.3.2:
+   version "2.3.2"
+   resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz"
+   integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
+@@ -1437,7 +1606,7 @@ globals@^15.0.0:
+   resolved "https://registry.npmjs.org/globals/-/globals-15.9.0.tgz"
+   integrity sha512-SmSKyLLKFbSr6rptvP8izbyxJL4ILwqO9Jg23UA0sDlGlu58V59D1//I3vlc0KJphVdUR7vMjHIplYnzBxorQA==
+ 
+-graceful-fs@^4.1.3:
++graceful-fs@^4.1.3, graceful-fs@^4.2.4:
+   version "4.2.11"
+   resolved "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.11.tgz"
+   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
+@@ -1503,7 +1672,7 @@ inflight@^1.0.4:
+     once "^1.3.0"
+     wrappy "1"
+ 
+-inherits@^2.0.3, inherits@~2.0.3, inherits@2:
++inherits@2, inherits@^2.0.3, inherits@~2.0.3:
+   version "2.0.4"
+   resolved "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz"
+   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
+@@ -1554,27 +1723,20 @@ is-path-inside@^3.0.3:
+   resolved "https://registry.npmjs.org/is-path-inside/-/is-path-inside-3.0.3.tgz"
+   integrity sha512-Fd4gABb+ycGAmKou8eMftCupSir5lRxqf4aD/vd0cD2qc4HL07OjCeuHMr8Ro4CoMaeCKDB0/ECBOVWjTwUvPQ==
+ 
+-is-reference@^3.0.0:
+-  version "3.0.2"
+-  resolved "https://registry.npmjs.org/is-reference/-/is-reference-3.0.2.tgz"
+-  integrity sha512-v3rht/LgVcsdZa3O2Nqs+NMowLOxeOm7Ay9+/ARQ2F+qEoANRcqrjAZKGN0v8ymUetZGgkp26LTnGT7H0Qo9Pg==
++is-reference@1.2.1:
++  version "1.2.1"
++  resolved "https://registry.npmjs.org/is-reference/-/is-reference-1.2.1.tgz"
++  integrity sha512-U82MsXXiFIrjCK4otLT+o2NA2Cd2g5MLoOVXUZjIOhLurrRxpEXzI8O0KZHr3IjLvlAH1kTPYSuqer5T9ZVBKQ==
+   dependencies:
+     "@types/estree" "*"
+ 
+-is-reference@^3.0.1:
++is-reference@^3.0.0, is-reference@^3.0.1:
+   version "3.0.2"
+   resolved "https://registry.npmjs.org/is-reference/-/is-reference-3.0.2.tgz"
+   integrity sha512-v3rht/LgVcsdZa3O2Nqs+NMowLOxeOm7Ay9+/ARQ2F+qEoANRcqrjAZKGN0v8ymUetZGgkp26LTnGT7H0Qo9Pg==
+   dependencies:
+     "@types/estree" "*"
+ 
+-is-reference@1.2.1:
+-  version "1.2.1"
+-  resolved "https://registry.npmjs.org/is-reference/-/is-reference-1.2.1.tgz"
+-  integrity sha512-U82MsXXiFIrjCK4otLT+o2NA2Cd2g5MLoOVXUZjIOhLurrRxpEXzI8O0KZHr3IjLvlAH1kTPYSuqer5T9ZVBKQ==
+-  dependencies:
+-    "@types/estree" "*"
+-
+ isarray@~1.0.0:
+   version "1.0.0"
+   resolved "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+@@ -1585,6 +1747,11 @@ isexe@^2.0.0:
+   resolved "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz"
+   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
+ 
++jiti@^2.5.1:
++  version "2.5.1"
++  resolved "https://registry.yarnpkg.com/jiti/-/jiti-2.5.1.tgz#bd099c1c2be1c59bbea4e5adcd127363446759d0"
++  integrity sha512-twQoecYPiVA5K/h6SxtORw/Bs3ar+mLUtoPSc7iMXzQzK8d7eJ/R09wmTwAjiamETn1cXYPGfNnu7DMoHgu12w==
++
+ "js-tokens@^3.0.0 || ^4.0.0":
+   version "4.0.0"
+   resolved "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
+@@ -1661,6 +1828,74 @@ lie@~3.3.0:
+   dependencies:
+     immediate "~3.0.5"
+ 
++lightningcss-darwin-arm64@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-darwin-arm64/-/lightningcss-darwin-arm64-1.30.1.tgz#3d47ce5e221b9567c703950edf2529ca4a3700ae"
++  integrity sha512-c8JK7hyE65X1MHMN+Viq9n11RRC7hgin3HhYKhrMyaXflk5GVplZ60IxyoVtzILeKr+xAJwg6zK6sjTBJ0FKYQ==
++
++lightningcss-darwin-x64@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.30.1.tgz#e81105d3fd6330860c15fe860f64d39cff5fbd22"
++  integrity sha512-k1EvjakfumAQoTfcXUcHQZhSpLlkAuEkdMBsI/ivWw9hL+7FtilQc0Cy3hrx0AAQrVtQAbMI7YjCgYgvn37PzA==
++
++lightningcss-freebsd-x64@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-freebsd-x64/-/lightningcss-freebsd-x64-1.30.1.tgz#a0e732031083ff9d625c5db021d09eb085af8be4"
++  integrity sha512-kmW6UGCGg2PcyUE59K5r0kWfKPAVy4SltVeut+umLCFoJ53RdCUWxcRDzO1eTaxf/7Q2H7LTquFHPL5R+Gjyig==
++
++lightningcss-linux-arm-gnueabihf@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-linux-arm-gnueabihf/-/lightningcss-linux-arm-gnueabihf-1.30.1.tgz#1f5ecca6095528ddb649f9304ba2560c72474908"
++  integrity sha512-MjxUShl1v8pit+6D/zSPq9S9dQ2NPFSQwGvxBCYaBYLPlCWuPh9/t1MRS8iUaR8i+a6w7aps+B4N0S1TYP/R+Q==
++
++lightningcss-linux-arm64-gnu@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-linux-arm64-gnu/-/lightningcss-linux-arm64-gnu-1.30.1.tgz#eee7799726103bffff1e88993df726f6911ec009"
++  integrity sha512-gB72maP8rmrKsnKYy8XUuXi/4OctJiuQjcuqWNlJQ6jZiWqtPvqFziskH3hnajfvKB27ynbVCucKSm2rkQp4Bw==
++
++lightningcss-linux-arm64-musl@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-linux-arm64-musl/-/lightningcss-linux-arm64-musl-1.30.1.tgz#f2e4b53f42892feeef8f620cbb889f7c064a7dfe"
++  integrity sha512-jmUQVx4331m6LIX+0wUhBbmMX7TCfjF5FoOH6SD1CttzuYlGNVpA7QnrmLxrsub43ClTINfGSYyHe2HWeLl5CQ==
++
++lightningcss-linux-x64-gnu@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.1.tgz#2fc7096224bc000ebb97eea94aea248c5b0eb157"
++  integrity sha512-piWx3z4wN8J8z3+O5kO74+yr6ze/dKmPnI7vLqfSqI8bccaTGY5xiSGVIJBDd5K5BHlvVLpUB3S2YCfelyJ1bw==
++
++lightningcss-linux-x64-musl@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.30.1.tgz#66dca2b159fd819ea832c44895d07e5b31d75f26"
++  integrity sha512-rRomAK7eIkL+tHY0YPxbc5Dra2gXlI63HL+v1Pdi1a3sC+tJTcFrHX+E86sulgAXeI7rSzDYhPSeHHjqFhqfeQ==
++
++lightningcss-win32-arm64-msvc@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.30.1.tgz#7d8110a19d7c2d22bfdf2f2bb8be68e7d1b69039"
++  integrity sha512-mSL4rqPi4iXq5YVqzSsJgMVFENoa4nGTT/GjO2c0Yl9OuQfPsIfncvLrEW6RbbB24WtZ3xP/2CCmI3tNkNV4oA==
++
++lightningcss-win32-x64-msvc@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.30.1.tgz#fd7dd008ea98494b85d24b4bea016793f2e0e352"
++  integrity sha512-PVqXh48wh4T53F/1CCu8PIPCxLzWyCnn/9T5W1Jpmdy5h9Cwd+0YQS6/LwhHXSafuc61/xg9Lv5OrCby6a++jg==
++
++lightningcss@1.30.1:
++  version "1.30.1"
++  resolved "https://registry.yarnpkg.com/lightningcss/-/lightningcss-1.30.1.tgz#78e979c2d595bfcb90d2a8c0eb632fe6c5bfed5d"
++  integrity sha512-xi6IyHML+c9+Q3W0S4fCQJOym42pyurFiJUHEcEyHS0CeKzia4yZDEsLlqOFykxOdHpNy0NmvVO31vcSqAxJCg==
++  dependencies:
++    detect-libc "^2.0.3"
++  optionalDependencies:
++    lightningcss-darwin-arm64 "1.30.1"
++    lightningcss-darwin-x64 "1.30.1"
++    lightningcss-freebsd-x64 "1.30.1"
++    lightningcss-linux-arm-gnueabihf "1.30.1"
++    lightningcss-linux-arm64-gnu "1.30.1"
++    lightningcss-linux-arm64-musl "1.30.1"
++    lightningcss-linux-x64-gnu "1.30.1"
++    lightningcss-linux-x64-musl "1.30.1"
++    lightningcss-win32-arm64-msvc "1.30.1"
++    lightningcss-win32-x64-msvc "1.30.1"
++
+ lilconfig@^2.0.5:
+   version "2.1.0"
+   resolved "https://registry.npmjs.org/lilconfig/-/lilconfig-2.1.0.tgz"
+@@ -1683,7 +1918,7 @@ lodash.merge@^4.6.2:
+   resolved "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz"
+   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+ 
+-loose-envify@^1.0.0, loose-envify@^1.1.0:
++loose-envify@^1.0.0:
+   version "1.4.0"
+   resolved "https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz"
+   integrity sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==
+@@ -1706,6 +1941,11 @@ loupe@^3.1.0, loupe@^3.1.1:
+   dependencies:
+     get-func-name "^2.0.1"
+ 
++lucide-svelte@^0.540.0:
++  version "0.540.0"
++  resolved "https://registry.yarnpkg.com/lucide-svelte/-/lucide-svelte-0.540.0.tgz#c56a855368d721f163720e73a73bc52eb41b187a"
++  integrity sha512-jedJgKrrsT1B6mAMHGMmk6dIZKhorLq4KO7v+j7hYfeGR0LRe3W+SvwpWF1E6WT2/AY9IAm8KT/G+Nzf+0lW3g==
++
+ magic-string@^0.30.10, magic-string@^0.30.11, magic-string@^0.30.3, magic-string@^0.30.4, magic-string@^0.30.5:
+   version "0.30.11"
+   resolved "https://registry.npmjs.org/magic-string/-/magic-string-0.30.11.tgz"
+@@ -1713,6 +1953,13 @@ magic-string@^0.30.10, magic-string@^0.30.11, magic-string@^0.30.3, magic-string
+   dependencies:
+     "@jridgewell/sourcemap-codec" "^1.5.0"
+ 
++magic-string@^0.30.17:
++  version "0.30.17"
++  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.17.tgz#450a449673d2460e5bbcfba9a61916a1714c7453"
++  integrity sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==
++  dependencies:
++    "@jridgewell/sourcemap-codec" "^1.5.0"
++
+ make-cancellable-promise@^1.3.1:
+   version "1.3.2"
+   resolved "https://registry.npmjs.org/make-cancellable-promise/-/make-cancellable-promise-1.3.2.tgz"
+@@ -1797,6 +2044,11 @@ minipass@^5.0.0:
+   resolved "https://registry.npmjs.org/minipass/-/minipass-5.0.0.tgz"
+   integrity sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==
+ 
++minipass@^7.0.4, minipass@^7.1.2:
++  version "7.1.2"
++  resolved "https://registry.yarnpkg.com/minipass/-/minipass-7.1.2.tgz#93a9626ce5e5e66bd4db86849e7515e92340a707"
++  integrity sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==
++
+ minizlib@^2.1.1:
+   version "2.1.2"
+   resolved "https://registry.npmjs.org/minizlib/-/minizlib-2.1.2.tgz"
+@@ -1805,6 +2057,13 @@ minizlib@^2.1.1:
+     minipass "^3.0.0"
+     yallist "^4.0.0"
+ 
++minizlib@^3.0.1:
++  version "3.0.2"
++  resolved "https://registry.yarnpkg.com/minizlib/-/minizlib-3.0.2.tgz#f33d638eb279f664439aa38dc5f91607468cb574"
++  integrity sha512-oG62iEk+CYt5Xj2YqI5Xi9xWUeZhDI8jjQmC5oThVH5JGCTgIjr7ciJDzC7MBzYd//WvR1OTmP5Q38Q8ShQtVA==
++  dependencies:
++    minipass "^7.1.2"
++
+ mkdirp@^0.5.1:
+   version "0.5.6"
+   resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.6.tgz"
+@@ -1817,6 +2076,11 @@ mkdirp@^1.0.3:
+   resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz"
+   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
+ 
++mkdirp@^3.0.1:
++  version "3.0.1"
++  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-3.0.1.tgz#e44e4c5607fb279c168241713cc6e0fea9adcb50"
++  integrity sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==
++
+ mri@^1.1.0:
+   version "1.2.0"
+   resolved "https://registry.npmjs.org/mri/-/mri-1.2.0.tgz"
+@@ -1966,14 +2230,6 @@ pathval@^2.0.0:
+   resolved "https://registry.npmjs.org/pathval/-/pathval-2.0.0.tgz"
+   integrity sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==
+ 
+-pdfjs-dist@^4.6.82:
+-  version "4.6.82"
+-  resolved "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-4.6.82.tgz"
+-  integrity sha512-BUOryeRFwvbLe0lOU6NhkJNuVQUp06WxlJVVCsxdmJ4y5cU3O3s3/0DunVdK1PMm7v2MUw52qKYaidhDH1Z9+w==
+-  optionalDependencies:
+-    canvas "^2.11.2"
+-    path2d "^0.2.1"
+-
+ pdfjs-dist@4.4.168:
+   version "4.4.168"
+   resolved "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-4.4.168.tgz"
+@@ -1982,6 +2238,14 @@ pdfjs-dist@4.4.168:
+     canvas "^2.11.2"
+     path2d "^0.2.0"
+ 
++pdfjs-dist@^4.6.82:
++  version "4.6.82"
++  resolved "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-4.6.82.tgz"
++  integrity sha512-BUOryeRFwvbLe0lOU6NhkJNuVQUp06WxlJVVCsxdmJ4y5cU3O3s3/0DunVdK1PMm7v2MUw52qKYaidhDH1Z9+w==
++  optionalDependencies:
++    canvas "^2.11.2"
++    path2d "^0.2.1"
++
+ periscopic@^3.1.0:
+   version "3.1.0"
+   resolved "https://registry.npmjs.org/periscopic/-/periscopic-3.1.0.tgz"
+@@ -2001,7 +2265,7 @@ picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.3.1:
+   resolved "https://registry.npmjs.org/picomatch/-/picomatch-2.3.1.tgz"
+   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
+ 
+-"picomatch@^3 || ^4", picomatch@^4.0.2:
++picomatch@^4.0.2:
+   version "4.0.3"
+   resolved "https://registry.npmjs.org/picomatch/-/picomatch-4.0.3.tgz"
+   integrity sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==
+@@ -2020,7 +2284,7 @@ playwright@1.47.2:
+   optionalDependencies:
+     fsevents "2.3.2"
+ 
+-"postcss-load-config@^2.1.0 || ^3.0.0 || ^4.0.0 || ^5.0.0", postcss-load-config@^3.1.4:
++postcss-load-config@^3.1.4:
+   version "3.1.4"
+   resolved "https://registry.npmjs.org/postcss-load-config/-/postcss-load-config-3.1.4.tgz"
+   integrity sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==
+@@ -2046,7 +2310,7 @@ postcss-selector-parser@^6.1.0:
+     cssesc "^3.0.0"
+     util-deprecate "^1.0.2"
+ 
+-"postcss@^7 || ^8", postcss@^8.3.3, postcss@^8.4.29, postcss@^8.4.38, postcss@^8.4.39, postcss@^8.4.43, postcss@>=8.0.9:
++postcss@^8.4.38, postcss@^8.4.39, postcss@^8.4.43:
+   version "8.4.47"
+   resolved "https://registry.npmjs.org/postcss/-/postcss-8.4.47.tgz"
+   integrity sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==
+@@ -2065,7 +2329,7 @@ prettier-plugin-svelte@^3.1.2:
+   resolved "https://registry.npmjs.org/prettier-plugin-svelte/-/prettier-plugin-svelte-3.2.6.tgz"
+   integrity sha512-Y1XWLw7vXUQQZmgv1JAEiLcErqUniAF2wO7QJsw8BVMvpLET2dI5WpEIEJx1r11iHVdSMzQxivyfrH9On9t2IQ==
+ 
+-prettier@^3.0.0, prettier@^3.1.1:
++prettier@^3.1.1:
+   version "3.3.3"
+   resolved "https://registry.npmjs.org/prettier/-/prettier-3.3.3.tgz"
+   integrity sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==
+@@ -2085,14 +2349,6 @@ queue-microtask@^1.2.2:
+   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz"
+   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
+ 
+-"react-dom@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
+-  version "18.3.1"
+-  resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz"
+-  integrity sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==
+-  dependencies:
+-    loose-envify "^1.1.0"
+-    scheduler "^0.23.2"
+-
+ react-pdf@^9.1.0:
+   version "9.1.1"
+   resolved "https://registry.npmjs.org/react-pdf/-/react-pdf-9.1.1.tgz"
+@@ -2107,13 +2363,6 @@ react-pdf@^9.1.0:
+     tiny-invariant "^1.0.0"
+     warning "^4.0.0"
+ 
+-"react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react@^18.3.1:
+-  version "18.3.1"
+-  resolved "https://registry.npmjs.org/react/-/react-18.3.1.tgz"
+-  integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
+-  dependencies:
+-    loose-envify "^1.1.0"
+-
+ readable-stream@^3.6.0:
+   version "3.6.2"
+   resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-3.6.2.tgz"
+@@ -2176,7 +2425,7 @@ rimraf@^3.0.2:
+   dependencies:
+     glob "^7.1.3"
+ 
+-rollup@^1.20.0||^2.0.0||^3.0.0||^4.0.0, rollup@^2.68.0||^3.0.0||^4.0.0, rollup@^2.78.0||^3.0.0||^4.0.0, rollup@^3.7.0:
++rollup@^3.7.0:
+   version "3.29.5"
+   resolved "https://registry.npmjs.org/rollup/-/rollup-3.29.5.tgz"
+   integrity sha512-GVsDdsbJzzy4S/v3dqWPJ7EfvZJfCHiDqe80IyrF59LYuP+e6U1LJoUqeuqRbwAWoMNoXivMNeNAOf5E22VA1w==
+@@ -2266,13 +2515,6 @@ sander@^0.5.0:
+     mkdirp "^0.5.1"
+     rimraf "^2.5.2"
+ 
+-scheduler@^0.23.2:
+-  version "0.23.2"
+-  resolved "https://registry.npmjs.org/scheduler/-/scheduler-0.23.2.tgz"
+-  integrity sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==
+-  dependencies:
+-    loose-envify "^1.1.0"
+-
+ semver@^6.0.0:
+   version "6.3.1"
+   resolved "https://registry.npmjs.org/semver/-/semver-6.3.1.tgz"
+@@ -2391,13 +2633,6 @@ std-env@^3.7.0:
+   resolved "https://registry.npmjs.org/std-env/-/std-env-3.7.0.tgz"
+   integrity sha512-JPbdCEQLj1w5GilpiHAx3qJvFndqybBysA3qUOnznweH4QbNYUsW/ea8QzSrnh0vNsezMMw5bcVool8lM0gwzg==
+ 
+-string_decoder@^1.1.1, string_decoder@~1.1.1:
+-  version "1.1.1"
+-  resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz"
+-  integrity sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
+-  dependencies:
+-    safe-buffer "~5.1.0"
+-
+ "string-width@^1.0.2 || 2 || 3 || 4", string-width@^4.2.3:
+   version "4.2.3"
+   resolved "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz"
+@@ -2407,6 +2642,13 @@ string_decoder@^1.1.1, string_decoder@~1.1.1:
+     is-fullwidth-code-point "^3.0.0"
+     strip-ansi "^6.0.1"
+ 
++string_decoder@^1.1.1, string_decoder@~1.1.1:
++  version "1.1.1"
++  resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz"
++  integrity sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
++  dependencies:
++    safe-buffer "~5.1.0"
++
+ strip-ansi@^6.0.1:
+   version "6.0.1"
+   resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
+@@ -2482,7 +2724,7 @@ svelte-youtube-lite@^0.5.1:
+   resolved "https://registry.npmjs.org/svelte-youtube-lite/-/svelte-youtube-lite-0.5.1.tgz"
+   integrity sha512-/GSp7M/esnxXx0ViaxDoZjccvm3xwe+Q+v7o3RaK6k6jX/mj8YwOCZKywJumgSDSXabY7prOjiEoPs1DeLpa4Q==
+ 
+-"svelte@^3.19.0 || ^4.0.0", "svelte@^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0", "svelte@^3.23.0 || ^4.0.0-next.0 || ^4.0.0 || ^5.0.0-next.0", "svelte@^3.37.0 || ^4.0.0 || ^5.0.0-next.191", "svelte@^3.55.0 || ^4.0.0-next.0 || ^4.0.0 || ^5.0.0-next.0", svelte@^4.0.0, "svelte@^4.0.0 || ^5.0.0-next.0", svelte@^4.2.19:
++svelte@^4.2.19:
+   version "4.2.19"
+   resolved "https://registry.npmjs.org/svelte/-/svelte-4.2.19.tgz"
+   integrity sha512-IY1rnGr6izd10B0A8LqsBfmlT5OILVuZ7XsI0vdGPEvuonFV7NYEUK4dAkm9Zg2q0Um92kYjTpS1CAP3Nh/KWw==
+@@ -2502,6 +2744,16 @@ svelte-youtube-lite@^0.5.1:
+     magic-string "^0.30.4"
+     periscopic "^3.1.0"
+ 
++tailwindcss@4.1.12, tailwindcss@^4.1.12:
++  version "4.1.12"
++  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-4.1.12.tgz#7baeed5b5ac77370571c2baa72ee06e0050fc0a8"
++  integrity sha512-DzFtxOi+7NsFf7DBtI3BJsynR+0Yp6etH+nRPTbpWnS2pZBaSksv/JGctNwSWzbFjp0vxSqknaUylseZqMDGrA==
++
++tapable@^2.2.0:
++  version "2.2.2"
++  resolved "https://registry.yarnpkg.com/tapable/-/tapable-2.2.2.tgz#ab4984340d30cb9989a490032f086dbb8b56d872"
++  integrity sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==
++
+ tar@^6.1.11:
+   version "6.2.1"
+   resolved "https://registry.npmjs.org/tar/-/tar-6.2.1.tgz"
+@@ -2514,6 +2766,18 @@ tar@^6.1.11:
+     mkdirp "^1.0.3"
+     yallist "^4.0.0"
+ 
++tar@^7.4.3:
++  version "7.4.3"
++  resolved "https://registry.yarnpkg.com/tar/-/tar-7.4.3.tgz#88bbe9286a3fcd900e94592cda7a22b192e80571"
++  integrity sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==
++  dependencies:
++    "@isaacs/fs-minipass" "^4.0.0"
++    chownr "^3.0.0"
++    minipass "^7.1.2"
++    minizlib "^3.0.1"
++    mkdirp "^3.0.1"
++    yallist "^5.0.0"
++
+ text-table@^0.2.0:
+   version "0.2.0"
+   resolved "https://registry.npmjs.org/text-table/-/text-table-0.2.0.tgz"
+@@ -2566,6 +2830,11 @@ tr46@~0.0.3:
+   resolved "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz"
+   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
+ 
++tslib@^2.4.0, tslib@^2.8.0:
++  version "2.8.1"
++  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
++  integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
++
+ type-check@^0.4.0, type-check@~0.4.0:
+   version "0.4.0"
+   resolved "https://registry.npmjs.org/type-check/-/type-check-0.4.0.tgz"
+@@ -2573,7 +2842,7 @@ type-check@^0.4.0, type-check@~0.4.0:
+   dependencies:
+     prelude-ls "^1.2.1"
+ 
+-typescript@^5.0.0, typescript@^5.0.3, "typescript@>=3.9.5 || ^4.0.0 || ^5.0.0":
++typescript@^5.0.0, typescript@^5.0.3:
+   version "5.6.2"
+   resolved "https://registry.npmjs.org/typescript/-/typescript-5.6.2.tgz"
+   integrity sha512-NW8ByodCSNCwZeghjN3o+JX5OFH0Ojg6sadjEKY4huZ52TqbJTJnDo5+Tw98lSy63NZvi4n+ez5m2u5d4PkZyw==
+@@ -2610,7 +2879,7 @@ vite-node@2.1.1:
+     pathe "^1.1.2"
+     vite "^5.0.0"
+ 
+-"vite@^3.0.0 || ^4.0.0 || ^5.0.0", vite@^5.0.0, vite@^5.0.3, "vite@^5.0.3 || ^6.0.0 || ^7.0.0-beta.0":
++vite@^5.0.0, vite@^5.0.3:
+   version "5.4.8"
+   resolved "https://registry.npmjs.org/vite/-/vite-5.4.8.tgz"
+   integrity sha512-FqrItQ4DT1NC4zCUqMB4c4AZORMKIa0m8/URVCZ77OZ/QSNeJ54bU1vrFADbDsuwfIPcgknRkmqakQcgnL4GiQ==
+@@ -2723,6 +2992,11 @@ yallist@^4.0.0:
+   resolved "https://registry.npmjs.org/yallist/-/yallist-4.0.0.tgz"
+   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
+ 
++yallist@^5.0.0:
++  version "5.0.0"
++  resolved "https://registry.yarnpkg.com/yallist/-/yallist-5.0.0.tgz#00e2de443639ed0d78fd87de0d27469fbcffb533"
++  integrity sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==
++
+ yaml@^1.10.2:
+   version "1.10.2"
+   resolved "https://registry.npmjs.org/yaml/-/yaml-1.10.2.tgz"

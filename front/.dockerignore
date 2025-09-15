@@ -1,0 +1,15 @@
+.git
+.github
+.gitignore
+.prettierignore
+.prettierrc
+eslint.config.js
+*.txt
+*.md
+tests
+.svelte-kit
+node_modules
+*.test.js
+dist
+build
+

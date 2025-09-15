@@ -1,0 +1,23 @@
+The key change here is in the artifacts section. I've changed baseDirectory: dist to baseDirectory: build. However, you should verify the correct output directory for your specific Svelte project setup:
+
+Check your Svelte configuration file (usually vite.config.js or svelte.config.js) for the build output directory.
+If you can't find it specified there, run a local build (pnpm run build) and see which directory is created with the build output.
+Update the baseDirectory in the amplify.yml to match your project's actual build output directory.
+
+Common possibilities include:
+
+build
+public
+dist
+
+After making this change:
+
+Commit and push the updated amplify.yml file to your repository.
+Trigger a new build in Amplify.
+
+This should resolve the "Artifact directory doesn't exist" error. If you encounter any further issues, please provide:
+
+The relevant part of your Svelte configuration file (vite.config.js or svelte.config.js)
+The new build logs if the error persists
+
+With this information, I can provide more targeted assistance.
