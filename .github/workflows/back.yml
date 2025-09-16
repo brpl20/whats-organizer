@@ -18,11 +18,13 @@ jobs:
         fingerprint: ${{ secrets.FINGERPRINT }}
         script: |
           export PROJECT="back"
+          export PROJECT_INFRA="infra"
           export BRANCH="master"
           export USER="${PROJECT}"
           export GROUP="${USER}"
           export HOME="/home/${USER}"
-          export PROJECT_DIR="${HOME}/whats-organizer-${PROJECT}"
+          export PROJECT_DIR="${HOME}/whats-organizer/${PROJECT}"
+          export INFRA_DIR="${PROJECT_DIR}/infra"
           export ENV_DIR="${HOME}"
           export SERVICE="back@.service"
           export ERROR=false
@@ -30,7 +32,7 @@ jobs:
           export MESSAGE="Whats-Organizer-${PROJECT}:"
           export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           export ENOENT=127
-          readonly PROJECT BRANCH USER GROUP HOME PROJECT_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
+          readonly PROJECT PROJECT_INFRA BRANCH USER GROUP HOME PROJECT_DIR INFRA_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
 
           if ! getent group "${GROUP}" >/dev/null; then
             groupadd -r "${GROUP}"
@@ -51,19 +53,26 @@ jobs:
             [ -d "${PROJECT_DIR}" ] && rm -rf "${PROJECT_DIR}"
             mkdir -p "${PROJECT_DIR}"
             cd "${PROJECT_DIR}"
-            git clone "${GIT_URL}" .
+            git clone --filter=blob:none --sparse "${GIT_URL}" .
+            git sparse-checkout set "${PROJECT}" "${PROJECT_INFRA}"
           else
             cd "${PROJECT_DIR}"
             git remote set-url origin "${GIT_URL}"
             git fetch origin "${BRANCH}"
+            git diff --quiet HEAD origin/${BRANCH} -- "${PROJECT}"
+            if [ \$? -eq 0 ]; then
+              echo "Nenhuma mudança detectada na pasta ${PROJECT}"
+              exit 0
+            fi
             git reset --hard "origin/${BRANCH}"
+            git sparse-checkout set "${PROJECT}"
           fi
           EOF
 
           mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
 
           sudo -u "${USER}" bash <<EOF
-          cd "${PROJECT_DIR}"
+          cd "${PROJECT_DIR}/${PROJECT}"
           if [ -f "${ENV_DIR}/.env" ]; then
             cp "${ENV_DIR}/.env" .
           else
@@ -91,7 +100,7 @@ jobs:
 
           sysctl -w net.ipv6.conf.all.disable_ipv6=1 net.ipv6.conf.default.disable_ipv6=1 net.ipv6.conf.lo.disable_ipv6=1
 
-          cp "${PROJECT_DIR}/infra/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
+          cp "${INFRA_DIR}/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
             export ERROR=true
           systemctl daemon-reload || export ERROR=true
 
