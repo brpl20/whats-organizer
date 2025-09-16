@@ -69,7 +69,7 @@ jobs:
               exit 1
             fi
             git reset --hard "origin/${BRANCH}"
-            git sparse-checkout set "${PROJECT}"
+            git sparse-checkout set "${PROJECT}" "${PROJECT_INFRA}"
           fi
           EOF
 
