@@ -1,4 +1,4 @@
-name: remote ssh command
+name: Front deploy
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: executing remote ssh commands using password
+    - name: executing Front deployment using password
       uses: appleboy/ssh-action@v1.1.0
       with:
         host: ${{ secrets.HOST }}

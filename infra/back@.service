@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=back
 Group=back
-WorkingDirectory=/home/back/whats-organizer-back
+WorkingDirectory=/home/back/whats-organizer/back
 EnvironmentFile=/home/back/.env
 ExecStart=/home/back/whats-organizer/back/.venv/bin/gunicorn --preload -w 1 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -b ${HOST}:%i app:app --timeout 1000 --limit-request-line 0
 Restart=always
