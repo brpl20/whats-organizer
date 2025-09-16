@@ -17,6 +17,7 @@ jobs:
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
         script: |
+          set -u
           export PROJECT="back"
           export PROJECT_INFRA="infra"
           export BRANCH="master"
