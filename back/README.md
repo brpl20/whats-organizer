@@ -142,3 +142,4 @@ HEADLESS=False
 - Testes: Remover testes sensíveis (add to .ignore)
 - Testes: Automatizar e criar logger / mensageria de testes
 
+.
