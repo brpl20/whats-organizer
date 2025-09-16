@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=front
 Group=front
-WorkingDirectory=/home/front/whats-organizer//front
+WorkingDirectory=/home/front/whats-organizer/front
 ExecStart=/bin/sh -lc 'export NVM_DIR="$${XDG_CONFIG_HOME:-$$HOME/.nvm}" && . "$$NVM_DIR/nvm.sh" && exec node --env-file=.env build/index'
 Restart=always
 RestartSec=5
