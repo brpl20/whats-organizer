@@ -1,0 +1,133 @@
+name: remote ssh command
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
+        script: |
+          export PROJECT=front
+          export BRANCH="master"
+          export USER="${PROJECT}"
+          export GROUP="${USER}"
+          export HOME="/home/${USER}"
+          export PROJECT_DIR="${HOME}/whats-organizer-${PROJECT}"
+          export ENV_DIR="${HOME}"
+          export SERVICE="front.service"
+          export ERROR=false
+          export DISK_USAGE=$(df -h / | grep -E -o "[0-9]+%" | cut -d "%" -f 1)
+          export MESSAGE="Whats-Organizer-${PROJECT}:"
+          export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          export ENOENT=127
+          readonly PROJECT BRANCH USER GROUP HOME PROJECT_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
+
+          if ! getent group "${GROUP}" >/dev/null; then
+            groupadd -r "${GROUP}"
+          fi
+
+          if ! id -u "${USER}" >/dev/null 2>&1; then
+            useradd -m -d "${HOME}" -g "${GROUP}" -s /bin/bash "${USER}"
+          fi
+
+          if ! command -v git >/dev/null 2>&1; then
+              if command -v pacman >/dev/null 2>&1; then
+                pacman --noconfirm -S git
+              fi
+          fi
+
+          sudo -u "${USER}" bash <<EOF
+          if [ ! -d "${PROJECT_DIR}/.git" ]; then
+            [ -d "${PROJECT_DIR}" ] && rm -rf "${PROJECT_DIR}"
+            mkdir -p "${PROJECT_DIR}"
+            cd "${PROJECT_DIR}"
+            git clone "${GIT_URL}" .
+          else
+            cd "${PROJECT_DIR}"
+            git remote set-url origin "${GIT_URL}"
+            git fetch origin "${BRANCH}"
+            git reset --hard "origin/${BRANCH}"
+          fi
+          EOF
+
+          sudo -u "${USER}" bash -l <<EOF
+          cd "${PROJECT_DIR}"
+          if [ -f "${ENV_DIR}/.env" ]; then
+            cp "${ENV_DIR}/.env" .
+          else
+            echo "Erro: Falta o arquivo de segredos .env em ${ENV_DIR}/.env"
+            exit ${ENOENT}
+          fi
+
+          cd "${HOME}"
+          export NVM_DIR="\$([ -z "\${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "\${XDG_CONFIG_HOME}/nvm")"
+          if [ ! -d "\${NVM_DIR}" ]; then
+            curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" | bash || exit 1
+            export NVM_DIR="\$([ -z "\${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "\${XDG_CONFIG_HOME}/nvm")"
+            [ -s "\${NVM_DIR}/nvm.sh" ] && . "\${NVM_DIR}/nvm.sh"
+            nvm install 20 || exit 1
+            nvm use 20 || exit 1
+          else
+            [ -s "\${NVM_DIR}/nvm.sh" ] && . "\${NVM_DIR}/nvm.sh"
+          fi
+  
+          readonly PNPM_HOME="\${XDG_DATA_HOME:-\$HOME/.local/share}/pnpm"
+          export PATH="\${PNPM_HOME}:\${PATH}"
+          if ! command -v pnpm >/dev/null 2>&1; then
+            curl -fsSL https://get.pnpm.io/install.sh | sh - || exit 1
+          fi
+
+          cd -
+          pnpm install --frozen-lockfile || exit 1
+          pnpm run build  || exit 1
+          EOF
+
+          readonly STATUS=$?
+          if [ ${STATUS} -ne 0 ]; then
+            if [ ${STATUS} -eq ${ENOENT} ]; then
+              exit ${STATUS}
+            fi
+            # else
+            export ERROR=true
+          fi
+
+          sysctl -w net.ipv6.conf.all.disable_ipv6=1 net.ipv6.conf.default.disable_ipv6=1 net.ipv6.conf.lo.disable_ipv6=1
+
+          cp "${PROJECT_DIR}/infra/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
+            export ERROR=true
+          systemctl daemon-reload || export ERROR=true
+
+          set -a
+          source "${ENV_DIR}/.env" || export ERROR=true
+          set +a
+
+          if [ "$(</etc/hostname)" != "$HOST" ]; then
+            hostnamectl set-hostname "${HOST}"
+          fi
+
+          ESCAPED_SERVICE=$(systemd-escape "${SERVICE}")
+          systemctl restart "${ESCAPED_SERVICE}" || export ERROR=true
+          systemctl enable "${ESCAPED_SERVICE}" || export ERROR=true
+
+          if [ ${ERROR} = true ]; then
+            export MESSAGE="${MESSAGE} Falhou ao Subir Imagem de Docker!"
+          else
+            export MESSAGE="${MESSAGE} Build feita com sucesso!"
+          fi
+          [ "$DISK_USAGE" -lt 90 ] || \
+            export MESSAGE="${MESSAGE} *** AVISO: Disco Lotado ***"
+          curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" \
+               -H "Content-Type: application/json" \
+               -d "{ \"message\": \"${MESSAGE}\" }"
+
+

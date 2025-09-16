@@ -1,0 +1,106 @@
+node_modules
+
+# Output
+.output
+.vercel
+.svelte-kit
+build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+.yarn
+act.env
+
+LEGADO/
+__pycache__/
+bin/
+include/
+lib/
+pymupdf-
+whats/
+whats2/
+_chat.txt
+_chat_output_stack.txt
+paulochat.txt
+paulochat_fixed.txt
+/__pycache__/
+/bin/
+/include/
+/lib/
+/py.cfg/
+/whats/
+/zip_tests/
+env
+/output/
+/tests/node_modules/
+
+
+# Mac
+.DS_Store
+
+# Ignore Python files
+*.pyc
+__pycache__/
+**/zip_tests
+
+# Ignore virtual environment files
+*.egg-info/
+*.egg
+*.egg-link
+
+# Ignore IDE files
+*.iml
+*.ipynb
+*.pydevproject
+*.pycharm
+
+# Ignore build files and Folders
+bin/
+include/
+lib/
+share/
+zip_tests/
+build/
+dist/
+
+*.egg-info
+*.egg
+
+# Ignore test files
+test/
+*_test.py
+*_test.pyi
+
+# Ignore coverage files
+coverage/
+*.coverage
+*.coverage.*
+
+# Ignore pip files
+pip/
+pip.log
+
+# Ignore environment files
+.env
+
+# Ignore other files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+.venv
+act.env
+
