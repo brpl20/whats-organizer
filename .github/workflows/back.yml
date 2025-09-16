@@ -23,8 +23,8 @@ jobs:
           export USER="${PROJECT}"
           export GROUP="${USER}"
           export HOME="/home/${USER}"
-          export PROJECT_DIR="${HOME}/whats-organizer/${PROJECT}"
-          export INFRA_DIR="${PROJECT_DIR}/infra"
+          export PROJECT_DIR="${HOME}/whats-organizer"
+          export INFRA_DIR="${PROJECT_DIR}/${PROJECT_INFRA}"
           export ENV_DIR="${HOME}"
           export SERVICE="back@.service"
           export ERROR=false
@@ -59,15 +59,23 @@ jobs:
             cd "${PROJECT_DIR}"
             git remote set-url origin "${GIT_URL}"
             git fetch origin "${BRANCH}"
-            git diff --quiet HEAD origin/${BRANCH} -- "${PROJECT}"
-            if [ \$? -eq 0 ]; then
+            git diff --quiet HEAD "origin/${BRANCH}" -- "${PROJECT}"
+            PROJECT_CHANGED=\$?
+            git diff --quiet HEAD "origin/${BRANCH}" -- "${PROJECT_INFRA}"
+            INFRA_CHANGED=\$?
+            if [ \${PROJECT_CHANGED} -eq 0 ] && [ \${INFRA_CHANGED} -eq 0 ]; then
               echo "Nenhuma mudança detectada na pasta ${PROJECT}"
-              exit 0
+              exit 1
             fi
             git reset --hard "origin/${BRANCH}"
             git sparse-checkout set "${PROJECT}"
           fi
           EOF
+
+          readonly PROJECT_CHANGED=$?
+          if [ ${PROJECT_CHANGED} -eq 1 ]; then
+            exit
+          fi
 
           mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
 
