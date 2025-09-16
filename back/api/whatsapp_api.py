@@ -9,7 +9,7 @@ from flask import request, jsonify, Response
 from werkzeug.datastructures import FileStorage
 
 # Add whatsapp-processor to path
-processor_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'backend')
+processor_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src')
 sys.path.insert(0, processor_dir)
 
 from core.conversation_processor import ConversationProcessor

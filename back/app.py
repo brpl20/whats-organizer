@@ -6,7 +6,7 @@ Maintains API compatibility while using the new modular system
 from gevent import monkey
 monkey.patch_all()
 
-from backend.utils.connection_handlers import handle_disconnect, handle_connect
+from src.utils.connection_handlers import handle_disconnect, handle_connect
 
 from asyncio import new_event_loop, set_event_loop
 from typing import Awaitable, Callable, TypeVar
@@ -17,12 +17,12 @@ from os import getenv, path
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
-from backend.utils.globals import globals
+from src.utils.globals import globals
 import os
 
 from api.whatsapp_api import create_whatsapp_api
 
-from backend.utils.print_page_pdf import print_page_pdf
+from src.utils.print_page_pdf import print_page_pdf
 
 load_dotenv(override=True)
 
