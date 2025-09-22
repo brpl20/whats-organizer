@@ -71,7 +71,7 @@ jobs:
           sudo -u "${USER}" bash <<EOF
           cd "${PROJECT_DIR}/${PROJECT}"
           if [ -f "${ENV_DIR}/.env" ]; then
-            cp "${ENV_DIR}/.env" .
+            cp -f "${ENV_DIR}/.env" .
           else
             echo "Erro: Falta o arquivo de segredos .env em '${ENV_DIR}'/.env"
             exit ${ENOENT}
@@ -95,7 +95,7 @@ jobs:
             export ERROR=true
           fi
 
-          cp "${INFRA_DIR}/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
+          cp  -f "${INFRA_DIR}/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
             export ERROR=true
           systemctl daemon-reload || export ERROR=true
 

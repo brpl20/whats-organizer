@@ -67,7 +67,7 @@ jobs:
           set -e
 
           if [ -f "${ENV_DIR}/.env" ]; then
-            cp "${ENV_DIR}/.env" .
+            cp -f "${ENV_DIR}/.env" .
               set -a
               . "${ENV_DIR}/.env"
               set +a
