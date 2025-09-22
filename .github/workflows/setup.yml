@@ -9,14 +9,22 @@ jobs:
     steps:
     - name: executing System Setup using key
       uses: appleboy/ssh-action@v1.1.0
+      env:
+        SHARED_BACK_FRONT_ENV: ${{ secrets.SHARED_BACK_FRONT_ENV }}
+        SHARED_BACK_NGINX_ENV: ${{ secrets.SHARED_BACK_NGINX_ENV }}
+        SHARED_BACK_RABBITMQ_ENV: ${{ secrets.SHARED_BACK_RABBITMQ_ENV }}
+        BACK_ENV: ${{ secrets.BACK_ENV }}
+        FRONT_ENV: ${{ secrets.FRONT_ENV }}
+        NGINX_ENV: ${{ secrets.NGINX_ENV }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
+        envs: SHARED_BACK_FRONT_ENV,SHARED_BACK_NGINX_ENV,SHARED_BACK_RABBITMQ_ENV,BACK_ENV,FRONT_ENV,NGINX_ENV
         script: |
-          set -u
+          set -euo pipefail
 
           export BACK_PROJECT="back"
           export BACK_USER="${BACK_PROJECT}"
@@ -41,24 +49,35 @@ jobs:
             FRONT_PROJECT FRONT_USER FRONT_GROUP FRONT_HOME       \
             NGINX_PROJECT NGINX_USER NGINX_GROUP NGINX_HOME       \
             RABBITMQ_PROJECT RABBITMQ_USER RABBITMQ_GROUP         \
-            RABBITMQ_HOME DISK_USAGE MESSAGE_INIT USER_GROUP_LIST
+            RABBITMQ_HOME DISK_USAGE MESSAGE_INIT
 
-          readonly USERS=(${BACK_USER} ${FRONT_USER} ${NGINX_USER} ${RABBITMQ_USER})
-          readonly GROUPS=(${BACK_GROUP} ${FRONT_GROUP} ${NGINX_GROUP} ${RABBITMQ_GROUP})
+          readonly ALL_USERS=("${BACK_USER}" "${FRONT_USER}" "${NGINX_USER}" "${RABBITMQ_USER}")
+          readonly ALL_GROUPS=("${BACK_GROUP}" "${FRONT_GROUP}" "${NGINX_GROUP}" "${RABBITMQ_GROUP}")
+          
+          BACK_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${SHARED_BACK_NGINX_ENV}\n${SHARED_BACK_RABBITMQ_ENV}\n${BACK_ENV}")
+          FRONT_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${FRONT_ENV}")
+          NGINX_ENV=$(echo  -e "${NGINX_ENV}")
+          readonly RABBITMQ_ENV=$(echo  -e "${SHARED_BACK_RABBITMQ_ENV}")
+
           readonly ENVS=(
-            "${SHARED_BACK_FRONT_ENV}\n{SHARED_BACK_NGINX_ENV}\n${SHARED_BACK_RABBITMQ_ENV}\n${BACK_ENV}"
+            "${BACK_ENV}"
             "${FRONT_ENV}"
             "${NGINX_ENV}"
-            "${SHARED_BACK_RABBITMQ_ENV}"
+            "${RABBITMQ_ENV}"
           )
 
-          declare -Ar USER_GROUP_LIST
-          declare -Ar USER_ENV_LIST
+          declare -A USER_GROUP_LIST
+          declare -A USER_ENV_LIST
 
-          for i in "${!USERS[@]}"; do
-            user=${USERS[$i]}
-            USER_GROUP_LIST[$user]=${GROUPS[$i]}
-            USER_ENV_LIST[$user]=${ENVS[$i]}
+          if [ ${#ALL_USERS[@]} -ne ${#ALL_GROUPS[@]} ] || [ ${#ALL_USERS[@]} -ne ${#ENVS[@]} ]; then
+            echo "Erro: Arrays têm tamanhos diferentes!" >&2
+            exit 1
+          fi
+
+          for i in "${!ALL_USERS[@]}"; do
+            SELECTED_USER=${ALL_USERS[$i]}
+            USER_GROUP_LIST[${SELECTED_USER}]=${ALL_GROUPS[$i]}
+            USER_ENV_LIST[${SELECTED_USER}]=${ENVS[$i]}
           done
 
           ERROR=false
@@ -100,10 +119,6 @@ jobs:
             chown -R "${USERVAL}:${GROUPVAL}" "${HOMEVAL}"
             chmod 400 "${HOMEVAL}/.env"
           done
-
-          sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
-          sysctl -w net.ipv6.conf.default.disable_ipv6=1 || true
-          sysctl -w net.ipv6.conf.lo.disable_ipv6=1 || true
 
           MESSAGE="${MESSAGE_INIT}"
           if [ "${ERROR}" = true ]; then

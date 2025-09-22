@@ -1,6 +1,7 @@
 name: Front deploy
 on:
   workflow_call:
+
 jobs:
   build:
     name: Build
@@ -15,12 +16,11 @@ jobs:
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
         script: |
-          set -u
+          set -euo pipefail
           export PROJECT=front
           export PROJECT_INFRA="infra"
           export BRANCH="master"
           export USER="${PROJECT}"
-          export GROUP="${USER}"
           export HOME="/home/${USER}"
           export PROJECT_DIR="${HOME}/whats-organizer"
           export INFRA_DIR="${PROJECT_DIR}/${PROJECT_INFRA}"
@@ -32,25 +32,6 @@ jobs:
           export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           export ENOENT=127
           readonly PROJECT PROJECT_INFRA BRANCH USER GROUP HOME PROJECT_DIR INFRA_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
-
-          if ! getent group "${GROUP}" >/dev/null; then
-            groupadd -r "${GROUP}"
-          fi
-
-          if ! id -u "${USER}" >/dev/null 2>&1; then
-            useradd -m -d "${HOME}" -g "${GROUP}" -s /bin/bash "${USER}"
-          fi
-
-          if command -v pacman >/dev/null 2>&1; then
-            pacman --noconfirm  -Ss
-            pacman --noconfirm  -Syu
-            if ! command -v git >/dev/null 2>&1; then
-              pacman --noconfirm -S git
-            fi
-            if ! command -v curl >/dev/null 2>&1; then
-                pacman --noconfirm -S curl
-            fi
-          fi
 
           sudo -u "${USER}" bash <<EOF
           if [ ! -d "${PROJECT_DIR}/.git" ]; then
@@ -69,7 +50,7 @@ jobs:
             INFRA_CHANGED=\$?
             if [ \${PROJECT_CHANGED} -eq 0 ] && [ \${INFRA_CHANGED} -eq 0 ]; then
               echo "Nenhuma mudança detectada na pasta ${PROJECT}"
-              exit 1
+              exit 0
             fi
             git reset --hard "origin/${BRANCH}"
             git sparse-checkout set "${PROJECT}" "${PROJECT_INFRA}"
@@ -121,8 +102,6 @@ jobs:
             # else
             export ERROR=true
           fi
-
-          sysctl -w net.ipv6.conf.all.disable_ipv6=1 net.ipv6.conf.default.disable_ipv6=1 net.ipv6.conf.lo.disable_ipv6=1
 
           cp "${INFRA_DIR}/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
             export ERROR=true

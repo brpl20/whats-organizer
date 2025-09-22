@@ -13,6 +13,13 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
+        SHARED_BACK_FRONT_ENV: ${{ secrets.SHARED_BACK_FRONT_ENV }}
+        SHARED_BACK_NGINX_ENV: ${{ secrets.SHARED_BACK_NGINX_ENV }}
+        SHARED_BACK_RABBITMQ_ENV: ${{ secrets.SHARED_BACK_RABBITMQ_ENV }}
+        BACK_ENV: ${{ secrets.BACK_ENV }}
+        FRONT_ENV: ${{ secrets.FRONT_ENV }}
+        NGINX_ENV: ${{ secrets.NGINX_ENV }}
+        envs: SHARED_BACK_FRONT_ENV,SHARED_BACK_NGINX_ENV,SHARED_BACK_RABBITMQ_ENV,BACK_ENV,FRONT_ENV,NGINX_ENV
 
   back-deploy:
     needs: [setup]

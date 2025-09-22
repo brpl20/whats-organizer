@@ -1,6 +1,7 @@
 name: Back deploy
 on:
   workflow_call:
+
 jobs:
   build:
     name: Build
@@ -15,7 +16,7 @@ jobs:
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
         script: |
-          set -u
+          set -euo pipefail
           export PROJECT="back"
           export PROJECT_INFRA="infra"
           export BRANCH="master"
@@ -32,31 +33,6 @@ jobs:
           export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           export ENOENT=127
           readonly PROJECT PROJECT_INFRA BRANCH USER GROUP HOME PROJECT_DIR INFRA_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
-
-          if ! getent group "${GROUP}" >/dev/null; then
-            groupadd -r "${GROUP}"
-          fi
-
-          if ! id -u "${USER}" >/dev/null 2>&1; then
-            useradd -m -d "${HOME}" -g "${GROUP}" -s /bin/bash "${USER}"
-          fi
-
-          if command -v pacman >/dev/null 2>&1; then
-            pacman --noconfirm  -Ss
-            pacman --noconfirm  -Syu
-            if ! command -v git >/dev/null 2>&1; then
-                pacman --noconfirm -S git
-            fi
-            if ! command -v curl >/dev/null 2>&1; then
-                pacman --noconfirm -S curl
-            fi
-            if ! command -v rabbitmq >/dev/null 2>&1; then
-                pacman --noconfirm -S rabbitmq
-            fi
-            if ! command -v getent >/dev/null 2>&1; then
-                pacman --noconfirm -S getent
-            fi
-          fi
 
           sudo -u "${USER}" bash <<EOF
           if [ ! -d "${PROJECT_DIR}/.git" ]; then
@@ -75,7 +51,7 @@ jobs:
             INFRA_CHANGED=\$?
             if [ \${PROJECT_CHANGED} -eq 0 ] && [ \${INFRA_CHANGED} -eq 0 ]; then
               echo "Nenhuma mudança detectada na pasta ${PROJECT}"
-              exit 1
+              exit 0
             fi
             git reset --hard "origin/${BRANCH}"
             git sparse-checkout set "${PROJECT}" "${PROJECT_INFRA}"
