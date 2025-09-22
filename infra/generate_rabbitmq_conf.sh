@@ -15,7 +15,7 @@ if [ -f "${ENV_DIR}/.env" ]; then
   . "${ENV_DIR}/.env"
   set +a
 else
-  printf 'Falta o arquivo .env em ${ENV_DIR}\n' >&2
+  echo "Falta o arquivo .env em ${ENV_DIR}\n" >&2
   exit 127
 fi
 
