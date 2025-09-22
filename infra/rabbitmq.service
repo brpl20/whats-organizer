@@ -1,0 +1,18 @@
+[Unit]
+Description=RabbitMQ Service
+After=network.target
+
+[Service]
+User=rabbitmq
+Group=rabbitmq
+WorkingDirectory=/home/rabbitmq/whats-organizer/rabbitmq
+ExecStart=/usr/sbin/rabbitmq-server
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
