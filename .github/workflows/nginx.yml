@@ -33,7 +33,9 @@ jobs:
           export ENOENT=127
           readonly PROJECT PROJECT_INFRA BRANCH USER HOME PROJECT_DIR INFRA_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
 
+          set +e
           sudo -u "${USER}" bash <<EOF
+          set -u
           if [ ! -d "${PROJECT_DIR}/.git" ]; then
             [ -d "${PROJECT_DIR}" ] && rm -rf "${PROJECT_DIR}"
             mkdir -p "${PROJECT_DIR}"
@@ -62,6 +64,7 @@ jobs:
           if [ ${PROJECT_CHANGED} -eq 1 ]; then
             exit
           fi
+          set -e
 
           if [ -f "${ENV_DIR}/.env" ]; then
             cp "${ENV_DIR}/.env" .
