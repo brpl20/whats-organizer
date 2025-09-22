@@ -10,9 +10,9 @@ if [ -z "${ENV_FILE}" ] || [ -z "${TEMPLATE_PATH}" ] || [ -z "${OUT_PATH}" ]; th
   exit 1
 fi
 
-if [ -f "${ENV_FILE}/.env" ]; then
+if [ -f "${ENV_FILE}" ]; then
   set -a
-  . "${ENV_FILE}/.env"
+  . "${ENV_FILE}"
   set +a
 else
   echo -e "Falta o arquivo .env em '${ENV_DIR}'\n" >&2

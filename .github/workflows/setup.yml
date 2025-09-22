@@ -56,7 +56,7 @@ jobs:
           
           BACK_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${SHARED_BACK_NGINX_ENV}\n${SHARED_BACK_RABBITMQ_ENV}\n${BACK_ENV}")
           FRONT_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${FRONT_ENV}")
-          NGINX_ENV=$(echo  -e "${NGINX_ENV}")
+          NGINX_ENV=$(echo  -e "${SHARED_BACK_NGINX_ENV}\n${NGINX_ENV}")
           readonly RABBITMQ_ENV=$(echo  -e "${SHARED_BACK_RABBITMQ_ENV}")
 
           readonly ENVS=(
