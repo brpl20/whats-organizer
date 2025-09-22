@@ -1,4 +1,4 @@
-name: Front deploy
+name: RabbitMQ deploy
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: executing Front deployment using key
+    - name: executing RabbitMQ deployment using key
       uses: appleboy/ssh-action@v1.1.0
       with:
         host: ${{ secrets.HOST }}
@@ -18,7 +18,7 @@ jobs:
         fingerprint: ${{ secrets.FINGERPRINT }}
         script: |
           set -u
-          export PROJECT=front
+          export PROJECT="rabbitmq"
           export PROJECT_INFRA="infra"
           export BRANCH="master"
           export USER="${PROJECT}"
@@ -27,15 +27,16 @@ jobs:
           export PROJECT_DIR="${HOME}/whats-organizer"
           export INFRA_DIR="${PROJECT_DIR}/${PROJECT_INFRA}"
           export ENV_DIR="${HOME}"
-          export SERVICE="front.service"
+          export SERVICE="rabbitmq.service"
           export ERROR=false
-          export DISK_USAGE=$(df -h / | grep -E -o "[0-9]+%" | cut -d "%" -f 1)
+          export DISK_USAGE=$(df -h / | awk 'NR==2{print $5}' | tr -d '%')
           export MESSAGE="Whats-Organizer-${PROJECT}:"
           export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           export ENOENT=127
           readonly PROJECT PROJECT_INFRA BRANCH USER GROUP HOME PROJECT_DIR INFRA_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
 
-          if ! getent group "${GROUP}" >/dev/null; then
+
+          if ! getent group "${GROUP}" >/dev/null 2>&1; then
             groupadd -r "${GROUP}"
           fi
 
@@ -47,10 +48,16 @@ jobs:
             pacman --noconfirm  -Ss
             pacman --noconfirm  -Syu
             if ! command -v git >/dev/null 2>&1; then
-              pacman --noconfirm -S git
+                pacman --noconfirm -S git
             fi
             if ! command -v curl >/dev/null 2>&1; then
                 pacman --noconfirm -S curl
+            fi
+            if ! command -v rabbitmq >/dev/null 2>&1; then
+                pacman --noconfirm -S rabbitmq
+            fi
+            if ! command -v getent >/dev/null 2>&1; then
+                pacman --noconfirm -S getent
             fi
           fi
 
@@ -59,8 +66,9 @@ jobs:
             [ -d "${PROJECT_DIR}" ] && rm -rf "${PROJECT_DIR}"
             mkdir -p "${PROJECT_DIR}"
             cd "${PROJECT_DIR}"
+            git clone "${GIT_URL}" .
             git clone --filter=blob:none --sparse "${GIT_URL}" .
-            git sparse-checkout set "${PROJECT}" "${PROJECT_INFRA}"
+            git sparse-checkout set "${PROJECT_INFRA}"
           else
             cd "${PROJECT_DIR}"
             git remote set-url origin "${GIT_URL}"
@@ -83,8 +91,6 @@ jobs:
             exit
           fi
 
-          sudo -u "${USER}" bash -l <<EOF
-          cd "${PROJECT_DIR}/${PROJECT}"
           if [ -f "${ENV_DIR}/.env" ]; then
             cp "${ENV_DIR}/.env" .
           else
@@ -92,58 +98,19 @@ jobs:
             exit ${ENOENT}
           fi
 
-          cd "${HOME}"
-          export NVM_DIR="\$([ -z "\${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "\${XDG_CONFIG_HOME}/nvm")"
-          if [ ! -d "\${NVM_DIR}" ]; then
-            curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" | bash || exit 1
-            export NVM_DIR="\$([ -z "\${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "\${XDG_CONFIG_HOME}/nvm")"
-            [ -s "\${NVM_DIR}/nvm.sh" ] && . "\${NVM_DIR}/nvm.sh"
-            nvm install 20 || exit 1
-            nvm use 20 || exit 1
-          else
-            [ -s "\${NVM_DIR}/nvm.sh" ] && . "\${NVM_DIR}/nvm.sh"
-          fi
-  
-          readonly PNPM_HOME="\${XDG_DATA_HOME:-\$HOME/.local/share}/pnpm"
-          export PATH="\${PNPM_HOME}:\${PATH}"
-          if ! command -v pnpm >/dev/null 2>&1; then
-            curl -fsSL https://get.pnpm.io/install.sh | sh - || exit 1
-          fi
+          cd "${PROJECT_DIR}"
+          chmod +x infra/generate_rabbitmq_conf.sh || true
+          ./infra/generate_rabbitmq_conf.sh
 
-          cd -
-          pnpm install --frozen-lockfile || exit 1
-          pnpm run build  || exit 1
-          EOF
-
-          readonly STATUS=$?
-          if [ ${STATUS} -ne 0 ]; then
-            if [ ${STATUS} -eq ${ENOENT} ]; then
-              exit ${STATUS}
-            fi
-            # else
-            export ERROR=true
-          fi
-
-          sysctl -w net.ipv6.conf.all.disable_ipv6=1 net.ipv6.conf.default.disable_ipv6=1 net.ipv6.conf.lo.disable_ipv6=1
-
-          cp "${INFRA_DIR}/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
-            export ERROR=true
-          systemctl daemon-reload || export ERROR=true
-
-          set -a
-          source "${ENV_DIR}/.env" || export ERROR=true
-          set +a
-
-          ESCAPED_SERVICE=$(systemd-escape "${SERVICE}")
-          systemctl restart "${ESCAPED_SERVICE}" || export ERROR=true
-          systemctl enable "${ESCAPED_SERVICE}" || export ERROR=true
+          cp "${PROJECT_DIR}/rabbitmq.conf.rendered" /etc/rabbitmq/rabbitmq.conf || ERROR=true
+          systemctl daemon-reload || ERROR=true
+          systemctl enable --now "${SERVICE}" || ERROR=true
+          systemctl restart "${SERVICE}" || ERROR=true
 
           if [ "${ERROR}" = true ]; then
-            export MESSAGE="${MESSAGE} Falhou ao Subir Configuração do Front!"
+            export MESSAGE="${MESSAGE} Falhou ao Subir Configuração do RabbitMQ!"
           else
-            export MESSAGE="${MESSAGE} Deploy do Front feito com sucesso!"
+            export MESSAGE="${MESSAGE} Deploy do RabbitMQ feito com sucesso!"
           fi
           [ "${DISK_USAGE}" -lt 90 ] || export MESSAGE="${MESSAGE} *** AVISO: Disco Lotado ***"
           curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" -H "Content-Type: application/json" -d "{ \"message\": \"${MESSAGE}\" }"
-
-

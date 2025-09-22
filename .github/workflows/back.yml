@@ -8,7 +8,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: executing Back deployment using password
+    - name: executing Back deployment using key
       uses: appleboy/ssh-action@v1.1.0
       with:
         host: ${{ secrets.HOST }}
@@ -43,9 +43,20 @@ jobs:
             useradd -m -d "${HOME}" -g "${GROUP}" -s /bin/bash "${USER}"
           fi
 
-          if ! command -v git >/dev/null 2>&1; then
-            if command -v pacman >/dev/null 2>&1; then
-              pacman --noconfirm -S git
+          if command -v pacman >/dev/null 2>&1; then
+            pacman --noconfirm  -Ss
+            pacman --noconfirm  -Syu
+            if ! command -v git >/dev/null 2>&1; then
+                pacman --noconfirm -S git
+            fi
+            if ! command -v curl >/dev/null 2>&1; then
+                pacman --noconfirm -S curl
+            fi
+            if ! command -v rabbitmq >/dev/null 2>&1; then
+                pacman --noconfirm -S rabbitmq
+            fi
+            if ! command -v getent >/dev/null 2>&1; then
+                pacman --noconfirm -S getent
             fi
           fi
 
@@ -117,10 +128,6 @@ jobs:
           source "${ENV_DIR}/.env" || export ERROR=true
           set +a
   
-          if [ "$(</etc/hostname)" != "$HOST" ]; then
-            hostnamectl set-hostname "${HOST}"
-          fi
-
           systemctl restart $(seq ${FLASK_PORT_START} ${FLASK_PORT_END} | xargs -I{} systemd-escape --template="${SERVICE}" {}) ||
             export ERROR=true
           systemctl enable $(seq ${FLASK_PORT_START} ${FLASK_PORT_END} | xargs -I{} systemd-escape --template="${SERVICE}" {}) ||

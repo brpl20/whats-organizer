@@ -1,5 +1,4 @@
-# .github/workflows/deploy-nginx.yml
-name: remote ssh command
+name: Nginx deploy
 on:
   push:
     branches:
@@ -9,94 +8,117 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: placeholder build
-        run: echo "build finished"
-  deploy-nginx:
-    name: Deploy Nginx
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: executing remote ssh commands using key
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          fingerprint: ${{ secrets.FINGERPRINT }}
-          script: |
-            set -u
-            export PROJECT="nginx"
-            export BRANCH="master"
-            export USER="${PROJECT}"
-            export GROUP="${USER}"
-            export HOME="/home/${USER}"
-            export PROJECT_DIR="${HOME}/whats-organizer"
-            export ENV_DIR="${HOME}"
-            export SERVICE="nginx.service"
-            export ERROR=false
-            export DISK_USAGE=$(df -h / | awk 'NR==2{print $5}' | tr -d '%')
-            export MESSAGE="Whats-Organizer-${PROJECT}:"
-            export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
-            export ENOENT=127
-            readonly PROJECT BRANCH USER GROUP HOME PROJECT_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
+    - name: executing Nginx deployment using key
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
+        script: |
+          set -u
+          export PROJECT="nginx"
+          export PROJECT_INFRA="infra"
+          export BRANCH="master"
+          export USER="${PROJECT}"
+          export GROUP="${USER}"
+          export HOME="/home/${USER}"
+          export PROJECT_DIR="${HOME}/whats-organizer"
+          export INFRA_DIR="${PROJECT_DIR}/${PROJECT_INFRA}"
+          export ENV_DIR="${HOME}"
+          export SERVICE="nginx.service"
+          export ERROR=false
+          export DISK_USAGE=$(df -h / | awk 'NR==2{print $5}' | tr -d '%')
+          export MESSAGE="Whats-Organizer-${PROJECT}:"
+          export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          export ENOENT=127
+          readonly PROJECT PROJECT_INFRA BRANCH USER GROUP HOME PROJECT_DIR INFRA_DIR ENV_DIR SERVICE DISK_USAGE GIT_URL ENOENT
 
-            pacman -S --noconfirm git gettext nginx
 
-            if ! getent group "${GROUP}" >/dev/null 2>&1; then
-              groupadd -r "${GROUP}"
+          if ! getent group "${GROUP}" >/dev/null 2>&1; then
+            groupadd -r "${GROUP}"
+          fi
+
+          if ! id -u "${USER}" >/dev/null 2>&1; then
+            useradd -m -d "${HOME}" -g "${GROUP}" -s /bin/bash "${USER}"
+          fi
+
+          if command -v pacman >/dev/null 2>&1; then
+            pacman --noconfirm  -Ss
+            pacman --noconfirm  -Syu
+            if ! command -v git >/dev/null 2>&1; then
+                pacman --noconfirm -S git
             fi
-
-            if ! id -u "${USER}" >/dev/null 2>&1; then
-              useradd -m -d "${HOME}" -g "${GROUP}" -s /bin/bash "${USER}"
+            if ! command -v curl >/dev/null 2>&1; then
+                pacman --noconfirm -S curl
             fi
-
-            sudo -u "${USER}" bash <<EOF
-            if [ ! -d "${PROJECT_DIR}/.git" ]; then
-              [ -d "${PROJECT_DIR}" ] && rm -rf "${PROJECT_DIR}"
-              mkdir -p "${PROJECT_DIR}"
-              cd "${PROJECT_DIR}"
-              git clone "${GIT_URL}" .
-            else
-              cd "${PROJECT_DIR}"
-              git remote set-url origin "${GIT_URL}"
-              git fetch origin "${BRANCH}"
-              git reset --hard "origin/${BRANCH}"
+            if ! command -v nginx >/dev/null 2>&1; then
+                pacman --noconfirm -S nginx
             fi
-
-            if [ -f "${ENV_DIR}/.env" ]; then
-              cp "${ENV_DIR}/.env" .
-            else
-              echo "Erro: Falta o arquivo de segredos .env em ${ENV_DIR}/.env"
-              exit ${ENOENT}
+            if ! command -v getent >/dev/null 2>&1; then
+                pacman --noconfirm -S getent
             fi
+          fi
 
+          sudo -u "${USER}" bash <<EOF
+          if [ ! -d "${PROJECT_DIR}/.git" ]; then
+            [ -d "${PROJECT_DIR}" ] && rm -rf "${PROJECT_DIR}"
+            mkdir -p "${PROJECT_DIR}"
             cd "${PROJECT_DIR}"
-            chmod +x infra/generate_nginx_conf.sh || true
-            ./infra/generate_nginx_conf.sh
-            EOF
-
-            STATUS=$?
-            if [ ${STATUS} -ne 0 ]; then
-              if [ ${STATUS} -eq ${ENOENT} ]; then
-                exit ${STATUS}
-              fi
-              ERROR=true
+            git clone "${GIT_URL}" .
+            git clone --filter=blob:none --sparse "${GIT_URL}" .
+            git sparse-checkout set "${PROJECT_INFRA}"
+          else
+            cd "${PROJECT_DIR}"
+            git remote set-url origin "${GIT_URL}"
+            git fetch origin "${BRANCH}"
+            git diff --quiet HEAD "origin/${BRANCH}" -- "${PROJECT}"
+            PROJECT_CHANGED=\$?
+            git diff --quiet HEAD "origin/${BRANCH}" -- "${PROJECT_INFRA}"
+            INFRA_CHANGED=\$?
+            if [ \${PROJECT_CHANGED} -eq 0 ] && [ \${INFRA_CHANGED} -eq 0 ]; then
+              echo "Nenhuma mudança detectada na pasta ${PROJECT}"
+              exit 1
             fi
+            git reset --hard "origin/${BRANCH}"
+            git sparse-checkout set "${PROJECT}" "${PROJECT_INFRA}"
+          fi
+          EOF
 
-            sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
-            sysctl -w net.ipv6.conf.default.disable_ipv6=1 || true
-            sysctl -w net.ipv6.conf.lo.disable_ipv6=1 || true
+          readonly PROJECT_CHANGED=$?
+          if [ ${PROJECT_CHANGED} -eq 1 ]; then
+            exit
+          fi
 
-            cp "${PROJECT_DIR}/nginx.conf.rendered" /etc/nginx/nginx.conf || ERROR=true
-            systemctl daemon-reload || ERROR=true
-            systemctl enable --now "${SERVICE}" || ERROR=true
-            systemctl restart "${SERVICE}" || ERROR=true
+          if [ -f "${ENV_DIR}/.env" ]; then
+            cp "${ENV_DIR}/.env" .
+          else
+            echo "Erro: Falta o arquivo de segredos .env em ${ENV_DIR}/.env"
+            exit ${ENOENT}
+          fi
 
-            if [ "${ERROR}" = true ]; then
-              export MESSAGE="${MESSAGE} Falhou ao Subir Configuração do Nginx!"
-            else
-              export MESSAGE="${MESSAGE} Deploy do Nginx feito com sucesso!"
-            fi
-            [ "${DISK_USAGE}" -lt 90 ] || export MESSAGE="${MESSAGE} *** AVISO: Disco Lotado ***"
-            curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" -H "Content-Type: application/json" -d "{ \"message\": \"${MESSAGE}\" }"
+          cd "${PROJECT_DIR}"
+          chmod +x infra/generate_nginx_conf.sh || true
+          ./infra/generate_nginx_conf.sh
+
+          sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
+          sysctl -w net.ipv6.conf.default.disable_ipv6=1 || true
+          sysctl -w net.ipv6.conf.lo.disable_ipv6=1 || true
+
+          if [ "$(</etc/hostname)" != "$HOST" ]; then
+            hostnamectl set-hostname "${HOST}"
+          fi
+
+          cp "${PROJECT_DIR}/nginx.conf.rendered" /etc/nginx/nginx.conf || ERROR=true
+          systemctl daemon-reload || ERROR=true
+          systemctl enable --now "${SERVICE}" || ERROR=true
+          systemctl restart "${SERVICE}" || ERROR=true
+
+          if [ "${ERROR}" = true ]; then
+            export MESSAGE="${MESSAGE} Falhou ao Subir Configuração do Nginx!"
+          else
+            export MESSAGE="${MESSAGE} Deploy do Nginx feito com sucesso!"
+          fi
+          [ "${DISK_USAGE}" -lt 90 ] || export MESSAGE="${MESSAGE} *** AVISO: Disco Lotado ***"
+          curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" -H "Content-Type: application/json" -d "{ \"message\": \"${MESSAGE}\" }"

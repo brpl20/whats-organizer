@@ -1,38 +1,31 @@
 #!/usr/bin/env sh
 set -eu
 
-ENV_DIR=${ENV_DIR:-"$HOME"}
-TEMPLATE_PATH=${TEMPLATE_PATH:-"infra/nginx.conf.tpl"}
-OUT_PATH=${OUT_PATH:-"nginx.conf.rendered"}
-NGINX_LOCALHOST=${NGINX_LOCALHOST:-"127.0.0.1"}
+readonly ENV_DIR="${1}"
+readonly TEMPLATE_PATH="${2}"
+readonly OUT_PATH="${3}"
 
-if [ ! -f "${ENV_DIR}/.env" ]; then
-  printf 'missing .env\n' >&2
-  exit 127
+if [ -z "${ENV_DIR}" ] || [ -z "${TEMPLATE_PATH}" ] || [ -z "${OUT_PATH}" ]; then
+  printf 'Usage: %s <ENV_DIR> <TEMPLATE_PATH> <OUT_PATH>\n' "$0" >&2
+  exit 1
 fi
 
-get_var() {
-  key="$1"
-  grep -E "^${key}=" "${ENV_DIR}/.env" | tail -n1 | sed -e "s/^${key}=//" -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//"
-}
-
-FLASK_PORT_START=$(get_var FLASK_PORT_START)
-FLASK_PORT_END=$(get_var FLASK_PORT_END)
-PORT=$(get_var PORT)
+if [ -f "${ENV_DIR}/.env" ]; then
+  set -a
+  . "${ENV_DIR}/.env"
+  set +a
+else
+  printf 'Falta o arquivo .env em ${ENV_DIR}\n' >&2
+  exit 127
+fi
 
 : "${FLASK_PORT_START:?}"
 : "${FLASK_PORT_END:?}"
 : "${PORT:?}"
 
-start=$(expr "${FLASK_PORT_START}" + 0)
-end=$(expr "${FLASK_PORT_END}" + 0)
-if [ "${start}" -gt "${end}" ]; then
-  tmp=${start}; start=${end}; end=${tmp}
-fi
-
 UPSTREAM_SERVERS=""
-p=${start}
-while [ "${p}" -le "${end}" ]; do
+p=${FLASK_PORT_START}
+while [ "$p" -le "${FLASK_PORT_START}" ]; do
   UPSTREAM_SERVERS=$(printf '%sserver %s:%s;\n' "${UPSTREAM_SERVERS}" "${NGINX_LOCALHOST}" "${p}")
   p=$((p + 1))
 done
@@ -40,11 +33,11 @@ done
 CF4=""
 CF6=""
 if command -v curl >/dev/null 2>&1; then
-  CF4=$(curl -fsSL https://www.cloudflare.com/ips-v4 || true)
-  CF6=$(curl -fsSL https://www.cloudflare.com/ips-v6 || true)
+  CF4=$(curl -fsSL https://www.cloudflare.com/ips-v4 || true )
+  CF6=$(curl -fsSL https://www.cloudflare.com/ips-v6 || true )
 elif command -v wget >/dev/null 2>&1; then
-  CF4=$(wget -qO- https://www.cloudflare.com/ips-v4 || true)
-  CF6=$(wget -qO- https://www.cloudflare.com/ips-v6 || true)
+  CF4=$(wget -qO- https://www.cloudflare.com/ips-v4 || true )
+  CF6=$(wget -qO- https://www.cloudflare.com/ips-v6 || true )
 fi
 
 CLOUDFLARE_IPS_FIREWALL=""
