@@ -1,0 +1,97 @@
+name: Set System Up
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing System Setup using key
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
+        script: |
+          set -u
+
+          export BACK_PROJECT="back"
+          export BACK_USER="${BACK_PROJECT}"
+          export BACK_GROUP="${BACK_USER}"
+
+          export FRONT_PROJECT="front"
+          export FRONT_USER="${FRONT_PROJECT}"
+          export FRONT_GROUP="${FRONT_USER}"
+
+          export NGINX_PROJECT="nginx"
+          export NGINX_USER="${NGINX_PROJECT}"
+          export NGINX_GROUP="${NGINX_USER}"
+
+          export RABBITMQ_PROJECT="rabbitmq"
+          export RABBITMQ_USER="${RABBITMQ_PROJECT}"
+          export RABBITMQ_GROUP="${RABBITMQ_USER}"
+
+          export DISK_USAGE=$(df -h / | awk 'NR==2{print $5}' | tr -d '%')
+          export MESSAGE_INIT="Whats-Organizer-Setup:"
+
+          declare -Ar USER_GROUP_LIST=(
+            [${BACK_USER}]=${BACK_GROUP}
+            [${FRONT_USER}]=${FRONT_GROUP}
+            [${NGINX_USER}]=${NGINX_GROUP}
+            [${RABBITMQ_USER}]=${RABBITMQ_GROUP}
+          )
+
+          readonly BACK_PROJECT BACK_USER BACK_GROUP BACK_HOME \
+            FRONT_PROJECT FRONT_USER FRONT_GROUP FRONT_HOME \
+            NGINX_PROJECT NGINX_USER NGINX_GROUP NGINX_HOME \
+            RABBITMQ_PROJECT RABBITMQ_USER RABBITMQ_GROUP RABBITMQ_HOME \
+            DISK_USAGE MESSAGE_INIT USER_GROUP_LIST
+
+          ERROR=false
+
+          if command -v pacman >/dev/null 2>&1; then
+            pacman --noconfirm -Ss
+            pacman --noconfirm -Syu
+            if ! command -v git >/dev/null 2>&1; then
+              pacman --noconfirm -S git
+            fi
+            if ! command -v curl >/dev/null 2>&1; then
+              pacman --noconfirm -S curl
+            fi
+            if ! command -v rabbitmq-server >/dev/null 2>&1; then
+              pacman --noconfirm -S rabbitmq
+            fi
+            if ! command -v nginx >/dev/null 2>&1; then
+              pacman --noconfirm -S nginx
+            fi
+            if ! command -v envsubst >/dev/null 2>&1; then
+              pacman --noconfirm -S gettext
+            fi
+            if ! command -v getent >/dev/null 2>&1; then
+              pacman --noconfirm -S getent
+            fi
+          fi
+
+          for USERVAL in "${!USER_GROUP_LIST[@]}"; do
+            GROUPVAL=${USER_GROUP_LIST[$USERVAL]}
+            HOMEVAL="/home/${USERVAL}"
+            if ! getent group "${GROUPVAL}" >/dev/null 2>&1; then
+              groupadd -r "${GROUPVAL}"
+            fi
+            if ! id -u "${USERVAL}" >/dev/null 2>&1; then
+              useradd -m -d "${HOMEVAL}" -g "${GROUPVAL}" -s /bin/bash "${USERVAL}"
+            fi
+          done
+
+          MESSAGE="${MESSAGE_INIT}"
+          if [ "${ERROR}" = true ]; then
+            MESSAGE="${MESSAGE} Falhou ao Subir Configuração do Sistema!"
+          else
+            MESSAGE="${MESSAGE} Deploy do Sistema feito com sucesso!"
+          fi
+          [ "${DISK_USAGE}" -lt 90 ] || MESSAGE="${MESSAGE} *** AVISO: Disco Lotado ***"
+          curl -X POST "https://hooks.zapier.com/hooks/catch/1863715/215sl1w/" -H "Content-Type: application/json" -d "{ \"message\": \"${MESSAGE}\" }"
