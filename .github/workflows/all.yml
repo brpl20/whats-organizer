@@ -1,0 +1,55 @@
+name: Run CI/CD Zero Config Deploy Pipeline
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  setup:
+    uses: ./.github/workflows/setup.yml
+    secrets:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
+
+  back-deploy:
+    needs: [setup]
+    uses: ./.github/workflows/back.yml
+    secrets:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
+
+  front-deploy:
+    needs: [setup]
+    uses: ./.github/workflows/front.yml
+    secrets:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
+
+  nginx-deploy:
+    needs: [setup, back-deploy, front-deploy]
+    uses: ./.github/workflows/nginx.yml
+    secrets:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}
+
+  rabbitmq-deploy:
+    needs: [setup, back-deploy]
+    uses: ./.github/workflows/rabbitmq.yml
+    secrets:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        fingerprint: ${{ secrets.FINGERPRINT }}

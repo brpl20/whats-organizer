@@ -1,13 +1,11 @@
 name: Nginx deploy
 on:
-  push:
-    branches:
-      - master
+  workflow_call:
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: setup
     steps:
     - name: executing Nginx deployment using key
       uses: appleboy/ssh-action@v1.1.0
@@ -102,10 +100,6 @@ jobs:
           cd "${PROJECT_DIR}"
           chmod +x infra/generate_nginx_conf.sh || true
           ./infra/generate_nginx_conf.sh
-
-          sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
-          sysctl -w net.ipv6.conf.default.disable_ipv6=1 || true
-          sysctl -w net.ipv6.conf.lo.disable_ipv6=1 || true
 
           if [ "$(</etc/hostname)" != "$HOST" ]; then
             hostnamectl set-hostname "${HOST}"

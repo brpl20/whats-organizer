@@ -1,13 +1,11 @@
 name: RabbitMQ deploy
 on:
-  push:
-    branches:
-      - master
+  workflow_call:
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: setup
     steps:
     - name: executing RabbitMQ deployment using key
       uses: appleboy/ssh-action@v1.1.0

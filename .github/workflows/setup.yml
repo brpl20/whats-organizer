@@ -1,8 +1,7 @@
 name: Set System Up
 on:
-  push:
-    branches:
-      - master
+  workflow_call:
+
 jobs:
   build:
     name: Build
@@ -38,18 +37,29 @@ jobs:
           export DISK_USAGE=$(df -h / | awk 'NR==2{print $5}' | tr -d '%')
           export MESSAGE_INIT="Whats-Organizer-Setup:"
 
-          declare -Ar USER_GROUP_LIST=(
-            [${BACK_USER}]=${BACK_GROUP}
-            [${FRONT_USER}]=${FRONT_GROUP}
-            [${NGINX_USER}]=${NGINX_GROUP}
-            [${RABBITMQ_USER}]=${RABBITMQ_GROUP}
+          readonly BACK_PROJECT BACK_USER BACK_GROUP BACK_HOME    \
+            FRONT_PROJECT FRONT_USER FRONT_GROUP FRONT_HOME       \
+            NGINX_PROJECT NGINX_USER NGINX_GROUP NGINX_HOME       \
+            RABBITMQ_PROJECT RABBITMQ_USER RABBITMQ_GROUP         \
+            RABBITMQ_HOME DISK_USAGE MESSAGE_INIT USER_GROUP_LIST
+
+          readonly USERS=(${BACK_USER} ${FRONT_USER} ${NGINX_USER} ${RABBITMQ_USER})
+          readonly GROUPS=(${BACK_GROUP} ${FRONT_GROUP} ${NGINX_GROUP} ${RABBITMQ_GROUP})
+          readonly ENVS=(
+            "${SHARED_BACK_FRONT_ENV}\n{SHARED_BACK_NGINX_ENV}\n${SHARED_BACK_RABBITMQ_ENV}\n${BACK_ENV}"
+            "${FRONT_ENV}"
+            "${NGINX_ENV}"
+            "${SHARED_BACK_RABBITMQ_ENV}"
           )
 
-          readonly BACK_PROJECT BACK_USER BACK_GROUP BACK_HOME \
-            FRONT_PROJECT FRONT_USER FRONT_GROUP FRONT_HOME \
-            NGINX_PROJECT NGINX_USER NGINX_GROUP NGINX_HOME \
-            RABBITMQ_PROJECT RABBITMQ_USER RABBITMQ_GROUP RABBITMQ_HOME \
-            DISK_USAGE MESSAGE_INIT USER_GROUP_LIST
+          declare -Ar USER_GROUP_LIST
+          declare -Ar USER_ENV_LIST
+
+          for i in "${!USERS[@]}"; do
+            user=${USERS[$i]}
+            USER_GROUP_LIST[$user]=${GROUPS[$i]}
+            USER_ENV_LIST[$user]=${ENVS[$i]}
+          done
 
           ERROR=false
 
@@ -85,7 +95,15 @@ jobs:
             if ! id -u "${USERVAL}" >/dev/null 2>&1; then
               useradd -m -d "${HOMEVAL}" -g "${GROUPVAL}" -s /bin/bash "${USERVAL}"
             fi
+            mkdir -p "${HOMEVAL}"
+            echo "${USER_ENV_LIST[$USERVAL]}" > "${HOMEVAL}/.env"
+            chown -R "${USERVAL}:${GROUPVAL}" "${HOMEVAL}"
+            chmod 400 "${HOMEVAL}/.env"
           done
+
+          sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
+          sysctl -w net.ipv6.conf.default.disable_ipv6=1 || true
+          sysctl -w net.ipv6.conf.lo.disable_ipv6=1 || true
 
           MESSAGE="${MESSAGE_INIT}"
           if [ "${ERROR}" = true ]; then
