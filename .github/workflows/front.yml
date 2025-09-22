@@ -50,7 +50,7 @@ jobs:
             INFRA_CHANGED=\$?
             if [ \${PROJECT_CHANGED} -eq 0 ] && [ \${INFRA_CHANGED} -eq 0 ]; then
               echo "Nenhuma mudança detectada na pasta ${PROJECT}"
-              exit 0
+              exit 1
             fi
             git reset --hard "origin/${BRANCH}"
             git sparse-checkout set "${PROJECT}" "${PROJECT_INFRA}"
@@ -67,7 +67,7 @@ jobs:
           if [ -f "${ENV_DIR}/.env" ]; then
             cp "${ENV_DIR}/.env" .
           else
-            echo "Erro: Falta o arquivo de segredos .env em ${ENV_DIR}/.env"
+            echo "Erro: Falta o arquivo de segredos .env em '${ENV_DIR}'/.env"
             exit ${ENOENT}
           fi
 
