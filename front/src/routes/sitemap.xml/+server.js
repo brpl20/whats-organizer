@@ -1,3 +1,5 @@
+import { PUBLIC_FRONT_URL } from '$env/static/public';
+
 export async function GET() {
 	return new Response(`
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -10,7 +12,7 @@ export async function GET() {
 	xmlns:video="https://www.google.com/schemas/sitemap-video/1.1"
 >
     <url>
-        <loc>https://www.whatsorganizer.com</loc>
+        <loc>${PUBLIC_FRONT_URL}</loc>
         <lastmod>2025-1-1T21:42:13+00:00</lastmod>
         <priority>1</priority>
     </url>

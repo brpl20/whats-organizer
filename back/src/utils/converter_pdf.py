@@ -10,7 +10,7 @@ import re
 import unicodedata 
 from .docxtopdf import convert_to
 
-api_url_env = os.getenv("API_URL", "https://api.whatsorganizer.com.br:8443")
+api_url_env = os.getenv("PUBLIC_API_URL", "https://api.whatsorganizer.com.br")
 
 
 def process_pdf_aws(pdf_path, bucket_name):

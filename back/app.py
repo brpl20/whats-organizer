@@ -29,7 +29,7 @@ load_dotenv(override=True)
 prod_env = getenv("FLASK_ENV")
 port_env = getenv("FLASK_PORT")
 host_env = getenv("HOST")
-max_upload_mb_env = getenv("MAX_UPLOAD_MB")
+max_upload_mb_env = getenv("PUBLIC_MAX_UPLOAD_MB")
 
 prod = (prod_env or "").lower() in ("prod", "production") 
 port = int(port_env or 5000)

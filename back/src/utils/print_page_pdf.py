@@ -9,7 +9,7 @@ from asyncio import sleep
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 
 playwright_headless_env = getenv("HEADLESS", "True") == "True"
-front_url_env = getenv("FRONT_URL", "https://whatsorganizer.com.br")
+front_url_env = getenv("PUBLIC_FRONT_URL", "https://whatsorganizer.com.br")
 
 async def print_page_pdf( file: FileStorage, notify_callback: Callable[[str], None] ) -> bytes:
     async with async_playwright() as p:

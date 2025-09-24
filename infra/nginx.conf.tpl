@@ -50,7 +50,7 @@ ${CLOUDFLARE_IPS_FIREWALL}
         listen 80 default_server;
         server_name ${FRONT_HOST};
         sendfile on;
-        client_max_body_size ${MAX_UPLOAD_MB}M;
+        client_max_body_size ${PUBLIC_MAX_UPLOAD_MB}M;
         client_body_timeout 10m;
 
         location / {

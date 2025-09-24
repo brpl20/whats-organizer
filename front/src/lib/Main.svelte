@@ -1,6 +1,6 @@
 <script>
 	import { fade } from 'svelte/transition';
-	import { API_URL, NODE_ENV, MAX_UPLOAD_MB } from '$env/static/private';
+	import { PUBLIC_API_URL, PUBLIC_NODE_ENV, PUBLIC_MAX_UPLOAD_MB } from '$env/static/public';
 	import UploadButton from './UploadButton.svelte';
 	import { onDestroy } from 'svelte';
 	import Video from './ChatComponents/Video.svelte';
@@ -20,7 +20,7 @@
 	 * @typedef {import('socket.io-client').Socket<DefaultEventsMap, DefaultEventsMap>=} SocketType
 	 */
 
-	const prod = (NODE_ENV || '').toLowerCase() in ['prod', 'production'];
+	const prod = (PUBLIC_NODE_ENV || '').toLowerCase() in ['prod', 'production'];
 
 	/** Timeout caso o socketio não consiga conectar */
 	const socketConnTimeout = 5000;
@@ -334,7 +334,7 @@
 		if (socket?.connected) return;
 
 		io ??= (await import('socket.io-client')).default;
-		socket ??= io(API_URL, {
+		socket ??= io(PUBLIC_API_URL, {
 			reconnectionAttempts: 5,
 			transports: ['websocket', 'polling', 'webtransport'],
 			timeout: socketConnTimeout,
@@ -415,7 +415,7 @@
 			const formData = new FormData();
 			formData.append('file', file);
 
-			const response = await fetch(`${API_URL}/process?uid=${uuid}`, {
+			const response = await fetch(`${PUBLIC_API_URL}/process?uid=${uuid}`, {
 				method: 'POST',
 				body: formData
 			}).catch((e) => {
@@ -539,7 +539,7 @@
 
 			formData.append('file', fileWithMessages);
 
-			const response = await fetch(`${API_URL}/download-pdf`, {
+			const response = await fetch(`${PUBLIC_API_URL}/download-pdf`, {
 				method: 'POST',
 				body: formData
 			});
@@ -1203,9 +1203,9 @@
 						<div class="flex items-start space-x-4">
 							<div class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
 							<div>
-								<h4 class="font-semibold text-gray-900 mb-1">Limite de arquivo: {MAX_UPLOAD_MB} MB</h4>
+								<h4 class="font-semibold text-gray-900 mb-1">Limite de arquivo: {PUBLIC_MAX_UPLOAD_MB} MB</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									O tamanho máximo permitido para upload é de {MAX_UPLOAD_MB} megabytes por arquivo.
+									O tamanho máximo permitido para upload é de {PUBLIC_MAX_UPLOAD_MB} megabytes por arquivo.
 								</p>
 							</div>
 						</div>

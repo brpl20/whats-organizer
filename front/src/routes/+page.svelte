@@ -1,5 +1,6 @@
 <script>
     import Main from '$lib/Main.svelte'
+    import { PUBLIC_FRONT_URL } from '$env/static/public';
 
 </script>
 <svelte:head>
@@ -15,16 +16,16 @@
     <meta name="robots" content="index, follow" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.whatsorganizer.com/" />
+    <meta property="og:url" content="{PUBLIC_FRONT_URL}" />
     <meta property="og:title" content="WhatsOrganizer - Organizador de Conversas WhatsApp" />
     <meta property="og:description" content="Simplifique sua vida organizando e gerenciando suas conversas do WhatsApp com eficiência. WhatsOrganizer: Arquive e transcreva chats e áudios automaticamente." />
-    <meta property="og:image" content="https://www.whatsorganizer.com/images/og-image.jpg" />
+    <meta property="og:image" content="{PUBLIC_FRONT_URL}/images/og-image.jpg" />
 
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://www.whatsorganizer.com/" />
+    <meta property="twitter:url" content="{PUBLIC_FRONT_URL}" />
     <meta property="twitter:title" content="WhatsOrganizer - Organizador de Conversas WhatsApp" />
     <meta property="twitter:description" content="Simplifique sua vida organizando e gerenciando suas conversas do WhatsApp com eficiência. WhatsOrganizer: Arquive e transcreva chats e áudios automaticamente." />
-    <meta property="twitter:image" content="https://www.whatsorganizer.com/images/twitter-image.jpg" />
+    <meta property="twitter:image" content="{PUBLIC_FRONT_URL}/images/twitter-image.jpg" />
 
     <meta name="apple-mobile-web-app-title" content="WhatsOrganizer" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -40,8 +41,8 @@
   "@type": "SoftwareApplication",
   "name": "WhatsOrganizer",
   "description": "Simplifique sua vida organizando e gerenciando suas conversas do WhatsApp com eficiência. WhatsOrganizer: Arquive e transcreva chats e áudios automaticamente.",
-  "url": "https://www.whatsorganizer.com.br/",
-  "image": "https://www.whatsorganizer.com.br/images/logo.png",
+  "url": PUBLIC_FRONT_URL,
+  "image": `${PUBLIC_FRONT_URL}/images/logo.png`,
   "applicationCategory": "Utilities",
   "operatingSystem": "Web",
   "offers": {
