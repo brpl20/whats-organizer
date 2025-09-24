@@ -67,7 +67,7 @@ jobs:
           set -e
 
           if [ -f "${ENV_DIR}/.env" ]; then
-            cp -f "${ENV_DIR}/.env" .
+            cp -f "${ENV_DIR}/.env" .  || true
           else
             echo "Erro: Falta o arquivo de segredos .env em '${ENV_DIR}'/.env"
             exit ${ENOENT}

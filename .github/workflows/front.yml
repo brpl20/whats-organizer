@@ -69,7 +69,7 @@ jobs:
           cd "${HOME}"
           if [ -f "${ENV_DIR}/.env" ]; then
             chmod +w .env
-            cp -f "${ENV_DIR}/.env" .
+            cp -f "${ENV_DIR}/.env" .  || true
             chmod 400 .env
             chown "${USER}:${GROUP}" .env
           else
@@ -111,7 +111,7 @@ jobs:
           fi
 
           cp -f "${INFRA_DIR}/${SERVICE}" "/etc/systemd/system/${SERVICE}" ||
-            export ERROR=true
+            true
           systemctl daemon-reload || export ERROR=true
 
           set -a

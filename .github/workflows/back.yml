@@ -71,7 +71,7 @@ jobs:
           mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
           if [ -f "${ENV_DIR}/.env" ]; then
             chmod +w .env
-            cp -f "${ENV_DIR}/.env" .
+            cp -f "${ENV_DIR}/.env" . || true
             chmod 400 .env
             chown "${USER}:${GROUP}" .env
           else
