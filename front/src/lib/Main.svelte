@@ -97,8 +97,10 @@
 	const loading = !!toast.text && toast.type == 'transcribe';
 	const printLoading = toast.type === 'print' && !loading;
 
+	let uploadDisabled = false;
+
 	// Variável para controlar se o processamento está desabilitado
-	$: isProcessingDisabled = messages?.length > 0;
+	$: isProcessingDisabled = messages?.length > 0 || uploadDisabled;
 
 	/** @type {Record<ToastTypes, ToastProps>} */
 	const toastMap = {
@@ -363,117 +365,130 @@
 
 	/** @param {SubmitEvent} ev */
 	async function handleSubmit(ev) {
-		ev.preventDefault();
-		
-		// Prevenir processamento se já há uma conversa processada
+		uploadDisabled = true;
 		if (isProcessingDisabled) {
-			toast = { 
-				type: 'error', 
-				text: 'Conversa já processada. Selecione um novo arquivo para processar novamente.', 
-				isSecurityError: false 
-			};
-			return;
-		}
-
-		/** @type { { target: {elements: HTMLCollection & HTMLInputElement } } */
-		const { target } = ev;
-		const elements = target.elements;
-		const fileInput = elements?.[1];
-		const files = /** @type {FileList} */ (fileInput.files);
-
-		if (!files?.length) {
-			toast = { type: 'error', text: 'Por favor selecione um arquivo zip antes.', isSecurityError: false };
-			return;
-		}
-
-		const file = files[0];
-		if (!file.name.endsWith('.zip')) {
-			toast = { type: 'error', text: 'Por favor confira a extensão do arquivo (.zip)', isSecurityError: false };
-			return;
-		}
-
-		messages = null;
-		result = null;
-		toast = {
-			text: 'Iniciando Processamento',
-			type: 'transcribe',
-			isSecurityError: false
-		};
-
-		connectSocket();
-
-		const formData = new FormData();
-		formData.append('file', file);
-
-		const response = await fetch(`${PUBLIC_API_URL}/process?uid=${uuid}`, {
-			method: 'POST',
-			body: formData
-		}).catch((e) => {
-			console.error(e);
 			toast = {
 				type: 'error',
-				text: 'Erro ao Enviar o Arquivo, Verifique Sua Conexão.',
+				text: 'Conversa já processada. Selecione um novo arquivo para processar novamente.',
 				isSecurityError: false
 			};
-		});
-		if (!response) return;
-
-		if (!response.ok) {
-			// Try to get error message from response
-			try {
-				const errorData = await response.json();
-				if (errorData.Erro) {
-					// Check if it's a security error
-					if (
-						errorData.Erro.includes('MALICIOSO') ||
-						errorData.Erro.includes('malicious') ||
-						errorData.Erro.includes('perigosos')
-					) {
-						toast = {
-							type: 'error',
-							text: `⚠️ ARQUIVO PERIGOSO DETECTADO!\n\n${errorData.Erro}\n\nPor favor, verifique o conteúdo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
-							isSecurityError: true
-						};
-					} else {
-						toast = { type: 'error', text: errorData.Erro, isSecurityError: false };
-					}
-				} else {
-					toast = { type: 'error', text: verifyFileErr, isSecurityError: false };
-				}
-			} catch (e) {
-				toast = { type: 'error', text: verifyFileErr, isSecurityError: false };
-			}
-			console.error(`HTTP error! status: ${response.status}`);
 			return;
 		}
+		try {
+			ev.preventDefault();
 
-		result = await response.json();
-		if (Array.isArray(result) && result.length > 0 && result[0].ERRO) {
-			toast = { type: 'error', text: result[0].ERRO, isSecurityError: false };
-			return;
-		} // else
-		if (!Array.isArray(result) && result.Erro) {
-			// Check if it's a security error
-			if (
-				result.Erro.includes('MALICIOSO') ||
-				result.Erro.includes('malicious') ||
-				result.Erro.includes('perigosos')
-			) {
+			/** @type { { target: {elements: HTMLCollection & HTMLInputElement } } */
+			const { target } = ev;
+			const elements = target.elements;
+			const fileInput = elements?.[1];
+			const files = /** @type {FileList} */ (fileInput.files);
+
+			if (!files?.length) {
 				toast = {
 					type: 'error',
-					text: `⚠️ ARQUIVO PERIGOSO DETECTADO!\n\n${result.Erro}\n\nPor favor, verifique o conteúdo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
-					isSecurityError: true
+					text: 'Por favor selecione um arquivo zip antes.',
+					isSecurityError: false
 				};
-			} else {
-				toast = { type: 'error', text: result.Erro, isSecurityError: false };
+				return;
 			}
-			return;
+
+			const file = files[0];
+			if (!file.name.endsWith('.zip')) {
+				toast = {
+					type: 'error',
+					text: 'Por favor confira a extensão do arquivo (.zip)',
+					isSecurityError: false
+				};
+				return;
+			}
+
+			messages = null;
+			result = null;
+			toast = {
+				text: 'Iniciando Processamento',
+				type: 'transcribe',
+				isSecurityError: false
+			};
+
+			connectSocket();
+
+			const formData = new FormData();
+			formData.append('file', file);
+
+			const response = await fetch(`${PUBLIC_API_URL}/process?uid=${uuid}`, {
+				method: 'POST',
+				body: formData
+			}).catch((e) => {
+				console.error(e);
+				toast = {
+					type: 'error',
+					text: 'Erro ao Enviar o Arquivo, Verifique Sua Conexão.',
+					isSecurityError: false
+				};
+			});
+			if (!response) return;
+
+			if (!response.ok) {
+				// Try to get error message from response
+				try {
+					const errorData = await response.json();
+					if (errorData.Erro) {
+						// Check if it's a security error
+						if (
+							errorData.Erro.includes('MALICIOSO') ||
+							errorData.Erro.includes('malicious') ||
+							errorData.Erro.includes('perigosos')
+						) {
+							toast = {
+								type: 'error',
+								text: `⚠️ ARQUIVO PERIGOSO DETECTADO!\n\n${errorData.Erro}\n\nPor favor, verifique o conteúdo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
+								isSecurityError: true
+							};
+						} else {
+							toast = { type: 'error', text: errorData.Erro, isSecurityError: false };
+						}
+					} else {
+						toast = { type: 'error', text: verifyFileErr, isSecurityError: false };
+					}
+				} catch (e) {
+					toast = { type: 'error', text: verifyFileErr, isSecurityError: false };
+				}
+				console.error(`HTTP error! status: ${response.status}`);
+				return;
+			}
+
+			result = await response.json();
+			if (Array.isArray(result) && result.length > 0 && result[0].ERRO) {
+				toast = { type: 'error', text: result[0].ERRO, isSecurityError: false };
+				return;
+			} // else
+			if (!Array.isArray(result) && result.Erro) {
+				// Check if it's a security error
+				if (
+					result.Erro.includes('MALICIOSO') ||
+					result.Erro.includes('malicious') ||
+					result.Erro.includes('perigosos')
+				) {
+					toast = {
+						type: 'error',
+						text: `⚠️ ARQUIVO PERIGOSO DETECTADO!\n\n${result.Erro}\n\nPor favor, verifique o conteúdo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
+						isSecurityError: true
+					};
+				} else {
+					toast = { type: 'error', text: result.Erro, isSecurityError: false };
+				}
+				return;
+			}
+			messages = result;
+			isApple = messages?.[0]?.IsApple;
+			console.log('isapple ' + isApple);
+			console.log(messages);
+			processConversation(file);
+		} catch (e) {
+			throw e;
+		} finally {
+			uploadDisabled = false;
 		}
-		messages = result;
-		isApple = messages?.[0]?.IsApple;
-		console.log('isapple ' + isApple);
-		console.log(messages);
-		processConversation(file);
 	}
 
 	/**
@@ -635,16 +650,20 @@
 
 <!-- Toast customizado para erros de segurança -->
 {#if toast.text}
-	<div 
+	<div
 		class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out"
 		transition:fade={{ duration: 300 }}
 	>
-		<div 
+		<div
 			class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden
 			{toast.isSecurityError ? 'max-w-2xl w-[90vw] sm:w-auto' : 'max-w-md'}"
 		>
 			<!-- Header do Toast -->
-			<div class="flex items-center justify-between {toast.isSecurityError ? 'p-6' : 'p-4'} border-b border-gray-100">
+			<div
+				class="flex items-center justify-between {toast.isSecurityError
+					? 'p-6'
+					: 'p-4'} border-b border-gray-100"
+			>
 				<div class="flex items-center space-x-3">
 					<div class="flex-shrink-0">
 						{#if toast.type === 'error'}
@@ -681,16 +700,18 @@
 					<X class="w-4 h-4 text-gray-500" />
 				</button>
 			</div>
-			
+
 			<!-- Conteúdo do Toast -->
-			<div class="{toast.isSecurityError ? 'p-6 pt-4' : 'p-4'}">
+			<div class={toast.isSecurityError ? 'p-6 pt-4' : 'p-4'}>
 				<div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
 					{toast.text}
 				</div>
-				
+
 				{#if toast.type === 'transcribe' || toast.type === 'print'}
 					<div class="mt-4 flex items-center space-x-2">
-						<div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+						<div
+							class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"
+						></div>
 						<span class="text-xs text-gray-500">Aguarde...</span>
 					</div>
 				{/if}
@@ -699,7 +720,9 @@
 	</div>
 {/if}
 
-<main class="min-h-screen bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 relative overflow-hidden">
+<main
+	class="min-h-screen bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 relative overflow-hidden"
+>
 	<!-- Fundo decorativo -->
 	<div class="absolute inset-0 bg-black/5"></div>
 	<div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
@@ -709,15 +732,11 @@
 		<!-- Header -->
 		<div class="text-center mb-16 animate-fade-in">
 			<div class="flex justify-center items-center mb-6">
-				<div
-					class="bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/30"
-				>
+				<div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/30">
 					<MessageCircle class="w-12 h-12 text-white" />
 				</div>
 			</div>
-			<h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-				WhatsOrganizer
-			</h1>
+			<h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">WhatsOrganizer</h1>
 			<p class="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed font-light">
 				Organize suas conversas de WhatsApp e transcreva áudios de forma rápida e segura
 			</p>
@@ -728,19 +747,25 @@
 			<div class="">
 				<form class="file-zip space-y-6" on:submit={handleSubmit} data-testid="file-upload-form">
 					<UploadButton on:update={updateFiles} {loading} disabled={isProcessingDisabled} />
-					
+
 					<!-- Indicador de status do processamento -->
 					{#if isProcessingDisabled}
 						<div class="bg-green-100 border border-green-300 rounded-xl p-4 text-center">
 							<div class="flex items-center justify-center space-x-2">
 								<div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
 									<svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+										<path
+											fill-rule="evenodd"
+											d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+											clip-rule="evenodd"
+										></path>
 									</svg>
 								</div>
 								<span class="text-green-800 font-semibold">Conversa processada com sucesso!</span>
 							</div>
-							<p class="text-green-700 text-sm mt-2">Selecione um novo arquivo para processar outra conversa.</p>
+							<p class="text-green-700 text-sm mt-2">
+								Selecione um novo arquivo para processar outra conversa.
+							</p>
 						</div>
 					{/if}
 				</form>
@@ -812,9 +837,7 @@
 											>
 												{message.Name}
 											</span>
-											<span
-												class="text-xs text-gray-500 ml-3"
-											>
+											<span class="text-xs text-gray-500 ml-3">
 												{message.Date}
 											</span>
 										</div>
@@ -830,12 +853,8 @@
 																? 'bg-black/5'
 																: 'bg-gray-50'} rounded-lg"
 														>
-															<FileText
-																class="w-4 h-4 text-gray-600 flex-shrink-0"
-															/>
-															<span
-																class="text-sm text-gray-600 truncate"
-															>
+															<FileText class="w-4 h-4 text-gray-600 flex-shrink-0" />
+															<span class="text-sm text-gray-600 truncate">
 																{getFileName(message.FileAttached)}
 															</span>
 														</div>
@@ -956,19 +975,18 @@
 															? 'bg-black/5'
 															: 'bg-gray-50'} rounded-lg"
 													>
-														<FileText
-															class="w-4 h-4 text-gray-600 flex-shrink-0"
-														/>
-														<span
-															class="text-sm text-gray-600 truncate"
-														>
+														<FileText class="w-4 h-4 text-gray-600 flex-shrink-0" />
+														<span class="text-sm text-gray-600 truncate">
 															{getFileName(message.FileAttached)}
 														</span>
 													</div>
 												{/if}
 											{:else}
 												<!-- Mensagem de texto -->
-												<div class="text-sm leading-relaxed whitespace-pre-wrap break-words" data-testid="texto">
+												<div
+													class="text-sm leading-relaxed whitespace-pre-wrap break-words"
+													data-testid="texto"
+												>
 													{message.Message}
 												</div>
 											{/if}
@@ -976,23 +994,17 @@
 
 										<!-- Horário da mensagem (estilo WhatsApp) -->
 										<div class="flex justify-end items-end mt-1 mb-0">
-											<span
-												class="text-xs text-gray-500 leading-none"
-											>
+											<span class="text-xs text-gray-500 leading-none">
 												{formatTime(message.Time)}
 											</span>
 											<!-- Indicador de lida apenas para mensagens enviadas -->
-											{#if isOutgoing}
-												
-											{/if}
+											{#if isOutgoing}{/if}
 										</div>
 
 										<!-- Indicador de lida (apenas para mensagens enviadas) -->
 										{#if isOutgoing}
 											<div class="flex justify-end mt-2">
-												<div class="flex space-x-1">
-													
-												</div>
+												<div class="flex space-x-1"></div>
 											</div>
 										{/if}
 									</div>
@@ -1149,8 +1161,8 @@
 			data-testid="limitacoes-modal"
 			transition:fade={{ duration: 300 }}
 		>
-			<div 
-				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100" 
+			<div
+				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
 				on:click|stopPropagation
 			>
 				<!-- Header do Modal -->
@@ -1207,16 +1219,20 @@
 								</p>
 							</div>
 						</div>
-							<div class="flex items-start space-x-4">
+						<div class="flex items-start space-x-4">
 							<div class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
 							<div>
 								<h4 class="font-semibold text-gray-900 mb-1">Projeto Open Source</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									 Este sistema é <strong>open source</strong> e pode ser livremente auditado por qualquer pessoa.
-    Confira o código completo no 
-    <a href="https://github.com/brpl20/whats-organizer-front" target="_blank" class="text-blue-600 hover:underline">
-        GitHub
-    </a>.
+									Este sistema é <strong>open source</strong> e pode ser livremente auditado por
+									qualquer pessoa. Confira o código completo no
+									<a
+										href="https://github.com/brpl20/whats-organizer-front"
+										target="_blank"
+										class="text-blue-600 hover:underline"
+									>
+										GitHub
+									</a>.
 								</p>
 							</div>
 						</div>
@@ -1243,8 +1259,8 @@
 			data-testid="lgpd-modal"
 			transition:fade={{ duration: 300 }}
 		>
-			<div 
-				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100" 
+			<div
+				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
 				on:click|stopPropagation
 			>
 				<!-- Header do Modal -->
@@ -1273,7 +1289,9 @@
 				<div class="px-8 py-8">
 					<div class="space-y-6">
 						<div class="text-center">
-							<div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+							<div
+								class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+							>
 								<Shield class="w-8 h-8 text-green-600" />
 							</div>
 							<h3 class="text-xl font-bold text-gray-900 mb-2">Seus dados estão seguros</h3>
@@ -1281,22 +1299,27 @@
 
 						<div class="bg-green-50 rounded-xl p-6 border border-green-100">
 							<p class="text-gray-700 leading-relaxed text-center">
-								<strong class="text-green-800">Não coletamos nenhum dado pessoal</strong> e todos os arquivos 
-								enviados são automaticamente <strong class="text-green-800">destruídos após o processamento</strong>, 
-								garantindo total privacidade e segurança.
+								<strong class="text-green-800">Não coletamos nenhum dado pessoal</strong> e todos os
+								arquivos enviados são automaticamente
+								<strong class="text-green-800">destruídos após o processamento</strong>, garantindo
+								total privacidade e segurança.
 							</p>
 						</div>
 
 						<div class="grid grid-cols-2 gap-4 pt-4">
 							<div class="text-center">
-								<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+								<div
+									class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2"
+								>
 									<span class="text-2xl">🚫</span>
 								</div>
 								<p class="text-sm font-semibold text-gray-700">Não coletamos</p>
 								<p class="text-xs text-gray-500">dados pessoais</p>
 							</div>
 							<div class="text-center">
-								<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+								<div
+									class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2"
+								>
 									<span class="text-2xl">🗑️</span>
 								</div>
 								<p class="text-sm font-semibold text-gray-700">Arquivos removidos</p>
@@ -1308,9 +1331,7 @@
 					<div class="mt-8 pt-6 border-t border-gray-100">
 						<div class="flex items-center justify-center space-x-2 text-green-600">
 							<Shield class="w-4 h-4" />
-							<span class="text-sm font-medium">
-								100% compatível com a LGPD
-							</span>
+							<span class="text-sm font-medium"> 100% compatível com a LGPD </span>
 						</div>
 					</div>
 				</div>
@@ -1323,36 +1344,36 @@
 	/* Cores do WhatsApp exatas */
 	:global(:root) {
 		--whatsapp-bg: #0b141a;
-		--whatsapp-chat-bg: #E5DDD5;
-		--whatsapp-header: #EDEDED;
-		--whatsapp-sent: #DCF8C6;
+		--whatsapp-chat-bg: #e5ddd5;
+		--whatsapp-header: #ededed;
+		--whatsapp-sent: #dcf8c6;
 	}
-	
+
 	.bg-whatsapp-bg {
 		background-color: var(--whatsapp-bg);
 	}
-	
+
 	.bg-whatsapp-chat-bg {
-	  background: url('/whatsback.png') no-repeat center center;
-  background-size: cover;
+		background: url('/whatsback.png') no-repeat center center;
+		background-size: cover;
 	}
-	
+
 	.bg-whatsapp-header {
 		background-color: var(--whatsapp-header);
 	}
-	
+
 	.bg-whatsapp-sent {
 		background-color: var(--whatsapp-sent);
 	}
-	
+
 	.text-whatsapp-sent {
 		color: var(--whatsapp-sent);
 	}
 
 	/* Padrão de fundo do WhatsApp exato */
 	.bg-whatsapp-chat-pattern {
-	   background: url('/whatsback.png') no-repeat center center;
-  background-size: cover;
+		background: url('/whatsback.png') no-repeat center center;
+		background-size: cover;
 	}
 
 	/* Estilo dos balões de conversa WhatsApp */

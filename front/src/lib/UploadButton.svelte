@@ -4,6 +4,7 @@
 	import UploadIcon from './UploadIcon.svelte';
 
 	export let loading = false;
+	export let disabled = false;
 
 	/** @type {FileList} */
 	let files = [];
@@ -141,7 +142,7 @@
 		<div class="mt-8 text-center">
 			<button
 			data-testid="submit-zip-btn"
-		disabled={files.length === 0}
+		    disabled={disabled || files.length === 0}
 		class="bg-gradient-to-r from-emerald-600 to-teal-600 
 		       hover:from-emerald-700 hover:to-teal-700 
 		       text-white font-bold py-4 px-12 rounded-2xl shadow-lg 
