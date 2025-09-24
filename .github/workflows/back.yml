@@ -66,9 +66,9 @@ jobs:
           fi
           set -e
 
-          mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
 
           cd "${PROJECT_DIR}/${PROJECT}"
+          mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
           if [ -f "${ENV_DIR}/.env" ]; then
             chmod +w .env
             cp -f "${ENV_DIR}/.env" .
