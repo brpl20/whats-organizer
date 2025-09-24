@@ -20,7 +20,7 @@ from uuid import uuid4
 from src.utils.globals import globals
 import os
 
-from api.whatsapp_api import create_whatsapp_api
+from api.whatsapp_api import create_whatsapp_api, WhatsAppAPI
 
 from src.utils.print_page_pdf import print_page_pdf
 
@@ -63,7 +63,7 @@ socketio = SocketIO(
 executor = ThreadPoolExecutor()
 
 # Initialize new API
-whatsapp_api = create_whatsapp_api()
+whatsapp_api: WhatsAppAPI
 
 @socketio.on('connect')
 def on_connect():
@@ -141,7 +141,7 @@ def process_zip():
         return jsonify({"Erro": "Nome do Arquivo Incompatível"}), 400
     
     if not (file and file.filename.endswith('.zip')):
-        return jsonify({"Erro": "Invalid file format"}), 400
+        return jsonify({"Erro": "Arquivo inválido"}), 400
     
     task_id = str(uid)
     globals.create_task(task_id)
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     
     # Test API initialization
     try:
-        test_api = create_whatsapp_api()
+        whatsapp_api = create_whatsapp_api()
         print("✅ API initialization successful")
     except Exception as e:
         print(f"❌ API initialization failed: {e}")

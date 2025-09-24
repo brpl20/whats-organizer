@@ -38,13 +38,6 @@ class WhatsAppAPI:
             JSON response with results or error
         """
         try:
-            # Validate file
-            if not file or not file.filename:
-                return jsonify({"Erro": "Nome do Arquivo Incompatível"}), 400
-            
-            if not file.filename.endswith('.zip'):
-                return jsonify({"Erro": "Invalid file format"}), 400
-            
             # Generate truly unique folder name with timestamp + UUID
             import uuid
             from datetime import datetime
