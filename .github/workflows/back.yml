@@ -68,14 +68,18 @@ jobs:
 
           mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
 
-          sudo -u "${USER}" bash <<EOF
-          cd "${PROJECT_DIR}/${PROJECT}"
           if [ -f "${ENV_DIR}/.env" ]; then
+            chmod +w .env
             cp -f "${ENV_DIR}/.env" .
+            chmod 400 .env
+            chown "${USER}:${GROUP}" .env
           else
             echo "Erro: Falta o arquivo de segredos .env em '${ENV_DIR}'/.env"
             exit ${ENOENT}
           fi
+
+          sudo -u "${USER}" bash <<EOF
+          cd "${PROJECT_DIR}/${PROJECT}"
 
           if [ ! -d .venv ]; then
             python3 -m venv .venv

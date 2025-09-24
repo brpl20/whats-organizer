@@ -21,6 +21,7 @@ jobs:
           export PROJECT_INFRA="infra"
           export BRANCH="master"
           export USER="${PROJECT}"
+          export GROUP="${USER}"
           export HOME="/home/${USER}"
           export PROJECT_DIR="${HOME}/whats-organizer"
           export INFRA_DIR="${PROJECT_DIR}/${PROJECT_INFRA}"
@@ -65,15 +66,17 @@ jobs:
           fi
           set -e
 
-          sudo -u "${USER}" bash -l <<EOF
-          cd "${PROJECT_DIR}/${PROJECT}"
           if [ -f "${ENV_DIR}/.env" ]; then
+            chmod +w .env
             cp -f "${ENV_DIR}/.env" .
+            chmod 400 .env
+            chown "${USER}:${GROUP}" .env
           else
             echo "Erro: Falta o arquivo de segredos .env em '${ENV_DIR}'/.env"
             exit ${ENOENT}
           fi
 
+          sudo -u "${USER}" bash -l <<EOF
           cd "${HOME}"
           export NVM_DIR="\$([ -z "\${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "\${XDG_CONFIG_HOME}/nvm")"
           if [ ! -d "\${NVM_DIR}" ]; then
