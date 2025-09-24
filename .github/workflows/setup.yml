@@ -103,6 +103,9 @@ jobs:
             if ! command -v getent >/dev/null 2>&1; then
               pacman --noconfirm -S getent
             fi
+            if ! command -v ffmpeg >/dev/null 2>&1; then
+              pacman --noconfirm -S ffmpeg
+            fi
           fi
 
           for USERVAL in "${!USER_GROUP_LIST[@]}"; do
