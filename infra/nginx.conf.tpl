@@ -51,7 +51,7 @@ ${CLOUDFLARE_IPS_FIREWALL}
         server_name ${FRONT_HOST};
         sendfile on;
         client_max_body_size ${MAX_UPLOAD_MB}M;
-        client_body_timeout 10m
+        client_body_timeout 10m;
 
         location / {
             proxy_pass http://${NGINX_LOCALHOST}:${PORT};
