@@ -94,5 +94,10 @@ async def convert_opus_to_mp3_async(path: str) -> TranscriptionList:
     return transcriptions_list
 
 def convert_opus_to_mp3(path: str) -> TranscriptionList:
-    """Synchronous wrapper for the async function"""
-    return asyncio.run(convert_opus_to_mp3_async(path))
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(convert_opus_to_mp3_async(path))
+    else:
+        future = asyncio.run_coroutine_threadsafe(convert_opus_to_mp3_async(path), loop)
+        return future.result()
