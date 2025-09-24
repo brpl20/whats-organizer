@@ -65,6 +65,14 @@ executor = ThreadPoolExecutor()
 # Initialize new API
 whatsapp_api: WhatsAppAPI
 
+try:
+    whatsapp_api = create_whatsapp_api()
+    print("✅ API initialization successful")
+except Exception as e:
+    print(f"❌ API initialization failed: {e}")
+    import traceback
+    traceback.print_exc()
+
 @socketio.on('connect')
 def on_connect():
     socketio.emit('Smessage', {'data': 'Enviando Arquivo...'})
@@ -208,15 +216,6 @@ if __name__ == '__main__':
     print("🚀 Starting WhatsApp Organizer API v2.0 (Refactored)")
     print("📁 Using local file storage (no AWS dependency)")
     print("🧹 LGPD compliant with automatic file cleanup")
-    
-    # Test API initialization
-    try:
-        whatsapp_api = create_whatsapp_api()
-        print("✅ API initialization successful")
-    except Exception as e:
-        print(f"❌ API initialization failed: {e}")
-        import traceback
-        traceback.print_exc()
     
     if prod:
         print("🌐 Production mode with RabbitMQ")
