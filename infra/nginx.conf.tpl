@@ -17,7 +17,6 @@ http {
 
     access_log /var/log/nginx/access.log main;
 
-    sendfile on;
     keepalive_timeout 80;
     gzip on;
 
@@ -31,7 +30,8 @@ ${UPSTREAM_SERVERS}
 
     server {
         listen 80;
-        server_name api.whatsorganizer.com.br;
+        server_name ${API_HOST};
+        sendfile off;
 
 ${CLOUDFLARE_IPS_FIREWALL}
         location / {
@@ -48,7 +48,10 @@ ${CLOUDFLARE_IPS_FIREWALL}
 
     server {
         listen 80 default_server;
-        server_name _;
+        server_name ${FRONT_HOST};
+        sendfile on;
+        client_max_body_size ${MAX_UPLOAD_MB}M;
+
         location / {
             proxy_pass http://${NGINX_LOCALHOST}:${PORT};
             proxy_set_header Host $host;

@@ -13,6 +13,7 @@ jobs:
         SHARED_BACK_FRONT_ENV: ${{ secrets.SHARED_BACK_FRONT_ENV }}
         SHARED_BACK_NGINX_ENV: ${{ secrets.SHARED_BACK_NGINX_ENV }}
         SHARED_BACK_RABBITMQ_ENV: ${{ secrets.SHARED_BACK_RABBITMQ_ENV }}
+        SHARED_BACK_FRONT_NGINX_ENV: ${{ secrets.SHARED_BACK_FRONT_NGINX_ENV }}
         BACK_ENV: ${{ secrets.BACK_ENV }}
         FRONT_ENV: ${{ secrets.FRONT_ENV }}
         NGINX_ENV: ${{ secrets.NGINX_ENV }}
@@ -22,7 +23,7 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
-        envs: SHARED_BACK_FRONT_ENV,SHARED_BACK_NGINX_ENV,SHARED_BACK_RABBITMQ_ENV,BACK_ENV,FRONT_ENV,NGINX_ENV
+        envs: SHARED_BACK_FRONT_ENV,SHARED_BACK_NGINX_ENV,SHARED_BACK_RABBITMQ_ENV,SHARED_BACK_FRONT_NGINX_ENV,BACK_ENV,FRONT_ENV,NGINX_ENV
         script: |
           set -euo pipefail
 
@@ -54,9 +55,9 @@ jobs:
           readonly ALL_USERS=("${BACK_USER}" "${FRONT_USER}" "${NGINX_USER}" "${RABBITMQ_USER}")
           readonly ALL_GROUPS=("${BACK_GROUP}" "${FRONT_GROUP}" "${NGINX_GROUP}" "${RABBITMQ_GROUP}")
           
-          BACK_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${SHARED_BACK_NGINX_ENV}\n${SHARED_BACK_RABBITMQ_ENV}\n${BACK_ENV}")
-          FRONT_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${FRONT_ENV}")
-          NGINX_ENV=$(echo  -e "${SHARED_BACK_NGINX_ENV}\n${NGINX_ENV}")
+          BACK_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${SHARED_BACK_NGINX_ENV}\n${SHARED_BACK_RABBITMQ_ENV}\n${BACK_ENV}\n${SHARED_BACK_FRONT_NGINX_ENV}")
+          FRONT_ENV=$(echo  -e "${SHARED_BACK_FRONT_ENV}\n${FRONT_ENV}\n${SHARED_BACK_FRONT_NGINX_ENV}")
+          NGINX_ENV=$(echo  -e "${SHARED_BACK_NGINX_ENV}\n${NGINX_ENV}\n${SHARED_BACK_FRONT_NGINX_ENV}")
           readonly RABBITMQ_ENV=$(echo  -e "${SHARED_BACK_RABBITMQ_ENV}")
 
           readonly ENVS=(

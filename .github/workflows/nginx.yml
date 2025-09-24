@@ -81,6 +81,7 @@ jobs:
           ./infra/generate_nginx_conf.sh "${ENV_DIR}/.env" "${PROJECT_DIR}/infra/nginx.conf.tpl" "/etc/nginx/nginx.conf"
 
           if [ "$(</etc/hostname)" != "${HOST}" ]; then
+            echo -e "Setting hostname to ${HOST}"
             hostnamectl set-hostname "${HOST}"
           fi
 

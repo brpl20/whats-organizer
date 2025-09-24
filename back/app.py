@@ -29,6 +29,7 @@ load_dotenv(override=True)
 prod_env = getenv("FLASK_ENV")
 port_env = getenv("FLASK_PORT")
 host_env = getenv("HOST")
+max_upload_mb_env = getenv("MAX_UPLOAD_MB")
 
 prod = (prod_env or "").lower() in ("prod", "production") 
 port = int(port_env or 5000)
@@ -37,7 +38,7 @@ host = host_env or "0.0.0.0"
 app = Flask(__name__)
 MEGABYTE = (2 ** 10) ** 2
 app.config['MAX_CONTENT_LENGTH'] = None
-app.config['MAX_FORM_MEMORY_SIZE'] = 50 * MEGABYTE
+app.config['MAX_FORM_MEMORY_SIZE'] = int(max_upload_mb_env or "", base=10) * MEGABYTE
 
 cors_origins = [
     "https://whatsorganizer.com.br",
