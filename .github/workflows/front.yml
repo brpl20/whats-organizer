@@ -66,6 +66,7 @@ jobs:
           fi
           set -e
 
+          cd "${HOME}"
           if [ -f "${ENV_DIR}/.env" ]; then
             chmod +w .env
             cp -f "${ENV_DIR}/.env" .

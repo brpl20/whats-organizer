@@ -68,6 +68,7 @@ jobs:
 
           mkdir -p zip_tests && chown "${USER}:${GROUP}" zip_tests
 
+          cd "${PROJECT_DIR}/${PROJECT}"
           if [ -f "${ENV_DIR}/.env" ]; then
             chmod +w .env
             cp -f "${ENV_DIR}/.env" .
@@ -77,6 +78,7 @@ jobs:
             echo "Erro: Falta o arquivo de segredos .env em '${ENV_DIR}'/.env"
             exit ${ENOENT}
           fi
+          cd -
 
           sudo -u "${USER}" bash <<EOF
           cd "${PROJECT_DIR}/${PROJECT}"
