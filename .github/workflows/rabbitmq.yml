@@ -26,6 +26,8 @@ on:
         required: true
       NGINX_ENV:
         required: true
+      envs:
+        required: false
 
 jobs:
   build:
