@@ -111,7 +111,6 @@ jobs:
           ERROR=false
 
           if command -v pacman >/dev/null 2>&1; then
-            pacman --noconfirm -Ss
             pacman --noconfirm -Syu
             if ! command -v git >/dev/null 2>&1; then
               pacman --noconfirm -S git
