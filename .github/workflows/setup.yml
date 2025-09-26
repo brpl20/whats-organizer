@@ -16,14 +16,10 @@ on:
         required: true
       SHARED_BACK_NGINX_ENV:
         required: true
-      envs:
-        required: false
       SHARED_BACK_RABBITMQ_ENV:
         required: true
       SHARED_BACK_FRONT_NGINX_ENV:
         required: true
-      envs:
-        required: false
       BACK_ENV:
         required: true
       FRONT_ENV:
