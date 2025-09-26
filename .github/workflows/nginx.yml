@@ -1,33 +1,6 @@
 name: Nginx deploy
 on:
   workflow_call:
-    secrets:
-      host:
-        required: true
-      username:
-        required: true
-      key:
-        required: true
-      port:
-        required: true
-      fingerprint:
-        required: true
-      SHARED_BACK_FRONT_ENV:
-        required: true
-      SHARED_BACK_NGINX_ENV:
-        required: true
-      SHARED_BACK_RABBITMQ_ENV:
-        required: true
-      SHARED_BACK_FRONT_NGINX_ENV:
-        required: true
-      BACK_ENV:
-        required: true
-      FRONT_ENV:
-        required: true
-      NGINX_ENV:
-        required: true
-      envs:
-        required: false
 
 jobs:
   build:
