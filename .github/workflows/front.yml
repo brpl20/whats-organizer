@@ -100,7 +100,8 @@ jobs:
             if [ "${ENV_CHANGED}" != "0" ]; then
               if [ -f "${LOCAL_ENV_DIR}/.env" ]; then
                 chmod +w "${LOCAL_ENV_DIR}/.env"
-              fi              cp -f "${GLOBAL_ENV_DIR}/.env" "${LOCAL_ENV_DIR}" || true
+              fi
+              cp -f "${GLOBAL_ENV_DIR}/.env" "${LOCAL_ENV_DIR}" || true
               chmod 400 "${LOCAL_ENV_DIR}/.env"
               chown "${USER}:${GROUP}" "${LOCAL_ENV_DIR}/.env"
             fi
