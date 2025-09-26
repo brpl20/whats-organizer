@@ -16,7 +16,8 @@ export default defineConfig({
   build: {
     commonjsOptions: {
       include: [/node_modules/]
-    }
+    },
+    sourcemap: true,
   },
   test: {
     environment: 'jsdom',
