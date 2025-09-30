@@ -355,10 +355,6 @@
 
 		socket.on('Smessage', (data) => {
 			if (!data?.data) return;
-			console.log(
-				`%c Server message:\n${data.data}`,
-				'background-color: #233142; color: #fdffcd; display: grid; place-items: center;'
-			);
 			toast = { ...toast, text: data.data };
 		});
 	}
@@ -481,8 +477,7 @@
 			}
 			messages = result;
 			isApple = messages?.[0]?.IsApple;
-			console.log('isapple ' + isApple);
-			console.log(messages);
+		
 			processConversation(file);
 		} catch (e) {
 			throw e;
@@ -998,8 +993,9 @@
 												{formatTime(message.Time)}
 											</span>
 											<!-- Indicador de lida apenas para mensagens enviadas -->
-											{#if isOutgoing}{/if}
-										</div>
+										{#if isOutgoing}
+										<span class="text-xs text-gray-400"></span>
+										{/if}										</div>
 
 										<!-- Indicador de lida (apenas para mensagens enviadas) -->
 										{#if isOutgoing}
@@ -1077,14 +1073,19 @@
 	<!-- Modal de Mídia -->
 	{#if showMediaModal && currentMedia}
 		<div
-			class="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4"
+			role="button"
+			tabindex="0"
 			on:click={toggleMediaModal}
+			on:keydown={(e) => e.key === 'Enter' && toggleMediaModal()}
+			class="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4"
 			transition:fade={{ duration: 300 }}
-		>
+>
 			<div
 				class="relative bg-white rounded-2xl shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden"
 				on:click|stopPropagation
-			>
+				role="presentation"
+				tabindex="-1"
+				>
 				<!-- Header do Modal -->
 				<div class="flex items-center justify-between p-4 bg-whatsapp-header text-gray-800">
 					<div class="flex items-center space-x-3 min-w-0 flex-1">
@@ -1159,12 +1160,16 @@
 			class="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4"
 			on:click={toggleLimitacoesModal}
 			data-testid="limitacoes-modal"
+			role="presentation"
+			tabindex="-1"
 			transition:fade={{ duration: 300 }}
-		>
+>
 			<div
-				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
-				on:click|stopPropagation
-			>
+  class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
+  on:click|stopPropagation
+  role="presentation"
+  tabindex="-1"
+>
 				<!-- Header do Modal -->
 				<div class="bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-6 text-white">
 					<div class="flex items-center justify-between">
@@ -1257,12 +1262,16 @@
 			class="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4"
 			on:click={toggleLGPDModal}
 			data-testid="lgpd-modal"
+			role="presentation"
+			tabindex="-1"
 			transition:fade={{ duration: 300 }}
-		>
-			<div
+>
+		<div
 				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
 				on:click|stopPropagation
-			>
+				role="presentation"
+				tabindex="-1"
+>
 				<!-- Header do Modal -->
 				<div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-6 text-white">
 					<div class="flex items-center justify-between">
@@ -1349,9 +1358,6 @@
 		--whatsapp-sent: #dcf8c6;
 	}
 
-	.bg-whatsapp-bg {
-		background-color: var(--whatsapp-bg);
-	}
 
 	.bg-whatsapp-chat-bg {
 		background: url('/whatsback.png') no-repeat center center;
@@ -1366,9 +1372,7 @@
 		background-color: var(--whatsapp-sent);
 	}
 
-	.text-whatsapp-sent {
-		color: var(--whatsapp-sent);
-	}
+
 
 	/* Padrão de fundo do WhatsApp exato */
 	.bg-whatsapp-chat-pattern {

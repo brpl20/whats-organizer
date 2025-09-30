@@ -130,7 +130,6 @@
 				bind:this={fileInput}
 				accept=".zip"
 				on:change={(e) => {
-					console.log('lel')
 					if (fileInput?.files) {
 						files = Array.from(fileInput.files);
 					}

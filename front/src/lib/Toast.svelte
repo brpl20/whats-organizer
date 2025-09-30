@@ -136,18 +136,5 @@
 	.hover\:bg-gray-50:hover { background-color: #f9fafb; }
 	.hover\:text-gray-700:hover { color: #374151; }
 
-	/* Classe para o ícone do close SVG, caso você não esteja passando a classe diretamente */
-	.w-4 { width: 1rem; }
-	.h-4 { height: 1rem; }
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border-width: 0;
-	}
+
 </style>
