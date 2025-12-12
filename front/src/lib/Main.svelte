@@ -648,6 +648,7 @@
 	<div
 		class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out"
 		transition:fade={{ duration: 300 }}
+		 data-testid={`toast${toast.type == 'error' ? '-error' : '-info'}`}
 	>
 		<div
 			class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden
@@ -977,7 +978,6 @@
 													</div>
 												{/if}
 											{:else}
-												<!-- Mensagem de texto -->
 												<div
 													class="text-sm leading-relaxed whitespace-pre-wrap break-words"
 													data-testid="texto"

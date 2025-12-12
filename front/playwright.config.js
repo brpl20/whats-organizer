@@ -1,11 +1,17 @@
 const port = 1337;
+const host = '127.0.0.1'
 const url = `http://localhost:${port}`;
 
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 const config = {
 	webServer: {
 		command: `npm run build && env PORT=${port} node --env-file=.env build/index`,
-		port
+		port,
+		env: {
+			PORT: port.toString(),
+			HOST: '127.0.0.1',
+			ORIGIN: url
+		}
 	},
 	testDir: 'tests/e2e',
 	testMatch: /(.+\.)?(test|spec)\.[jt]s/,

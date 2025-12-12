@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 import fs from 'fs/promises';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 test('Upload Chat', async ({ page }) => {
   await page.goto('/');
@@ -13,7 +18,7 @@ test('Upload Chat', async ({ page }) => {
   await expect(uploadForm).toBeVisible();
   await expect(submitBtn).toBeVisible();
   
-  const filePath = '/home/skid/My_Code/whats-organizer/tests/android-bruno/teste-audio-curto-uma-imagem.zip'
+  const filePath = join(__dirname, '../../../tests/android-bruno/teste-audio-curto-uma-imagem.zip')
   const fileBuffer = await fs.readFile(filePath)
 
   await uploadInput.evaluate((input) => {
