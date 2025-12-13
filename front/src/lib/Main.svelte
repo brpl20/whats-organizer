@@ -1,6 +1,7 @@
 <script>
 	import { fade } from 'svelte/transition';
-	import { PUBLIC_API_URL, PUBLIC_NODE_ENV, PUBLIC_MAX_UPLOAD_MB } from '$env/static/public';
+	import * as publicEnv from '$env/dynamic/public';
+	import { PUBLIC_API_URL as STATIC_API_URL, PUBLIC_NODE_ENV, PUBLIC_MAX_UPLOAD_MB } from '$env/static/public';
 	import UploadButton from './UploadButton.svelte';
 	import { onDestroy } from 'svelte';
 	import Video from './ChatComponents/Video.svelte';
@@ -11,6 +12,8 @@
 	import ErrorSvg from './ErrorSvg.svelte';
 	import { MessageCircle, FileText, X, Download, AlertTriangle, Shield, Info } from 'lucide-svelte';
 
+	const PUBLIC_API_URL = publicEnv.PUBLIC_API_URL || STATIC_API_URL
+	
 	/**
 	 * @typedef {import('./types/toast.type.js').ToastTypes} ToastTypes
 	 * @typedef {import('./types/toast.type.js').ToastProps} ToastProps
@@ -883,6 +886,7 @@
 																			src={link}
 																			alt="Página do Documento"
 																			class="w-full h-24 object-cover"
+																			data-testid="pdf-page"
 																		/>
 																		<div
 																			class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
@@ -902,6 +906,7 @@
 																target="_blank"
 																rel="noopener noreferrer"
 																class="inline-flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700 underline underline-offset-2 hover:no-underline transition-colors"
+																data-testid="pdf-link"
 															>
 																<FileText class="w-3 h-3 flex-shrink-0" />
 																<span class="truncate">Baixar PDF completo</span>

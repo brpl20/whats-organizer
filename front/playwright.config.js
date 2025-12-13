@@ -1,18 +1,34 @@
-const port = 1337;
-const host = '127.0.0.1'
-const url = `http://localhost:${port}`;
+const front_port = 1337;
+const front_host = '127.0.0.1'
+const front_url = `http://${front_host}:${front_port}`;
+
+const back_port = 4242;
+const back_host = '127.0.0.1'
+const back_url = `http://${back_host}:${back_port}`;
 
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 const config = {
-	webServer: {
-		command: `npm run build && env PORT=${port} node --env-file=.env build/index`,
-		port,
+	webServer: [{
+		command: `env PUBLIC_API_URL=${back_url} npm run build && \\
+			env PORT=${front_port} node --env-file=.env build/index`,
+		port: front_port,
 		env: {
-			PORT: port.toString(),
-			HOST: '127.0.0.1',
-			ORIGIN: url
+			PORT: front_port.toString(),
+			HOST: front_host,
+			ORIGIN: front_url
 		}
 	},
+	{
+		command: `env FLASK_PORT=${back_port} python3 -m app`,
+		cwd: '../back',
+		port: back_port,
+		env: {
+			PORT: back_port.toString(),
+			HOST: back_host,
+			ORIGIN: back_url
+		}
+	}
+	],
 	testDir: 'tests/e2e',
 	testMatch: /(.+\.)?(test|spec)\.[jt]s/,
 	fullyParallel: true,
@@ -21,7 +37,7 @@ const config = {
 	workers: process.env.CI ? 1 : undefined,
 	reporter: 'html',
 	use: {
-		baseURL: url,
+		baseURL: front_url,
 		trace: 'on-first-retry',
 		headless: false,
 		browserName: 'chromium',
@@ -39,7 +55,7 @@ const config = {
 	projects: [
 		{
 			name: 'chromium',
-			url
+			front_url
 		}
 	]
 };

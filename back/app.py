@@ -24,10 +24,11 @@ from api.whatsapp_api import create_whatsapp_api, WhatsAppAPI
 
 from src.utils.print_page_pdf import print_page_pdf
 
+port_env = getenv("FLASK_PORT")
 load_dotenv(override=True)
 
 prod_env = getenv("FLASK_ENV")
-port_env = getenv("FLASK_PORT")
+port_env = port_env or getenv("FLASK_PORT")
 host_env = getenv("HOST")
 max_upload_mb_env = getenv("PUBLIC_MAX_UPLOAD_MB")
 
