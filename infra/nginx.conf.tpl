@@ -35,6 +35,11 @@ ${UPSTREAM_SERVERS}
 
 ${CLOUDFLARE_IPS_FIREWALL}
         location / {
+            server_name ${FRONT_HOST};
+            sendfile on;
+            client_max_body_size ${PUBLIC_MAX_UPLOAD_MB}M;
+            client_body_timeout 10m;
+
             proxy_pass http://backend;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
@@ -49,9 +54,7 @@ ${CLOUDFLARE_IPS_FIREWALL}
     server {
         listen 80 default_server;
         server_name ${FRONT_HOST};
-        sendfile on;
-        client_max_body_size ${PUBLIC_MAX_UPLOAD_MB}M;
-        client_body_timeout 10m;
+        sendfile off;
 
         location / {
             proxy_pass http://${NGINX_LOCALHOST}:${PORT};
