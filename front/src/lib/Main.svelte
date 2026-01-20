@@ -1,7 +1,11 @@
 <script>
 	import { fade } from 'svelte/transition';
 	import * as publicEnv from '$env/dynamic/public';
-	import { PUBLIC_API_URL as STATIC_API_URL, PUBLIC_NODE_ENV, PUBLIC_MAX_UPLOAD_MB } from '$env/static/public';
+	import {
+		PUBLIC_API_URL as STATIC_API_URL,
+		PUBLIC_NODE_ENV,
+		PUBLIC_MAX_UPLOAD_MB
+	} from '$env/static/public';
 	import UploadButton from './UploadButton.svelte';
 	import { onDestroy } from 'svelte';
 	import Video from './ChatComponents/Video.svelte';
@@ -10,10 +14,18 @@
 	import TranscribeSvg from './TranscribeSvg.svelte';
 	import PrintSvg from './PrinterSvg.svelte';
 	import ErrorSvg from './ErrorSvg.svelte';
-	import { MessageCircle, FileText, X, Download, AlertTriangle, Shield, Info } from 'lucide-svelte';
+	import {
+		MessageCircle,
+		FileText,
+		X,
+		Download,
+		AlertTriangle,
+		Shield,
+		Info
+	} from 'lucide-svelte';
 
-	const PUBLIC_API_URL = publicEnv.PUBLIC_API_URL || STATIC_API_URL
-	
+	const PUBLIC_API_URL = publicEnv.PUBLIC_API_URL || STATIC_API_URL;
+
 	/**
 	 * @typedef {import('./types/toast.type.js').ToastTypes} ToastTypes
 	 * @typedef {import('./types/toast.type.js').ToastProps} ToastProps
@@ -130,7 +142,12 @@
 
 	/** @param {ToastTypes} newType */
 	const removeToast = (newType) =>
-		(toast = { ...toast, text: null, isSecurityError: false, ...(newType && { type: newType }) });
+		(toast = {
+			...toast,
+			text: null,
+			isSecurityError: false,
+			...(newType && { type: newType })
+		});
 
 	/** @param {CustomEvent<FileList>} event */
 	const updateFiles = (event) => {
@@ -480,7 +497,7 @@
 			}
 			messages = result;
 			isApple = messages?.[0]?.IsApple;
-		
+
 			processConversation(file);
 		} catch (e) {
 			throw e;
@@ -651,7 +668,7 @@
 	<div
 		class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out"
 		transition:fade={{ duration: 300 }}
-		 data-testid={`toast${toast.type == 'error' ? '-error' : '-info'}`}
+		data-testid={`toast${toast.type == 'error' ? '-error' : '-info'}`}
 	>
 		<div
 			class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden
@@ -666,15 +683,21 @@
 				<div class="flex items-center space-x-3">
 					<div class="flex-shrink-0">
 						{#if toast.type === 'error'}
-							<div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+							<div
+								class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center"
+							>
 								<ErrorSvg class="w-5 h-5 text-red-600" />
 							</div>
 						{:else if toast.type === 'transcribe'}
-							<div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+							<div
+								class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"
+							>
 								<TranscribeSvg class="w-5 h-5 text-blue-600" />
 							</div>
 						{:else if toast.type === 'print'}
-							<div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+							<div
+								class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center"
+							>
 								<PrintSvg class="w-5 h-5 text-green-600" />
 							</div>
 						{/if}
@@ -725,18 +748,26 @@
 	<!-- Fundo decorativo -->
 	<div class="absolute inset-0 bg-black/5"></div>
 	<div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
-	<div class="absolute bottom-20 right-10 w-96 h-96 bg-emerald-300/20 rounded-full blur-3xl"></div>
+	<div
+		class="absolute bottom-20 right-10 w-96 h-96 bg-emerald-300/20 rounded-full blur-3xl"
+	></div>
 
 	<div class="relative z-10 container mx-auto px-4 py-12">
 		<!-- Header -->
 		<div class="text-center mb-16 animate-fade-in">
 			<div class="flex justify-center items-center mb-6">
-				<div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/30">
+				<div
+					class="bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-white/30"
+				>
 					<MessageCircle class="w-12 h-12 text-white" />
 				</div>
 			</div>
-			<h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">WhatsOrganizer</h1>
-			<p class="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed font-light">
+			<h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+				WhatsOrganizer
+			</h1>
+			<p
+				class="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed font-light"
+			>
 				Organize suas conversas de WhatsApp e transcreva áudios de forma rápida e segura
 			</p>
 		</div>
@@ -744,15 +775,31 @@
 		<!-- Upload Card -->
 		<div class="max-w-2xl mx-auto mb-12">
 			<div class="">
-				<form class="file-zip space-y-6" on:submit={handleSubmit} data-testid="file-upload-form">
-					<UploadButton on:update={updateFiles} {loading} disabled={isProcessingDisabled} />
+				<form
+					class="file-zip space-y-6"
+					on:submit={handleSubmit}
+					data-testid="file-upload-form"
+				>
+					<UploadButton
+						on:update={updateFiles}
+						{loading}
+						disabled={isProcessingDisabled}
+					/>
 
 					<!-- Indicador de status do processamento -->
 					{#if isProcessingDisabled}
-						<div class="bg-green-100 border border-green-300 rounded-xl p-4 text-center">
+						<div
+							class="bg-green-100 border border-green-300 rounded-xl p-4 text-center"
+						>
 							<div class="flex items-center justify-center space-x-2">
-								<div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-									<svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+								<div
+									class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center"
+								>
+									<svg
+										class="w-3 h-3 text-white"
+										fill="currentColor"
+										viewBox="0 0 20 20"
+									>
 										<path
 											fill-rule="evenodd"
 											d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -760,7 +807,9 @@
 										></path>
 									</svg>
 								</div>
-								<span class="text-green-800 font-semibold">Conversa processada com sucesso!</span>
+								<span class="text-green-800 font-semibold"
+									>Conversa processada com sucesso!</span
+								>
 							</div>
 							<p class="text-green-700 text-sm mt-2">
 								Selecione um novo arquivo para processar outra conversa.
@@ -793,17 +842,25 @@
 				>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-3">
-							<div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+							<div
+								class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"
+							>
 								<MessageCircle class="w-6 h-6 text-white" />
 							</div>
 							<div>
-								<h3 class="text-lg font-semibold text-white">Conversa Organizada</h3>
-								<p class="text-sm text-white/80">{messages.length} mensagens processadas</p>
+								<h3 class="text-lg font-semibold text-white">
+									Conversa Organizada
+								</h3>
+								<p class="text-sm text-white/80">
+									{messages.length} mensagens processadas
+								</p>
 							</div>
 						</div>
 						<div class="flex items-center space-x-2">
 							<div class="px-3 py-1 bg-white/20 rounded-full">
-								<span class="text-xs font-medium text-white">{isApple ? 'iOS' : 'Android'}</span>
+								<span class="text-xs font-medium text-white"
+									>{isApple ? 'iOS' : 'Android'}</span
+								>
 							</div>
 						</div>
 					</div>
@@ -815,16 +872,20 @@
 				>
 					{#each messages as message, index}
 						{@const attachedPdfMsg = message.FileAttached && message.links}
-						{@const isOutgoing = getSideByDevice(isApple)[(message?.ID || 1) - 1] === 'right'}
+						{@const isOutgoing =
+							getSideByDevice(isApple)[(message?.ID || 1) - 1] === 'right'}
 
-						<div class="message-wrapper animate-slide-in" style="animation-delay: {index * 0.05}s">
+						<div
+							class="message-wrapper animate-slide-in"
+							style="animation-delay: {index * 0.05}s"
+						>
 							<div class="flex {isOutgoing ? 'justify-end' : 'justify-start'} mb-3">
 								<div class="max-w-[75%] sm:max-w-[85%] group">
 									<!-- Bubble da mensagem -->
 									<div
 										class="relative message-bubble {isOutgoing
 											? 'bg-whatsapp-sent text-gray-800 message-sent'
-											: 'bg-white text-gray-800 message-received'} 
+											: 'bg-white text-gray-800 message-received'}
 										p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
 									>
 										<!-- Header da mensagem -->
@@ -852,8 +913,12 @@
 																? 'bg-black/5'
 																: 'bg-gray-50'} rounded-lg"
 														>
-															<FileText class="w-4 h-4 text-gray-600 flex-shrink-0" />
-															<span class="text-sm text-gray-600 truncate">
+															<FileText
+																class="w-4 h-4 text-gray-600 flex-shrink-0"
+															/>
+															<span
+																class="text-sm text-gray-600 truncate"
+															>
 																{getFileName(message.FileAttached)}
 															</span>
 														</div>
@@ -866,7 +931,9 @@
 																		on:click={() =>
 																			openMediaModal(
 																				link,
-																				getFileName(message.FileAttached),
+																				getFileName(
+																					message.FileAttached
+																				),
 																				'pdf',
 																				message.links
 																			)}
@@ -874,7 +941,9 @@
 																			e.key === 'Enter' &&
 																			openMediaModal(
 																				link,
-																				getFileName(message.FileAttached),
+																				getFileName(
+																					message.FileAttached
+																				),
 																				'pdf',
 																				message.links
 																			)}
@@ -891,8 +960,12 @@
 																		<div
 																			class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
 																		>
-																			<div class="bg-white/90 rounded-full p-2">
-																				<FileText class="w-4 h-4 text-gray-700" />
+																			<div
+																				class="bg-white/90 rounded-full p-2"
+																			>
+																				<FileText
+																					class="w-4 h-4 text-gray-700"
+																				/>
 																			</div>
 																		</div>
 																	</div>
@@ -908,8 +981,12 @@
 																class="inline-flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700 underline underline-offset-2 hover:no-underline transition-colors"
 																data-testid="pdf-link"
 															>
-																<FileText class="w-3 h-3 flex-shrink-0" />
-																<span class="truncate">Baixar PDF completo</span>
+																<FileText
+																	class="w-3 h-3 flex-shrink-0"
+																/>
+																<span class="truncate"
+																	>Baixar PDF completo</span
+																>
 															</a>
 														{/if}
 													</div>
@@ -917,10 +994,14 @@
 
 												<!-- Arquivos de áudio -->
 												{#if isAudioFile(message.FileAttached)}
-													<div class="mb-2 w-full max-w-full overflow-hidden">
+													<div
+														class="mb-2 w-full max-w-full overflow-hidden"
+													>
 														<div class="w-full max-w-full">
 															<Audio
-																filename={getFileName(message.FileAttached)}
+																filename={getFileName(
+																	message.FileAttached
+																)}
 																fileUrl={message.FileURL}
 																audioTranscription={message.AudioTranscription}
 															/>
@@ -934,14 +1015,18 @@
 															on:click={() =>
 																openMediaModal(
 																	message.FileURL,
-																	getFileName(message.FileAttached),
+																	getFileName(
+																		message.FileAttached
+																	),
 																	'image'
 																)}
 															on:keydown={(e) =>
 																e.key === 'Enter' &&
 																openMediaModal(
 																	message.FileURL,
-																	getFileName(message.FileAttached),
+																	getFileName(
+																		message.FileAttached
+																	),
 																	'image'
 																)}
 															tabindex="0"
@@ -956,8 +1041,12 @@
 															<div
 																class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
 															>
-																<div class="bg-white/90 rounded-full p-3">
-																	<div class="w-4 h-4 border-2 border-gray-700 rounded-sm"></div>
+																<div
+																	class="bg-white/90 rounded-full p-3"
+																>
+																	<div
+																		class="w-4 h-4 border-2 border-gray-700 rounded-sm"
+																	></div>
 																</div>
 															</div>
 														</div>
@@ -965,7 +1054,9 @@
 													<!-- Vídeos -->
 												{:else if isVideoFile(message.FileAttached)}
 													<div class="mb-2">
-														<div class="rounded-lg overflow-hidden shadow-lg max-w-xs">
+														<div
+															class="rounded-lg overflow-hidden shadow-lg max-w-xs"
+														>
 															<Video fileURL={message.FileURL} />
 														</div>
 													</div>
@@ -976,8 +1067,12 @@
 															? 'bg-black/5'
 															: 'bg-gray-50'} rounded-lg"
 													>
-														<FileText class="w-4 h-4 text-gray-600 flex-shrink-0" />
-														<span class="text-sm text-gray-600 truncate">
+														<FileText
+															class="w-4 h-4 text-gray-600 flex-shrink-0"
+														/>
+														<span
+															class="text-sm text-gray-600 truncate"
+														>
 															{getFileName(message.FileAttached)}
 														</span>
 													</div>
@@ -998,9 +1093,10 @@
 												{formatTime(message.Time)}
 											</span>
 											<!-- Indicador de lida apenas para mensagens enviadas -->
-										{#if isOutgoing}
-										<span class="text-xs text-gray-400"></span>
-										{/if}										</div>
+											{#if isOutgoing}
+												<span class="text-xs text-gray-400"></span>
+											{/if}
+										</div>
 
 										<!-- Indicador de lida (apenas para mensagens enviadas) -->
 										{#if isOutgoing}
@@ -1029,7 +1125,9 @@
 
 		<!-- Instruções -->
 		<div class="max-w-3xl mx-auto mb-12">
-			<div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8">
+			<div
+				class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8"
+			>
 				<h3 class="text-xl font-bold text-gray-800 mb-6">Como usar o WhatsOrganizer</h3>
 				<p class="text-gray-600 leading-relaxed mb-6">
 					Faça o upload do seu arquivo exportado do WhatsApp em formato <b>.zip</b>.
@@ -1084,13 +1182,13 @@
 			on:keydown={(e) => e.key === 'Enter' && toggleMediaModal()}
 			class="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4"
 			transition:fade={{ duration: 300 }}
->
+		>
 			<div
 				class="relative bg-white rounded-2xl shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden"
 				on:click|stopPropagation
 				role="presentation"
 				tabindex="-1"
-				>
+			>
 				<!-- Header do Modal -->
 				<div class="flex items-center justify-between p-4 bg-whatsapp-header text-gray-800">
 					<div class="flex items-center space-x-3 min-w-0 flex-1">
@@ -1133,7 +1231,9 @@
 					{:else if currentMedia.type === 'pdf'}
 						<!-- PDF com todas as páginas -->
 						<div class="space-y-6">
-							<h3 class="text-lg font-semibold text-gray-800 mb-4">Visualização do Documento</h3>
+							<h3 class="text-lg font-semibold text-gray-800 mb-4">
+								Visualização do Documento
+							</h3>
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 								{#each currentMedia.links as link, linkIndex}
 									{#if !(linkIndex % 2) && currentMedia.links[linkIndex + 1] !== 'pdf'}
@@ -1168,23 +1268,27 @@
 			role="presentation"
 			tabindex="-1"
 			transition:fade={{ duration: 300 }}
->
+		>
 			<div
-  class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
-  on:click|stopPropagation
-  role="presentation"
-  tabindex="-1"
->
+				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
+				on:click|stopPropagation
+				role="presentation"
+				tabindex="-1"
+			>
 				<!-- Header do Modal -->
 				<div class="bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-6 text-white">
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-3">
-							<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+							<div
+								class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center"
+							>
 								<AlertTriangle class="w-6 h-6" />
 							</div>
 							<div>
 								<h2 class="text-2xl font-bold tracking-tight">Limitações</h2>
-								<p class="text-white/90 text-sm mt-1">Informações importantes sobre o sistema</p>
+								<p class="text-white/90 text-sm mt-1">
+									Informações importantes sobre o sistema
+								</p>
 							</div>
 						</div>
 						<button
@@ -1201,43 +1305,63 @@
 				<div class="px-8 py-8">
 					<div class="space-y-6">
 						<div class="flex items-start space-x-4">
-							<div class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+							<div
+								class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"
+							></div>
 							<div>
-								<h4 class="font-semibold text-gray-900 mb-1">Grupos não suportados</h4>
+								<h4 class="font-semibold text-gray-900 mb-1">
+									Grupos não suportados
+								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									Atualmente, o sistema processa apenas conversas individuais do WhatsApp.
+									Atualmente, o sistema processa apenas conversas individuais do
+									WhatsApp.
 								</p>
 							</div>
 						</div>
 
 						<div class="flex items-start space-x-4">
-							<div class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+							<div
+								class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"
+							></div>
 							<div>
-								<h4 class="font-semibold text-gray-900 mb-1">Limite de arquivo: {PUBLIC_MAX_UPLOAD_MB} MB</h4>
+								<h4 class="font-semibold text-gray-900 mb-1">
+									Limite de arquivo: {PUBLIC_MAX_UPLOAD_MB} MB
+								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									O tamanho máximo permitido para upload é de {PUBLIC_MAX_UPLOAD_MB} megabytes por arquivo.
+									O tamanho máximo permitido para upload é de {PUBLIC_MAX_UPLOAD_MB}
+									megabytes por arquivo.
 								</p>
 							</div>
 						</div>
 
 						<div class="flex items-start space-x-4">
-							<div class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+							<div
+								class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"
+							></div>
 							<div>
-								<h4 class="font-semibold text-gray-900 mb-1">Sem garantia de autenticidade</h4>
+								<h4 class="font-semibold text-gray-900 mb-1">
+									Sem garantia de autenticidade
+								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									O sistema não verifica a autenticidade das mensagens processadas.
+									O sistema não verifica a autenticidade das mensagens
+									processadas.
 								</p>
 							</div>
 						</div>
 						<div class="flex items-start space-x-4">
-							<div class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+							<div
+								class="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"
+							></div>
 							<div>
-								<h4 class="font-semibold text-gray-900 mb-1">Projeto Open Source</h4>
+								<h4 class="font-semibold text-gray-900 mb-1">
+									Projeto Open Source
+								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									Este sistema é <strong>open source</strong> e pode ser livremente auditado por
-									qualquer pessoa. Confira o código completo no
+									Este sistema é <strong>open source</strong> e pode ser
+									livremente auditado por qualquer pessoa. Confira o código
+									completo no
 									<a
-										href="https://github.com/brpl20/whats-organizer-front"
+										href="https://github.com/brpl20/whats-organizer"
 										target="_blank"
 										class="text-blue-600 hover:underline"
 									>
@@ -1270,23 +1394,27 @@
 			role="presentation"
 			tabindex="-1"
 			transition:fade={{ duration: 300 }}
->
-		<div
+		>
+			<div
 				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
 				on:click|stopPropagation
 				role="presentation"
 				tabindex="-1"
->
+			>
 				<!-- Header do Modal -->
 				<div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-6 text-white">
 					<div class="flex items-center justify-between">
 						<div class="flex items-center space-x-3">
-							<div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+							<div
+								class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center"
+							>
 								<Shield class="w-6 h-6" />
 							</div>
 							<div>
 								<h2 class="text-2xl font-bold tracking-tight">LGPD</h2>
-								<p class="text-white/90 text-sm mt-1">Lei Geral de Proteção de Dados</p>
+								<p class="text-white/90 text-sm mt-1">
+									Lei Geral de Proteção de Dados
+								</p>
 							</div>
 						</div>
 						<button
@@ -1308,15 +1436,20 @@
 							>
 								<Shield class="w-8 h-8 text-green-600" />
 							</div>
-							<h3 class="text-xl font-bold text-gray-900 mb-2">Seus dados estão seguros</h3>
+							<h3 class="text-xl font-bold text-gray-900 mb-2">
+								Seus dados estão seguros
+							</h3>
 						</div>
 
 						<div class="bg-green-50 rounded-xl p-6 border border-green-100">
 							<p class="text-gray-700 leading-relaxed text-center">
-								<strong class="text-green-800">Não coletamos nenhum dado pessoal</strong> e todos os
-								arquivos enviados são automaticamente
-								<strong class="text-green-800">destruídos após o processamento</strong>, garantindo
-								total privacidade e segurança.
+								<strong class="text-green-800"
+									>Não coletamos nenhum dado pessoal</strong
+								>
+								e todos os arquivos enviados são automaticamente
+								<strong class="text-green-800"
+									>destruídos após o processamento</strong
+								>, garantindo total privacidade e segurança.
 							</p>
 						</div>
 
@@ -1336,7 +1469,9 @@
 								>
 									<span class="text-2xl">🗑️</span>
 								</div>
-								<p class="text-sm font-semibold text-gray-700">Arquivos removidos</p>
+								<p class="text-sm font-semibold text-gray-700">
+									Arquivos removidos
+								</p>
 								<p class="text-xs text-gray-500">automaticamente</p>
 							</div>
 						</div>
@@ -1363,7 +1498,6 @@
 		--whatsapp-sent: #dcf8c6;
 	}
 
-
 	.bg-whatsapp-chat-bg {
 		background: url('/whatsback.png') no-repeat center center;
 		background-size: cover;
@@ -1376,8 +1510,6 @@
 	.bg-whatsapp-sent {
 		background-color: var(--whatsapp-sent);
 	}
-
-
 
 	/* Padrão de fundo do WhatsApp exato */
 	.bg-whatsapp-chat-pattern {
