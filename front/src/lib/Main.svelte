@@ -1310,7 +1310,7 @@
 							></div>
 							<div>
 								<h4 class="font-semibold text-gray-900 mb-1">
-									Grupos não suportados
+									Grupos não suportados*
 								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
 									Atualmente, o sistema processa apenas conversas individuais do
