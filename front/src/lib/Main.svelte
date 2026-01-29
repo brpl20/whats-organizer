@@ -535,8 +535,7 @@
 	};
 
 	async function generatePDF() {
-		if (!chatContainer) {
-			console.error('Chat container not found');
+		if (!messages?.length) {
 			toast = { type: 'error', text: 'Não há chat para imprimir', isSecurityError: false };
 			return;
 		}
@@ -548,20 +547,15 @@
 		connectSocket();
 
 		try {
-			const formData = new FormData();
-			const zipFile = files[0];
-			const fileWithMessages = await addMessagesJson(zipFile);
-
-			formData.append('file', fileWithMessages);
-
 			const response = await fetch(`${PUBLIC_API_URL}/download-pdf`, {
 				method: 'POST',
-				body: formData
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ messages, isApple: isApple })
 			});
 
 			if (!response.ok) {
 				toast = { type: 'error', text: 'Erro ao gerar o PDF', isSecurityError: false };
-				console.error(error, await response.text());
+				console.error('PDF error', await response.text());
 				return;
 			}
 
@@ -580,7 +574,7 @@
 			removeToast();
 		} catch (e) {
 			toast = { type: 'error', text: 'Erro ao Processar Requisição', isSecurityError: false };
-			console.error(error, e);
+			console.error('PDF error', e);
 		}
 	}
 

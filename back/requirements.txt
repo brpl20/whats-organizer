@@ -38,11 +38,10 @@ openai==1.69.0
 packaging==25.0
 pdf2image==1.17.0
 pillow==11.0.0
-playwright==1.49.1
+weasyprint==62.3
 propcache==0.3.1
 pydantic==2.11.0
 pydantic_core==2.33.0
-pyee==12.0.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 python-engineio==4.12.0
