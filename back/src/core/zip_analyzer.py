@@ -89,13 +89,16 @@ class ZipAnalyzer:
         if "Creation systems:" in analysis_result:
             system_info = analysis_result.split("Creation systems:")[1].split("\n")[0].strip()
             self.analysis_data.creation_system = system_info
-        
-        # Determine device type
+
+        # Primary detection: check if _chat.txt exists (iPhone format)
+        if "Mac format WhatsApp backup detected" in analysis_result:
+            self.analysis_data.detected_device = DeviceType.IPHONE.value
+            return
+
+        # Fallback: creation system heuristic
         self.analysis_data.detected_device = DeviceType.ANDROID.value
 
-        if any(sys in system_info for sys in ["MS-DOS", "OS/2", "Windows", "NTFS", "VFAT", "UNIX"]):
-            self.analysis_data.detected_device = DeviceType.ANDROID.value
-        elif any(sys in system_info for sys in ["Macintosh", "OS X", "Darwin", "Z-System"]):
+        if any(s in system_info for s in ["Macintosh", "OS X", "Darwin", "Z-System"]):
             self.analysis_data.detected_device = DeviceType.IPHONE.value
 
     def _extract_contact(self, analysis_result: str) -> None:
@@ -163,7 +166,7 @@ class ZipAnalyzer:
             with open(chat_file_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     # iPhone format: [dd/mm/yyyy, hh:mm:ss] Contact Name: message
-                    match = re.match(r'\[(\d{2}/\d{2}/\d{4}), (\d{2}:\d{2}:\d{2})\] ([^:]+):', line)
+                    match = re.match(r'\[(\d{2}/\d{2}/\d{4}),? (\d{2}:\d{2}(?::\d{2})?)\] ([^:]+):', line)
                     if match:
                         contact_name = match.group(3).strip()
                         self.analysis_data.whatsapp_contact = contact_name

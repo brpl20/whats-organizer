@@ -133,6 +133,8 @@ jobs:
             if ! command -v ffmpeg >/dev/null 2>&1; then
               pacman --noconfirm -S ffmpeg
             fi
+            # WeasyPrint system dependencies (Cairo, Pango, GDK-Pixbuf)
+            pacman --noconfirm -S --needed cairo pango gdk-pixbuf2 libffi
           fi
 
           for USERVAL in "${!USER_GROUP_LIST[@]}"; do

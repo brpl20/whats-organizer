@@ -22,7 +22,7 @@ import os
 
 from api.whatsapp_api import create_whatsapp_api, WhatsAppAPI
 
-from src.utils.print_page_pdf import print_page_pdf
+from src.utils.generate_pdf_weasyprint import generate_pdf
 
 port_env = getenv("FLASK_PORT")
 load_dotenv(override=True)
@@ -45,6 +45,7 @@ cors_origins = [
     "https://whatsorganizer.com.br",
     "https://www.whatsorganizer.com.br",
     "http://localhost:5173",
+    "http://localhost:5174",
     "http://localhost:1337"
 ]
 
@@ -115,14 +116,22 @@ def run_coroutine_sync(coro: Awaitable[T]) -> T:
 
 @app.route('/download-pdf', methods=['POST'])
 def download_pdf():
-    """Legacy PDF download endpoint - keep for compatibility"""
-    file = request.files.get('file')
-    if not file:
-        return jsonify({'Erro': 'Erro ao Obter Anexos'}), 400
-    
+    """Generate PDF from chat messages using WeasyPrint"""
     from flask import Response
-    pdf_bytes = executor.submit(run_async, print_page_pdf(file, sock_send)).result()
-    
+
+    data = request.get_json(silent=True)
+    if not data or 'messages' not in data:
+        return jsonify({'Erro': 'Dados de mensagens nao encontrados'}), 400
+
+    messages = data['messages']
+    is_apple = bool(data.get('isApple', False))
+
+    try:
+        pdf_bytes = generate_pdf(messages, is_apple, sock_send)
+    except Exception as e:
+        print(f"PDF generation error: {e}")
+        return jsonify({'Erro': 'Erro ao gerar o PDF'}), 500
+
     return Response(
         pdf_bytes,
         mimetype='application/pdf',

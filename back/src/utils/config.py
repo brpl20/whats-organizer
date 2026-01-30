@@ -9,16 +9,19 @@ load_dotenv(override=True)
 
 class Config:
     """Classe de configuração centralizada"""
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    
-    # Adicione outras configurações conforme necessário
-    # DATABASE_URL = os.getenv("DATABASE_URL")
-    # DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-    
+    WHISPER = os.getenv("WHISPER")
+    WHISPER_GROQ = os.getenv("WHISPER_GROQ")
+    WHISPER_LANG = os.getenv("WHISPER_LANG", "pt")
+
     @classmethod
-    def has_openai_key(cls):
-        """Verifica se a chave da OpenAI está configurada"""
-        return bool(cls.OPENAI_API_KEY)
+    def has_whisper_key(cls):
+        """Verifica se a chave do Whisper está configurada"""
+        return bool(cls.WHISPER)
+
+    @classmethod
+    def has_groq_key(cls):
+        """Verifica se a chave do Groq está configurada"""
+        return bool(cls.WHISPER_GROQ)
 
 # Instância única de configuração
 config = Config()

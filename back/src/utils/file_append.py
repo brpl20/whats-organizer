@@ -36,9 +36,12 @@ def file_appending(first_list, second_list):
 #     print(second_list)
 
 def file_appending_pdf(messages, file_links):
+    import unicodedata
     for message in messages:
         if message.get('FileAttached'):
+            msg_file = unicodedata.normalize('NFC', message['FileAttached'])
             for file_info in file_links:
-                if message['FileAttached'] == file_info['File']:
+                info_file = unicodedata.normalize('NFC', file_info['File'])
+                if msg_file == info_file:
                     message['links'] = file_info['Links']
     return messages

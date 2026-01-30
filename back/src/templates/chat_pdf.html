@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 30px 5px;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #e5ddd5;
+    color: #111;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .header {
+    background: linear-gradient(to right, #128c7e, #075e54);
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .header-title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .header-subtitle {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  .device-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .chat-body {
+    padding: 16px 12px;
+  }
+
+  .message-row {
+    display: flex;
+    margin-bottom: 8px;
+  }
+
+  .message-row.sent {
+    justify-content: flex-end;
+  }
+
+  .message-row.received {
+    justify-content: flex-start;
+  }
+
+  .bubble {
+    max-width: 75%;
+    padding: 8px 10px 4px 10px;
+    border-radius: 8px;
+    position: relative;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .bubble.sent {
+    background-color: #dcf8c6;
+  }
+
+  .bubble.received {
+    background-color: #ffffff;
+  }
+
+  .sender-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .sender-name.sent {
+    color: #2e7d32;
+  }
+
+  .sender-name.received {
+    color: #1565c0;
+  }
+
+  .msg-date {
+    font-size: 10px;
+    color: #888;
+    margin-left: 8px;
+  }
+
+  .msg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+  }
+
+  .msg-text {
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg-time {
+    text-align: right;
+    font-size: 10px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  .media-image {
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 4px 0;
+    display: block;
+  }
+
+  .audio-placeholder {
+    background: #f0f0f0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 4px 0;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .audio-icon {
+    display: inline;
+    margin-right: 4px;
+  }
+
+  .audio-transcription {
+    margin-top: 6px;
+    padding: 6px 8px;
+    background: #e8f5e9;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #333;
+    font-style: italic;
+  }
+
+  .video-placeholder {
+    background: #e3f2fd;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 4px 0;
+    font-size: 12px;
+    color: #1565c0;
+  }
+
+  .doc-placeholder {
+    background: #fff3e0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 4px 0;
+    font-size: 12px;
+    color: #e65100;
+  }
+
+  .pdf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin: 4px 0;
+  }
+
+  .pdf-grid img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+
+  .pdf-label {
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">&#128172;</div>
+    <div>
+      <div class="header-title">Conversa Organizada</div>
+      <div class="header-subtitle">{{ message_count }} mensagens processadas</div>
+    </div>
+  </div>
+  <div class="device-badge">{{ 'iOS' if is_apple else 'Android' }}</div>
+</div>
+
+<div class="chat-body">
+  {% for msg in messages %}
+    {% set side = 'sent' if msg._side == 'sent' else 'received' %}
+    <div class="message-row {{ side }}">
+      <div class="bubble {{ side }}">
+        <div class="msg-header">
+          <span class="sender-name {{ side }}">{{ msg.Name }}</span>
+          <span class="msg-date">{{ msg.Date }}</span>
+        </div>
+
+        {% if msg.FileAttached %}
+          {# PDF with page images #}
+          {% if msg._media_type == 'pdf_pages' %}
+            <div class="pdf-label">&#128196; {{ msg._filename }}</div>
+            <div class="pdf-grid">
+              {% for page_b64 in msg._pdf_pages %}
+                <img src="{{ page_b64 }}" alt="Pagina">
+              {% endfor %}
+            </div>
+
+          {# Image #}
+          {% elif msg._media_type == 'image' %}
+            <img class="media-image" src="{{ msg._b64 }}" alt="Imagem">
+
+          {# Audio #}
+          {% elif msg._media_type == 'audio' %}
+            <div class="audio-placeholder">
+              <span class="audio-icon">&#127925;</span> {{ msg._filename }}
+            </div>
+            {% if msg.get('AudioTranscription') %}
+              <div class="audio-transcription">{{ msg.AudioTranscription }}</div>
+            {% endif %}
+
+          {# Video #}
+          {% elif msg._media_type == 'video' %}
+            <div class="video-placeholder">&#127910; Video: {{ msg._filename }}</div>
+
+          {# Word doc #}
+          {% elif msg._media_type == 'docx' %}
+            <div class="doc-placeholder">&#128196; Documento: {{ msg._filename }}</div>
+
+          {% else %}
+            <div class="doc-placeholder">&#128206; {{ msg._filename }}</div>
+          {% endif %}
+        {% endif %}
+
+        {% if msg.Message %}
+          <div class="msg-text">{{ msg.Message }}</div>
+        {% endif %}
+
+        <div class="msg-time">{{ msg._time_short }}</div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+</body>
+</html>
