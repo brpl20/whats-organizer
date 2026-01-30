@@ -45,6 +45,7 @@ cors_origins = [
     "https://whatsorganizer.com.br",
     "https://www.whatsorganizer.com.br",
     "http://localhost:5173",
+    "http://localhost:5174",
     "http://localhost:1337"
 ]
 

@@ -113,6 +113,9 @@
 	const printLoading = toast.type === 'print' && !loading;
 
 	let uploadDisabled = false;
+	let isProcessing = false;
+	let isProcessingComplete = false;
+	let isGeneratingPDF = false;
 
 	// Variável para controlar se o processamento está desabilitado
 	$: isProcessingDisabled = messages?.length > 0 || uploadDisabled;
@@ -156,6 +159,8 @@
 		if (files?.length > 0) {
 			messages = [];
 			result = null;
+			isProcessingComplete = false;
+			isProcessing = false;
 		}
 	};
 
@@ -420,6 +425,8 @@
 
 			messages = null;
 			result = null;
+			isProcessing = true;
+			isProcessingComplete = false;
 			toast = {
 				text: 'Iniciando Processamento',
 				type: 'transcribe',
@@ -496,12 +503,14 @@
 				return;
 			}
 			messages = result;
+			isProcessingComplete = true;
 			isApple = messages?.[0]?.IsApple;
 
 			processConversation(file);
 		} catch (e) {
 			throw e;
 		} finally {
+			isProcessing = false;
 			uploadDisabled = false;
 		}
 	}
@@ -535,10 +544,12 @@
 	};
 
 	async function generatePDF() {
+		if (isGeneratingPDF) return;
 		if (!messages?.length) {
 			toast = { type: 'error', text: 'Não há chat para imprimir', isSecurityError: false };
 			return;
 		}
+		isGeneratingPDF = true;
 		toast = {
 			text: 'Iniciando Impressão',
 			type: 'print',
@@ -575,6 +586,8 @@
 		} catch (e) {
 			toast = { type: 'error', text: 'Erro ao Processar Requisição', isSecurityError: false };
 			console.error('PDF error', e);
+		} finally {
+			isGeneratingPDF = false;
 		}
 	}
 
@@ -781,8 +794,24 @@
 					/>
 
 					<!-- Indicador de status do processamento -->
-					{#if isProcessingDisabled}
-						<div
+					{#if isProcessing}
+					<div
+						class="bg-blue-100 border border-blue-300 rounded-xl p-4 text-center"
+					>
+						<div class="flex items-center justify-center space-x-2">
+							<div
+								class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"
+							></div>
+							<span class="text-blue-800 font-semibold"
+								>Processando conversa...</span
+							>
+						</div>
+						<p class="text-blue-700 text-sm mt-2">
+							Aguarde enquanto processamos seu arquivo.
+						</p>
+					</div>
+				{:else if isProcessingComplete}
+					<div
 							class="bg-green-100 border border-green-300 rounded-xl p-4 text-center"
 						>
 							<div class="flex items-center justify-center space-x-2">
@@ -1162,8 +1191,20 @@
 		</div>
 
 		<!-- Floating PDF download -->
-		{#if messages?.length}
-			<!-- Comentado conforme original -->
+		{#if messages?.length > 0}
+			<button
+				on:click={generatePDF}
+				disabled={isGeneratingPDF}
+				class="fixed bottom-8 right-8 z-40 flex items-center space-x-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 px-6 rounded-full shadow-2xl border border-white/20 transition-all duration-300 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+			>
+				{#if isGeneratingPDF}
+					<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+					<span>Gerando PDF...</span>
+				{:else}
+					<Download class="w-5 h-5" />
+					<span>Download PDF</span>
+				{/if}
+			</button>
 		{/if}
 	</div>
 

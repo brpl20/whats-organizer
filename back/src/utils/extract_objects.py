@@ -4,6 +4,7 @@ from re import Pattern
 from typing import Iterator, List, Literal, Mapping, Optional, Set, Tuple, TypeAlias, TypedDict, Union, cast, Callable, Tuple
 from os import PathLike
 from enum import Enum
+import unicodedata
 
 '''
 Repetição é melhor que acoplamento desnecessário, mantenha as funções
@@ -135,7 +136,7 @@ attached_message: Callable[[str], str] = lambda file: f'Arquivo Anexado: {file}'
 
 
 datetime_pattern_apple = re.compile(
-    r'\[([0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}), ([0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2})\]')
+    r'\[([0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}),? ([0-9]{1,2}:[0-9]{1,2}(?::[0-9]{1,2})?)\]')
 message_pattern_apple = re.compile(r'\] (.*?): (.*)')
 attachment_pattern_apple = re.compile(
     r'''<.{3,25}:\s # <Anexado: <Attached: etc
@@ -174,6 +175,8 @@ def read_file_lines(filename: FileLike) -> Iterator[str]:
 def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> TMessageData:
     messageStore = MessagesStore()
     uniqueIds = UniqueIdsStore()
+    # Normalize filenames to NFC — macOS os.listdir returns NFD, chat text may be NFC or vice versa
+    attachment_files = tuple(unicodedata.normalize('NFC', f) for f in attachment_files)
 
     for line in read_file_lines(input_file):
         sender: Optional[str] = None
@@ -198,9 +201,11 @@ def extract_info_iphone(input_file: FileLike, attachment_files: Tuple[str]) -> T
 
         matches = re.search(attachment_pattern_apple, message)
         attachment_test = (matches.groups() or ()) if matches else ()
+        # Normalize NFD -> NFC to match filesystem filenames (macOS/WhatsApp uses NFD for accented chars)
+        attachment_test = tuple(unicodedata.normalize('NFC', s) if s else s for s in attachment_test)
         filename_group = 0
         has_attachment = (
-            len(attachment_test) > filename_group and 
+            len(attachment_test) > filename_group and
             attachment_test[filename_group] in attachment_files
         )
         
