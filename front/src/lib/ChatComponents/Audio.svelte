@@ -1,18 +1,13 @@
 <script>
-	import { onDestroy } from 'svelte';
-	/** @type {string} */
-	export let filename;
-	/** @type {string} */
-	export let fileUrl;
-	/** @type {string} */
-	export let audioTranscription;
+	/** @type {{ filename: string, fileUrl: string, audioTranscription: string }} */
+	let { filename, fileUrl, audioTranscription } = $props();
 
 	/** @type {string} */
-	let browser = '';
+	let browser = $state('');
 
-	/** svelte 5 derived rune */
-	$: if (window?.chrome) browser = 'chrome'; 
-
+	$effect(() => {
+		if (typeof window !== 'undefined' && window?.chrome) browser = 'chrome';
+	});
 </script>
 
 <div class={`audio-message ${browser}`} data-testid="audio">
@@ -21,13 +16,12 @@
 		<audio
 			preload="metadata"
 			data-rendered="false"
-			on:loadedmetadata={({ target }) => {
-				// Para mostrar a duração do áudio ao gerar PDF;
-				target.setAttribute('data-rendered', 'true');
+			onloadedmetadata={(e) => {
+				e.currentTarget.setAttribute('data-rendered', 'true');
 			}}
 			controls
 			src={fileUrl}
-		/>
+		></audio>
 	</div>
 	{#if audioTranscription}
 		<div class="transcription">
@@ -47,7 +41,7 @@
 		color: #666;
 		margin-bottom: 5px;
 	}
-    
+
     .transcription {
 		margin-top: 5px;
 		font-style: italic;
@@ -116,13 +110,6 @@
 		bottom: var(--audio-message-time-bottom);
 	}
 
-	/**
-	Esconde a "/" no player de audio, delimitando tempo atual/ tempo total,
-	agradeço https://stackoverflow.com/users/2817442/iorgu pela resposta
-	no stackoverflow sobre como esconder essa "/"
-	Aplica somente no Chrome (Chromium, Brave e Edge acho?)
-	*/
-
 	.audio-message .wrap {
 		position: relative;
 		width: fit-content;
@@ -160,32 +147,4 @@
 			content: none !important;
 		}
 	}
-
-	/* Firefox styles don't work as firefox has no pseudo attributes
-	when inspecting the shadow dom, only webkit
-	.audio-message audio::-moz-media-controls-enclosure {
-		background-color: #e0f5e9;
-		border-radius: 25px;
-	}
-
-	.audio-message audio::-moz-media-controls-button {
-		background-color: #25d366;
-		color: white;
-		border-radius: 50%;
-		border: none;
-	}
-
-	.audio-message audio::-moz-media-controls-button:hover {
-		background-color: #1bb257;
-	}
-
-	.audio-message audio::-moz-time-slider-thumb {
-		width: 10px;
-		height: 10px;
-		background-color: #25d366;
-		border-radius: 50%;
-		border: 2px solid #fff;
-		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-	}
-	*/
 </style>
