@@ -1,33 +1,62 @@
-# Whats-Organizer
+# WhatsApp Organizer
 
-Whats-Organizer é uma aplicação feita em Flask (Python) e Svelte (JavaScript) com o objetivo de arquivar conversas.
+WhatsApp Organizer is an open-source tool for archiving and organizing WhatsApp conversations. Upload an exported `.zip` file and get a structured, searchable view of your chat with media support and PDF export.
 
-## Setup do projeto:
+Built with **Flask** (Python) and **SvelteKit** (JavaScript).
 
-Crie as envs a partir dos arquivos `.env.example`, renomeie esses arquivos para `.env` e ajuste os segredos.
+## Features
 
-### Como iniciar:
+- Process WhatsApp exported ZIP files (iOS and Android)
+- Structured chat view with WhatsApp-styled message bubbles
+- Media support: images, videos, audio, PDFs, Word documents
+- Audio transcription via Whisper API
+- PDF export of conversations
+- LGPD-compliant automatic file deletion
+- Real-time processing progress via WebSocket
+- Malware detection in uploaded files
 
-Backend:
+## Quick Start
+
+### 1. Setup environment files
+
 ```bash
-whats-organizer-monorepo ~$ cd back
-whats-organizer-monorepo/back ~$ python3 -m back
+cp back/.env.example back/.env
+cp front/.env.example front/.env
 ```
 
-Frontend:
+Edit both `.env` files with your configuration.
+
+### 2. Backend
+
 ```bash
-whats-organizer-monorepo ~$ cd front
-whats-organizer-monorepo ~$ corepack enable
-whats-organizer-monorepo ~$ corepack prepare yarn@stable --activate
-whats-organizer-monorepo ~$ yarn set version latest
-whats-organizer-monorepo ~$ yarn install
-whats-organizer-monorepo ~$ yarn dev
-
-  VITE v5.4.8  ready in 1758 ms
-
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: use --host to expose
-  ➜  press h + enter to show help
-
-# Digite o + <Enter> para abrir a aplicação no navegador automaticamente
+cd back
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python app.py
 ```
+
+### 3. Frontend
+
+```bash
+cd front
+corepack enable
+yarn install
+yarn dev
+```
+
+Open `http://localhost:5173` in your browser.
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture](docs/ARCHITECTURE.md) | System overview, modules, data flow |
+| [API Reference](docs/API.md) | All endpoints with request/response examples |
+| [Deployment](docs/DEPLOYMENT.md) | CI/CD, server setup, Nginx, RabbitMQ, SSL |
+| [Development](docs/DEVELOPMENT.md) | Local setup, testing, linting |
+| [Environment Variables](docs/ENV_VARS.md) | All env vars for backend and frontend |
+
+## License
+
+Open source. See repository for details.
