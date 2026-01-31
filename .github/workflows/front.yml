@@ -42,6 +42,7 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         fingerprint: ${{ secrets.FINGERPRINT }}
+        command_timeout: 30m
         script: |
           set -euo pipefail
           export PROJECT=front
