@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+zip_tests/
+node_modules/
+.env
+*.env
+scripts/
+.git/
+.gitignore
+README.md

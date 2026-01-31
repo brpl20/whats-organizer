@@ -1,0 +1,88 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: wo-rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "127.0.0.1:15672:15672"
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  backend-0:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: wo-backend-0
+    restart: unless-stopped
+    env_file: .env.backend
+    environment:
+      - FLASK_PORT=3000
+      - RMQ_HOST=rabbitmq
+      - RMQ_PORT=5672
+    command: >
+      gunicorn --preload -w 1
+      -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker
+      -b 0.0.0.0:3000 app:app
+      --timeout 1000 --limit-request-line 0
+    volumes:
+      - backend-0-data:/app/zip_tests
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  backend-1:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: wo-backend-1
+    restart: unless-stopped
+    env_file: .env.backend
+    environment:
+      - FLASK_PORT=3001
+      - RMQ_HOST=rabbitmq
+      - RMQ_PORT=5672
+    command: >
+      gunicorn --preload -w 1
+      -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker
+      -b 0.0.0.0:3001 app:app
+      --timeout 1000 --limit-request-line 0
+    volumes:
+      - backend-1-data:/app/zip_tests
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: wo-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./infra/docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend-0
+      - backend-1
+    networks:
+      - backend-net
+
+volumes:
+  backend-0-data:
+  backend-1-data:
+
+networks:
+  backend-net:
+    driver: bridge
