@@ -36,6 +36,17 @@ ${UPSTREAM_SERVERS}
         client_body_timeout 10m;
 
 ${CLOUDFLARE_IPS_FIREWALL}
+        proxy_intercept_errors on;
+        error_page 502 503 504 =503 @backend_down;
+
+        location @backend_down {
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'Content-Type' always;
+            add_header 'Content-Type' 'application/json' always;
+            return 503 '{"error": "Backend unavailable"}';
+        }
+
         location / {
             proxy_pass http://backend;
             proxy_set_header Host $host;

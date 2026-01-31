@@ -149,8 +149,25 @@ jobs:
           systemctl enable $(seq ${FLASK_PORT_START} ${FLASK_PORT_END} | xargs -I{} systemd-escape --template="${SERVICE}" {}) ||
             export ERROR=true
 
+          sleep 5
+          HEALTHY=false
+          for p in $(seq ${FLASK_PORT_START} ${FLASK_PORT_END}); do
+            if curl -sf "http://localhost:${p}/health" >/dev/null 2>&1; then
+              echo "Backend on port ${p} is healthy"
+              HEALTHY=true
+            else
+              echo "Backend on port ${p} is NOT responding"
+            fi
+          done
+          if [ "${HEALTHY}" != "true" ]; then
+            echo "CRITICAL: No backend instance is responding to health checks!"
+            echo "--- journalctl back@${FLASK_PORT_START}.service ---"
+            journalctl -u "back@${FLASK_PORT_START}.service" --no-pager -n 50 || true
+            export ERROR=true
+          fi
+
           if [ ${ERROR} = true ]; then
-            export MESSAGE="${MESSAGE} Falhou ao Subir Imagem de Docker!"
+            export MESSAGE="${MESSAGE} Deploy falhou! Backend nao respondeu ao health check."
           else
             export MESSAGE="${MESSAGE} Build feita com sucesso!"
           fi

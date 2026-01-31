@@ -25,7 +25,7 @@ fi
 
 UPSTREAM_SERVERS=""
 p=${FLASK_PORT_START}
-while [ "$p" -le "${FLASK_PORT_START}" ]; do
+while [ "$p" -le "${FLASK_PORT_END}" ]; do
   UPSTREAM_SERVERS=$(printf '%sserver %s:%s;\n' "${UPSTREAM_SERVERS}" "${NGINX_LOCALHOST}" "${p}")
   p=$((p + 1))
 done
