@@ -1,0 +1,15 @@
+meta {
+  name: Serve Media
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/media/:filename
+  body: none
+  auth: none
+}
+
+params:path {
+  filename: example.png
+}

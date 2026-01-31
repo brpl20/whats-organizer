@@ -1,0 +1,19 @@
+meta {
+  name: Process ZIP
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/process?uid=test-uid-123
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+body:multipart-form {
+  file: @file()
+}
