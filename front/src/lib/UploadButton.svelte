@@ -1,21 +1,23 @@
 <script>
-	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import UploadIcon from './UploadIcon.svelte';
 
-	export let loading = false;
-	export let disabled = false;
+	let { loading = false, disabled = false, onupdate = () => {} } = $props();
 
-	/** @type {FileList} */
-	let files = [];
+	/** @type {File[]} */
+	let files = $state([]);
 	/** @type {HTMLInputElement | null} */
-	let fileInput = null;
-	let isDragging = false;
+	let fileInput = $state(null);
+	let isDragging = $state(false);
 
-	let svgY = 45;
-	$: files?.length && (svgY += files.length * 15);
-	const dispatch = createEventDispatcher();
-	$: dispatch('update', files);
+	let svgY = $state(45);
+	$effect(() => {
+		if (files?.length) svgY = 45 + files.length * 15;
+	});
+
+	$effect(() => {
+		onupdate(files);
+	});
 
 	const handleDrop = (event) => {
 		event.preventDefault();
@@ -62,15 +64,15 @@
         ${isDragging
 				? "border-emerald-500 bg-emerald-50 scale-105"
 				: "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"}`}
-			on:dragover|preventDefault={handleDragOver}
-			on:dragleave={handleDragLeave}
-			on:drop|preventDefault={handleDrop}
-			on:click={triggerFileInput}
+			ondragover={(e) => { e.preventDefault(); isDragging = true; }}
+			ondragleave={() => { isDragging = false; }}
+			ondrop={(e) => { handleDrop(e); }}
+			onclick={triggerFileInput}
 			type="button"
 			aria-label="Drop files here or click to upload"
 		>
 			<div class="flex flex-col items-center space-y-4">
-				<!-- Ícone / Spinner -->
+				<!-- Icone / Spinner -->
 				<div
 					class={`p-6 rounded-full transition-all duration-300
           ${isDragging
@@ -129,7 +131,7 @@
 			type="file"
 				bind:this={fileInput}
 				accept=".zip"
-				on:change={(e) => {
+				onchange={() => {
 					if (fileInput?.files) {
 						files = Array.from(fileInput.files);
 					}
@@ -142,14 +144,14 @@
 			<button
 			data-testid="submit-zip-btn"
 		    disabled={disabled || files.length === 0}
-		class="bg-gradient-to-r from-emerald-600 to-teal-600 
-		       hover:from-emerald-700 hover:to-teal-700 
-		       text-white font-bold py-4 px-12 rounded-2xl shadow-lg 
+		class="bg-gradient-to-r from-emerald-600 to-teal-600
+		       hover:from-emerald-700 hover:to-teal-700
+		       text-white font-bold py-4 px-12 rounded-2xl shadow-lg
 		       transition-all duration-300 text-lg
 		       disabled:opacity-50 disabled:cursor-not-allowed"
 			   type="submit"
 	>
-			
+
 				<div class="flex items-center space-x-3">
 					<span>Processar Arquivo</span>
 				</div>

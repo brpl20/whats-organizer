@@ -1,39 +1,39 @@
 <script>
-	import { onDestroy } from 'svelte';
 	/**
-	 * @type {string}
-	 * Cria um componente de vídeo e um thumbnail quando exporta para PDF.
+	 * Cria um componente de video e um thumbnail quando exporta para PDF.
+	 * @type {{ fileURL: string }}
 	 */
-	export let fileURL;
+	let { fileURL } = $props();
 
 	/** @type {HTMLVideoElement | null} */
-	let video;
+	let video = $state(null);
 
 	/** @type {HTMLCanvasElement | null} */
-	let canvas;
+	let canvas = $state(null);
 
-	/** @type {((this: HTMLVideoElement, ev: Event) => any) | null} */
-	let loadListener = null;
+	let renderedThumb = $state(false);
 
-	let renderedThumb = false;
+	$effect(() => {
+		if (!video || !canvas) return;
 
-	$: if (video && canvas && !loadListener) {
-		loadListener = () => {
-			const renderFrame = (rendered = false) => {
-				if (!video?.videoWidth || !video?.videoHeight) return
-				const ctx = canvas.getContext('2d');
-				canvas.width = video.videoWidth;
-				canvas.height = video.videoHeight;
+		/** @param {boolean} rendered */
+		const renderFrame = (rendered = false) => {
+			if (!video?.videoWidth || !video?.videoHeight) return;
+			const ctx = canvas.getContext('2d');
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
 
-				if (rendered) requestAnimationFrame(() => {
+			if (rendered) {
+				requestAnimationFrame(() => {
 					renderedThumb = true;
 				});
+			}
 
-				// const proportion = video.videoWidth / video.videoHeight;
-				ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-				requestAnimationFrame(() => renderFrame(true));
-			};
+			ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+			requestAnimationFrame(() => renderFrame(true));
+		};
 
+		const handler = () => {
 			try {
 				renderFrame();
 			} catch (e) {
@@ -42,21 +42,23 @@
 			}
 		};
 
-		video.addEventListener('loadeddata', loadListener);
-	}
+		video.addEventListener('loadeddata', handler);
 
-	$: if (video && renderedThumb && loadListener)
-		video.removeEventListener('loadeddata', loadListener);
+		return () => {
+			video?.removeEventListener('loadeddata', handler);
+		};
+	});
 
-	onDestroy(() => {
-		if (video && loadListener) {
-			video.removeEventListener('loadeddata', loadListener);
+	// Remove listener once thumb is rendered
+	$effect(() => {
+		if (renderedThumb && video) {
+			// Listener already cleaned up by first effect's return
 		}
 	});
 </script>
 
 <video bind:this={video} controls src={fileURL} data-rendered={renderedThumb} preload='auto'>
-	<track kind="captions" label="Vídeo enviado pelo WhatsApp" />
+	<track kind="captions" label="Video enviado pelo WhatsApp" />
 </video>
 <div class="video-thumb" data-rendered={renderedThumb}>
 	<canvas bind:this={canvas}></canvas>

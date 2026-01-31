@@ -37,28 +37,27 @@
 
 	const prod = (PUBLIC_NODE_ENV || '').toLowerCase() in ['prod', 'production'];
 
-	/** Timeout caso o socketio não consiga conectar */
+	/** Timeout caso o socketio nao consiga conectar */
 	const socketConnTimeout = 5000;
 
 	const uuid = crypto.randomUUID();
 
-	/** @type {HTMLDivElement=}*/
-	let chatContainer = null;
+	/** @type {HTMLDivElement | undefined}*/
+	let chatContainer = $state(undefined);
 
-	/** @type {string=}*/
-	let showLimitacoesModal = false;
-	let showLGPDModal = false;
-	let showMediaModal = false;
+	let showLimitacoesModal = $state(false);
+	let showLGPDModal = $state(false);
+	let showMediaModal = $state(false);
 
 	/**
 	 * @typedef {object} MediaModalData
 	 * @property {string} type - 'image' | 'pdf'
-	 * @property {string} src - URL da mídia
+	 * @property {string} src - URL da midia
 	 * @property {string} filename - Nome do arquivo
-	 * @property {string[]=} links - Para PDFs com múltiplas páginas
+	 * @property {string[]=} links - Para PDFs com multiplas paginas
 	 */
-	/** @type {MediaModalData=} */
-	let currentMedia = null;
+	/** @type {MediaModalData | null} */
+	let currentMedia = $state(null);
 
 	/**
 	 * @typedef {object} ApiResult
@@ -75,8 +74,8 @@
 	 * @typedef {object} ApiError
 	 * @property {string=} Erro
 	 */
-	/** @type {(ApiResult[]|ApiError)=} */
-	let result = null;
+	/** @type {(ApiResult[]|ApiError) | null} */
+	let result = $state(null);
 	/**
 	 * @typedef {object} Message
 	 * @property {string} Date
@@ -93,32 +92,31 @@
 	 * @property {string=} thumbnail
 	 * @property {string[]} links
 	 */
-	/** @type {Message[]} */
-	let messages = [];
-	/** @type {FileList=} */
-	let files = null;
-	// maioria é android
-	let isApple = false;
+	/** @type {Message[] | null} */
+	let messages = $state(null);
+	/** @type {FileList | null} */
+	let files = $state(null);
+	// maioria e android
+	let isApple = $state(false);
 
 	/**
 	 * @typedef {Pick<ToastProps, 'text' | 'onClose'> & {type: Exclude<ToastTypes, 'all'>}} ToastType
 	 * @type {ToastType}
 	 */
-	let toast = {
+	let toast = $state({
 		text: null,
 		type: 'transcribe',
 		isSecurityError: false
-	};
-	const loading = !!toast.text && toast.type == 'transcribe';
-	const printLoading = toast.type === 'print' && !loading;
+	});
+	const loading = $derived(!!toast.text && toast.type == 'transcribe');
+	const printLoading = $derived(toast.type === 'print' && !loading);
 
-	let uploadDisabled = false;
-	let isProcessing = false;
-	let isProcessingComplete = false;
-	let isGeneratingPDF = false;
+	let uploadDisabled = $state(false);
+	let isProcessing = $state(false);
+	let isProcessingComplete = $state(false);
+	let isGeneratingPDF = $state(false);
 
-	// Variável para controlar se o processamento está desabilitado
-	$: isProcessingDisabled = messages?.length > 0 || uploadDisabled;
+	const isProcessingDisabled = $derived(messages?.length > 0 || uploadDisabled);
 
 	/** @type {Record<ToastTypes, ToastProps>} */
 	const toastMap = {
@@ -135,13 +133,13 @@
 	};
 
 	/** @type {Record<ToastTypes, ToastProps>} */
-	$: toastProps = {
+	const toastProps = $derived({
 		...toastMap[toast.type],
 		text: toast.text,
 		closed: !toast.text,
 		onClose: toast.onClose,
 		isSecurityError: toast.isSecurityError
-	};
+	});
 
 	/** @param {ToastTypes} newType */
 	const removeToast = (newType) =>
@@ -152,9 +150,9 @@
 			...(newType && { type: newType })
 		});
 
-	/** @param {CustomEvent<FileList>} event */
-	const updateFiles = (event) => {
-		files = event.detail;
+	/** @param {File[]} newFiles */
+	const updateFiles = (newFiles) => {
+		files = newFiles;
 		// Limpar mensagens quando novo arquivo for selecionado
 		if (files?.length > 0) {
 			messages = [];
@@ -390,7 +388,7 @@
 		if (isProcessingDisabled) {
 			toast = {
 				type: 'error',
-				text: 'Conversa já processada. Selecione um novo arquivo para processar novamente.',
+				text: 'Conversa ja processada. Selecione um novo arquivo para processar novamente.',
 				isSecurityError: false
 			};
 			return;
@@ -417,7 +415,7 @@
 			if (!file.name.endsWith('.zip')) {
 				toast = {
 					type: 'error',
-					text: 'Por favor confira a extensão do arquivo (.zip)',
+					text: 'Por favor confira a extensao do arquivo (.zip)',
 					isSecurityError: false
 				};
 				return;
@@ -445,7 +443,7 @@
 				console.error(e);
 				toast = {
 					type: 'error',
-					text: 'Erro ao Enviar o Arquivo, Verifique Sua Conexão.',
+					text: 'Erro ao Enviar o Arquivo, Verifique Sua Conexao.',
 					isSecurityError: false
 				};
 			});
@@ -464,7 +462,7 @@
 						) {
 							toast = {
 								type: 'error',
-								text: `⚠️ ARQUIVO PERIGOSO DETECTADO!\n\n${errorData.Erro}\n\nPor favor, verifique o conteúdo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
+								text: `ARQUIVO PERIGOSO DETECTADO!\n\n${errorData.Erro}\n\nPor favor, verifique o conteudo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
 								isSecurityError: true
 							};
 						} else {
@@ -494,7 +492,7 @@
 				) {
 					toast = {
 						type: 'error',
-						text: `⚠️ ARQUIVO PERIGOSO DETECTADO!\n\n${result.Erro}\n\nPor favor, verifique o conteúdo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
+						text: `ARQUIVO PERIGOSO DETECTADO!\n\n${result.Erro}\n\nPor favor, verifique o conteudo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
 						isSecurityError: true
 					};
 				} else {
@@ -546,12 +544,12 @@
 	async function generatePDF() {
 		if (isGeneratingPDF) return;
 		if (!messages?.length) {
-			toast = { type: 'error', text: 'Não há chat para imprimir', isSecurityError: false };
+			toast = { type: 'error', text: 'Nao ha chat para imprimir', isSecurityError: false };
 			return;
 		}
 		isGeneratingPDF = true;
 		toast = {
-			text: 'Iniciando Impressão',
+			text: 'Iniciando Impressao',
 			type: 'print',
 			isSecurityError: false
 		};
@@ -584,7 +582,7 @@
 
 			removeToast();
 		} catch (e) {
-			toast = { type: 'error', text: 'Erro ao Processar Requisição', isSecurityError: false };
+			toast = { type: 'error', text: 'Erro ao Processar Requisicao', isSecurityError: false };
 			console.error('PDF error', e);
 		} finally {
 			isGeneratingPDF = false;
@@ -635,7 +633,7 @@
 	const getFileName = (path) => path.split('/').pop();
 
 	/**
-	 * Função utilizada pelo backend, pra injetar a conversa e gerar o PDF
+	 * Funcao utilizada pelo backend, pra injetar a conversa e gerar o PDF
 	 * em um navegador simulado que roda no servidor (playwright)
 	 * @param {Event & {currentTarget: EventTarget & HTMLInputElement}} e
 	 */
@@ -670,7 +668,7 @@
 	};
 </script>
 
-<!-- Toast customizado para erros de segurança -->
+<!-- Toast customizado para erros de seguranca -->
 {#if toast.text}
 	<div
 		class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out"
@@ -712,7 +710,7 @@
 					<div class="min-w-0 flex-1">
 						<h4 class="text-sm font-semibold text-gray-900">
 							{#if toast.type === 'error'}
-								{toast.isSecurityError ? 'Alerta de Segurança' : 'Erro'}
+								{toast.isSecurityError ? 'Alerta de Seguranca' : 'Erro'}
 							{:else if toast.type === 'transcribe'}
 								Processando
 							{:else if toast.type === 'print'}
@@ -722,7 +720,7 @@
 					</div>
 				</div>
 				<button
-					on:click={() => removeToast()}
+					onclick={() => removeToast()}
 					class="flex-shrink-0 p-1 hover:bg-gray-100 rounded-lg transition-colors"
 					title="Fechar"
 				>
@@ -730,7 +728,7 @@
 				</button>
 			</div>
 
-			<!-- Conteúdo do Toast -->
+			<!-- Conteudo do Toast -->
 			<div class={toast.isSecurityError ? 'p-6 pt-4' : 'p-4'}>
 				<div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
 					{toast.text}
@@ -775,7 +773,7 @@
 			<p
 				class="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed font-light"
 			>
-				Organize suas conversas de WhatsApp e transcreva áudios de forma rápida e segura
+				Organize suas conversas de WhatsApp e transcreva audios de forma rapida e segura
 			</p>
 		</div>
 
@@ -784,11 +782,11 @@
 			<div class="">
 				<form
 					class="file-zip space-y-6"
-					on:submit={handleSubmit}
+					onsubmit={handleSubmit}
 					data-testid="file-upload-form"
 				>
 					<UploadButton
-						on:update={updateFiles}
+						onupdate={updateFiles}
 						{loading}
 						disabled={isProcessingDisabled}
 					/>
@@ -843,12 +841,12 @@
 			</div>
 		</div>
 
-		<!-- NAO REMOVA ESSA INPUT, ELA É USADA PRA GERAR O PDF -->
+		<!-- NAO REMOVA ESSA INPUT, ELA E USADA PRA GERAR O PDF -->
 		<input
 			data-testid="playwright-inject-media"
 			type="file"
 			accept=".zip"
-			on:change={handleBackendFileInjection}
+			onchange={handleBackendFileInjection}
 			class="hidden"
 		/>
 
@@ -925,7 +923,7 @@
 											</span>
 										</div>
 
-										<!-- Conteúdo da mensagem -->
+										<!-- Conteudo da mensagem -->
 										<div class="message-content w-full min-w-0">
 											{#if message.FileAttached}
 												<!-- Anexos PDF -->
@@ -951,7 +949,7 @@
 																{#if !(linkIndex % 2) && message.links[linkIndex + 1] !== 'pdf'}
 																	<div
 																		class="relative overflow-hidden rounded cursor-pointer"
-																		on:click={() =>
+																		onclick={() =>
 																			openMediaModal(
 																				link,
 																				getFileName(
@@ -960,7 +958,7 @@
 																				'pdf',
 																				message.links
 																			)}
-																		on:keydown={(e) =>
+																		onkeydown={(e) =>
 																			e.key === 'Enter' &&
 																			openMediaModal(
 																				link,
@@ -976,7 +974,7 @@
 																	>
 																		<img
 																			src={link}
-																			alt="Página do Documento"
+																			alt="Pagina do Documento"
 																			class="w-full h-24 object-cover"
 																			data-testid="pdf-page"
 																		/>
@@ -1015,7 +1013,7 @@
 													</div>
 												{/if}
 
-												<!-- Arquivos de áudio -->
+												<!-- Arquivos de audio -->
 												{#if isAudioFile(message.FileAttached)}
 													<div
 														class="mb-2 w-full max-w-full overflow-hidden"
@@ -1035,7 +1033,7 @@
 													<div class="mb-2" data-testid="imagem">
 														<div
 															class="relative overflow-hidden rounded-lg shadow-lg max-w-xs cursor-pointer transform hover:scale-105 transition-all duration-300"
-															on:click={() =>
+															onclick={() =>
 																openMediaModal(
 																	message.FileURL,
 																	getFileName(
@@ -1043,7 +1041,7 @@
 																	),
 																	'image'
 																)}
-															on:keydown={(e) =>
+															onkeydown={(e) =>
 																e.key === 'Enter' &&
 																openMediaModal(
 																	message.FileURL,
@@ -1058,7 +1056,7 @@
 														>
 															<img
 																src={message.FileURL}
-																alt="Mídia compartilhada"
+																alt="Midia compartilhada"
 																class="w-full h-auto object-cover"
 															/>
 															<div
@@ -1074,7 +1072,7 @@
 															</div>
 														</div>
 													</div>
-													<!-- Vídeos -->
+													<!-- Videos -->
 												{:else if isVideoFile(message.FileAttached)}
 													<div class="mb-2">
 														<div
@@ -1110,7 +1108,7 @@
 											{/if}
 										</div>
 
-										<!-- Horário da mensagem (estilo WhatsApp) -->
+										<!-- Horario da mensagem (estilo WhatsApp) -->
 										<div class="flex justify-end items-end mt-1 mb-0">
 											<span class="text-xs text-gray-500 leading-none">
 												{formatTime(message.Time)}
@@ -1146,14 +1144,14 @@
 			</div>
 		{/if}
 
-		<!-- Instruções -->
+		<!-- Instrucoes -->
 		<div class="max-w-3xl mx-auto mb-12">
 			<div
 				class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8"
 			>
 				<h3 class="text-xl font-bold text-gray-800 mb-6">Como usar o WhatsOrganizer</h3>
 				<p class="text-gray-600 leading-relaxed mb-6">
-					Faça o upload do seu arquivo exportado do WhatsApp em formato <b>.zip</b>.
+					Faca o upload do seu arquivo exportado do WhatsApp em formato <b>.zip</b>.
 				</p>
 				<div class="flex justify-center gap-6">
 					<a
@@ -1172,18 +1170,18 @@
 			</div>
 		</div>
 
-		<!-- Botões extra -->
+		<!-- Botoes extra -->
 		<div class="text-center space-x-4">
 			<button
 				class="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 transition-all duration-300 hover:scale-105"
-				on:click={toggleLimitacoesModal}
+				onclick={toggleLimitacoesModal}
 				data-tetstid="limitacoes-btn"
 			>
-				Limitações
+				Limitacoes
 			</button>
 			<button
 				class="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 transition-all duration-300 hover:scale-105"
-				on:click={toggleLGPDModal}
+				onclick={toggleLGPDModal}
 				data-tetstid="lgpd-btn"
 			>
 				LGPD
@@ -1193,7 +1191,7 @@
 		<!-- Floating PDF download -->
 		{#if messages?.length > 0}
 			<button
-				on:click={generatePDF}
+				onclick={generatePDF}
 				disabled={isGeneratingPDF}
 				class="fixed bottom-8 right-8 z-40 flex items-center space-x-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 px-6 rounded-full shadow-2xl border border-white/20 transition-all duration-300 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
 			>
@@ -1208,19 +1206,20 @@
 		{/if}
 	</div>
 
-	<!-- Modal de Mídia -->
+	<!-- Modal de Midia -->
 	{#if showMediaModal && currentMedia}
 		<div
 			role="button"
 			tabindex="0"
-			on:click={toggleMediaModal}
-			on:keydown={(e) => e.key === 'Enter' && toggleMediaModal()}
+			onclick={toggleMediaModal}
+			onkeydown={(e) => e.key === 'Enter' && toggleMediaModal()}
 			class="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4"
 			transition:fade={{ duration: 300 }}
 		>
 			<div
 				class="relative bg-white rounded-2xl shadow-2xl max-w-6xl max-h-[90vh] overflow-hidden"
-				on:click|stopPropagation
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={() => {}}
 				role="presentation"
 				tabindex="-1"
 			>
@@ -1243,7 +1242,7 @@
 							</a>
 						{/if}
 						<button
-							on:click={toggleMediaModal}
+							onclick={toggleMediaModal}
 							class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
 							title="Fechar"
 						>
@@ -1252,7 +1251,7 @@
 					</div>
 				</div>
 
-				<!-- Conteúdo do Modal -->
+				<!-- Conteudo do Modal -->
 				<div class="p-6 overflow-auto max-h-[calc(90vh-80px)]">
 					{#if currentMedia.type === 'image'}
 						<!-- Imagem em tamanho grande -->
@@ -1264,10 +1263,10 @@
 							/>
 						</div>
 					{:else if currentMedia.type === 'pdf'}
-						<!-- PDF com todas as páginas -->
+						<!-- PDF com todas as paginas -->
 						<div class="space-y-6">
 							<h3 class="text-lg font-semibold text-gray-800 mb-4">
-								Visualização do Documento
+								Visualizacao do Documento
 							</h3>
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 								{#each currentMedia.links as link, linkIndex}
@@ -1275,13 +1274,13 @@
 										<div class="relative">
 											<img
 												src={link}
-												alt="Página {Math.floor(linkIndex / 2) + 1}"
+												alt="Pagina {Math.floor(linkIndex / 2) + 1}"
 												class="w-full h-auto object-contain rounded-lg shadow-md border border-gray-200"
 											/>
 											<div
 												class="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs"
 											>
-												Página {Math.floor(linkIndex / 2) + 1}
+												Pagina {Math.floor(linkIndex / 2) + 1}
 											</div>
 										</div>
 									{/if}
@@ -1294,11 +1293,11 @@
 		</div>
 	{/if}
 
-	<!-- Modal de Limitações -->
+	<!-- Modal de Limitacoes -->
 	{#if showLimitacoesModal}
 		<div
 			class="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4"
-			on:click={toggleLimitacoesModal}
+			onclick={toggleLimitacoesModal}
 			data-testid="limitacoes-modal"
 			role="presentation"
 			tabindex="-1"
@@ -1306,7 +1305,7 @@
 		>
 			<div
 				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
-				on:click|stopPropagation
+				onclick={(e) => e.stopPropagation()}
 				role="presentation"
 				tabindex="-1"
 			>
@@ -1320,14 +1319,14 @@
 								<AlertTriangle class="w-6 h-6" />
 							</div>
 							<div>
-								<h2 class="text-2xl font-bold tracking-tight">Limitações</h2>
+								<h2 class="text-2xl font-bold tracking-tight">Limitacoes</h2>
 								<p class="text-white/90 text-sm mt-1">
-									Informações importantes sobre o sistema
+									Informacoes importantes sobre o sistema
 								</p>
 							</div>
 						</div>
 						<button
-							on:click={toggleLimitacoesModal}
+							onclick={toggleLimitacoesModal}
 							class="p-2 hover:bg-white/20 rounded-lg transition-colors"
 							title="Fechar"
 						>
@@ -1336,7 +1335,7 @@
 					</div>
 				</div>
 
-				<!-- Conteúdo -->
+				<!-- Conteudo -->
 				<div class="px-8 py-8">
 					<div class="space-y-6">
 						<div class="flex items-start space-x-4">
@@ -1345,7 +1344,7 @@
 							></div>
 							<div>
 								<h4 class="font-semibold text-gray-900 mb-1">
-									Grupos não suportados*
+									Grupos nao suportados*
 								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
 									Atualmente, o sistema processa apenas conversas individuais do
@@ -1363,7 +1362,7 @@
 									Limite de arquivo: {PUBLIC_MAX_UPLOAD_MB} MB
 								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									O tamanho máximo permitido para upload é de {PUBLIC_MAX_UPLOAD_MB}
+									O tamanho maximo permitido para upload e de {PUBLIC_MAX_UPLOAD_MB}
 									megabytes por arquivo.
 								</p>
 							</div>
@@ -1378,7 +1377,7 @@
 									Sem garantia de autenticidade
 								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									O sistema não verifica a autenticidade das mensagens
+									O sistema nao verifica a autenticidade das mensagens
 									processadas.
 								</p>
 							</div>
@@ -1392,8 +1391,8 @@
 									Projeto Open Source
 								</h4>
 								<p class="text-gray-600 text-sm leading-relaxed">
-									Este sistema é <strong>open source</strong> e pode ser
-									livremente auditado por qualquer pessoa. Confira o código
+									Este sistema e <strong>open source</strong> e pode ser
+									livremente auditado por qualquer pessoa. Confira o codigo
 									completo no
 									<a
 										href="https://github.com/brpl20/whats-organizer"
@@ -1411,7 +1410,7 @@
 						<div class="flex items-center space-x-2 text-amber-600">
 							<Info class="w-4 h-4" />
 							<span class="text-sm font-medium">
-								Essas limitações ajudam a garantir o melhor desempenho do sistema.
+								Essas limitacoes ajudam a garantir o melhor desempenho do sistema.
 							</span>
 						</div>
 					</div>
@@ -1424,7 +1423,7 @@
 	{#if showLGPDModal}
 		<div
 			class="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4"
-			on:click={toggleLGPDModal}
+			onclick={toggleLGPDModal}
 			data-testid="lgpd-modal"
 			role="presentation"
 			tabindex="-1"
@@ -1432,7 +1431,7 @@
 		>
 			<div
 				class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden transform transition-all duration-300 scale-95 hover:scale-100"
-				on:click|stopPropagation
+				onclick={(e) => e.stopPropagation()}
 				role="presentation"
 				tabindex="-1"
 			>
@@ -1448,12 +1447,12 @@
 							<div>
 								<h2 class="text-2xl font-bold tracking-tight">LGPD</h2>
 								<p class="text-white/90 text-sm mt-1">
-									Lei Geral de Proteção de Dados
+									Lei Geral de Protecao de Dados
 								</p>
 							</div>
 						</div>
 						<button
-							on:click={toggleLGPDModal}
+							onclick={toggleLGPDModal}
 							class="p-2 hover:bg-white/20 rounded-lg transition-colors"
 							title="Fechar"
 						>
@@ -1462,7 +1461,7 @@
 					</div>
 				</div>
 
-				<!-- Conteúdo -->
+				<!-- Conteudo -->
 				<div class="px-8 py-8">
 					<div class="space-y-6">
 						<div class="text-center">
@@ -1472,19 +1471,19 @@
 								<Shield class="w-8 h-8 text-green-600" />
 							</div>
 							<h3 class="text-xl font-bold text-gray-900 mb-2">
-								Seus dados estão seguros
+								Seus dados estao seguros
 							</h3>
 						</div>
 
 						<div class="bg-green-50 rounded-xl p-6 border border-green-100">
 							<p class="text-gray-700 leading-relaxed text-center">
 								<strong class="text-green-800"
-									>Não coletamos nenhum dado pessoal</strong
+									>Nao coletamos nenhum dado pessoal</strong
 								>
-								e todos os arquivos enviados são automaticamente
+								e todos os arquivos enviados sao automaticamente
 								<strong class="text-green-800"
-									>destruídos após o processamento</strong
-								>, garantindo total privacidade e segurança.
+									>destruidos apos o processamento</strong
+								>, garantindo total privacidade e seguranca.
 							</p>
 						</div>
 
@@ -1493,16 +1492,16 @@
 								<div
 									class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2"
 								>
-									<span class="text-2xl">🚫</span>
+									<span class="text-2xl">&#128683;</span>
 								</div>
-								<p class="text-sm font-semibold text-gray-700">Não coletamos</p>
+								<p class="text-sm font-semibold text-gray-700">Nao coletamos</p>
 								<p class="text-xs text-gray-500">dados pessoais</p>
 							</div>
 							<div class="text-center">
 								<div
 									class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2"
 								>
-									<span class="text-2xl">🗑️</span>
+									<span class="text-2xl">&#128465;</span>
 								</div>
 								<p class="text-sm font-semibold text-gray-700">
 									Arquivos removidos
@@ -1515,7 +1514,7 @@
 					<div class="mt-8 pt-6 border-t border-gray-100">
 						<div class="flex items-center justify-center space-x-2 text-green-600">
 							<Shield class="w-4 h-4" />
-							<span class="text-sm font-medium"> 100% compatível com a LGPD </span>
+							<span class="text-sm font-medium"> 100% compativel com a LGPD </span>
 						</div>
 					</div>
 				</div>
@@ -1546,13 +1545,13 @@
 		background-color: var(--whatsapp-sent);
 	}
 
-	/* Padrão de fundo do WhatsApp exato */
+	/* Padrao de fundo do WhatsApp exato */
 	.bg-whatsapp-chat-pattern {
 		background: url('/whatsback.png') no-repeat center center;
 		background-size: cover;
 	}
 
-	/* Estilo dos balões de conversa WhatsApp */
+	/* Estilo dos baloes de conversa WhatsApp */
 	.message-bubble {
 		border-radius: 12px;
 		position: relative;
@@ -1560,7 +1559,7 @@
 		word-wrap: break-word;
 	}
 
-	/* Triângulo do balão - mensagem enviada (direita) */
+	/* Triangulo do balao - mensagem enviada (direita) */
 	.message-sent::after {
 		content: '';
 		position: absolute;
@@ -1573,7 +1572,7 @@
 		border-top: 0px solid transparent;
 	}
 
-	/* Triângulo do balão - mensagem recebida (esquerda) */
+	/* Triangulo do balao - mensagem recebida (esquerda) */
 	.message-received::after {
 		content: '';
 		position: absolute;
@@ -1647,7 +1646,7 @@
 		}
 	}
 
-	/* Ajustes específicos para responsividade */
+	/* Ajustes especificos para responsividade */
 	@media (max-width: 640px) {
 		.message-wrapper .max-w-\[75\%\] {
 			max-width: 90%;
