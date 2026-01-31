@@ -133,8 +133,12 @@ jobs:
             if ! command -v ffmpeg >/dev/null 2>&1; then
               pacman --noconfirm -S ffmpeg
             fi
-            # WeasyPrint + lxml system dependencies (pkgconf needed for C extension builds)
-            pacman --noconfirm -S --needed cairo pango gdk-pixbuf2 libffi libxml2 libxslt pkgconf
+            # Build tools (gcc/cc/make) needed because Arch rolls Python 3.14
+            # and most packages lack pre-built wheels for it
+            pacman --noconfirm -S --needed base-devel
+            # WeasyPrint + lxml + Pillow system dependencies
+            pacman --noconfirm -S --needed cairo pango gdk-pixbuf2 libffi libxml2 libxslt pkgconf \
+              libjpeg-turbo zlib freetype2 lcms2 libwebp openjpeg2
           fi
 
           for USERVAL in "${!USER_GROUP_LIST[@]}"; do
