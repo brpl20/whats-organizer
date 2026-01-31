@@ -115,9 +115,11 @@ jobs:
           cd -
 
           sudo -u "${USER}" bash <<EOF
+          set -e
           cd "${PROJECT_DIR}/${PROJECT}"
 
-          if [ ! -d .venv ]; then
+          if [ ! -d .venv ] || ! .venv/bin/python3 -m pip --version >/dev/null 2>&1; then
+            rm -rf .venv
             python3 -m venv .venv
           fi
           source .venv/bin/activate
