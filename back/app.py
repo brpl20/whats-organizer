@@ -13,6 +13,9 @@ from typing import Awaitable, Callable, TypeVar
 from flask import Flask, request, jsonify, send_file, abort, app
 from flask_socketio import SocketIO
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from src.utils.auth import require_api_key
 from os import getenv, path
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor
@@ -51,6 +54,14 @@ cors_origins = [
 
 # Enable CORS for the Flask app
 CORS(app, resources={"/*": {"origins": cors_origins}})
+
+# Rate limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://",
+)
 
 rmq_url = f"amqp://{getenv('RMQ_HOST')}:{getenv('RMQ_PORT')}"
 socketio = SocketIO(
@@ -115,6 +126,8 @@ def run_coroutine_sync(coro: Awaitable[T]) -> T:
         loop.close()
 
 @app.route('/download-pdf', methods=['POST'])
+@limiter.limit("20/minute")
+@require_api_key
 def download_pdf():
     """Generate PDF from chat messages using WeasyPrint"""
     from flask import Response
@@ -141,6 +154,8 @@ def download_pdf():
     )
 
 @app.route('/process', methods=['POST'])
+@limiter.limit("10/minute")
+@require_api_key
 def process_zip():
     """
     Main processing endpoint using new modular system
