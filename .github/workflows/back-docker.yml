@@ -36,25 +36,16 @@ jobs:
           export GIT_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           readonly PROJECT_DIR BRANCH DISK_USAGE GIT_URL
 
-          # Clone or update repository (sparse checkout: back + infra + docker-compose)
+          # Clone or update repository
           if [ ! -d "${PROJECT_DIR}/.git" ]; then
             mkdir -p "${PROJECT_DIR}"
             cd "${PROJECT_DIR}"
-            git clone --filter=blob:none --sparse "${GIT_URL}" .
-            git sparse-checkout set back infra docker-compose.yml .env.backend.example
+            git clone --filter=blob:none "${GIT_URL}" .
           else
             cd "${PROJECT_DIR}"
             git remote set-url origin "${GIT_URL}"
             git fetch origin "${BRANCH}"
-
-            git diff --quiet HEAD "origin/${BRANCH}" -- back infra docker-compose.yml
-            CHANGED=$?
-            if [ "${CHANGED}" -eq 0 ]; then
-              echo "Nenhuma mudança detectada — verificando se .env.backend mudou"
-            fi
-
             git reset --hard "origin/${BRANCH}"
-            git sparse-checkout set back infra docker-compose.yml .env.backend.example
           fi
 
           # Write .env.backend from GitHub secret
