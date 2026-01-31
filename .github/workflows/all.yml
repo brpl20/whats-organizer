@@ -67,5 +67,4 @@ jobs:
         username: ${{ secrets.BACKEND_USERNAME }}
         key: ${{ secrets.BACKEND_KEY }}
         port: ${{ secrets.BACKEND_PORT }}
-        fingerprint: ${{ secrets.BACKEND_FINGERPRINT }}
         BACKEND_ENV: ${{ secrets.BACKEND_ENV }}

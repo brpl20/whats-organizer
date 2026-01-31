@@ -10,8 +10,6 @@ on:
         required: true
       port:
         required: true
-      fingerprint:
-        required: true
       BACKEND_ENV:
         required: true
 
@@ -27,7 +25,6 @@ jobs:
         username: ${{ secrets.username }}
         key: ${{ secrets.key }}
         port: ${{ secrets.port }}
-        fingerprint: ${{ secrets.fingerprint }}
         command_timeout: 15m
         script: |
           set -euo pipefail
