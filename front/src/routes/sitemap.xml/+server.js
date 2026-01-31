@@ -1,6 +1,20 @@
 import { PUBLIC_FRONT_URL } from '$env/static/public';
+import { getAllPosts } from '$lib/blog/posts.js';
 
 export async function GET() {
+	const posts = getAllPosts();
+
+	const blogUrls = posts
+		.map(
+			(post) => `
+    <url>
+        <loc>${PUBLIC_FRONT_URL}/blog/${post.slug}</loc>
+        <lastmod>${post.date}T00:00:00+00:00</lastmod>
+        <priority>0.7</priority>
+    </url>`
+		)
+		.join('');
+
 	return new Response(`
 <?xml version="1.0" encoding="UTF-8" ?>
 <urlset
@@ -16,6 +30,11 @@ export async function GET() {
         <lastmod>2025-1-1T21:42:13+00:00</lastmod>
         <priority>1</priority>
     </url>
+    <url>
+        <loc>${PUBLIC_FRONT_URL}/blog</loc>
+        <lastmod>${new Date().toISOString()}</lastmod>
+        <priority>0.8</priority>
+    </url>${blogUrls}
 </urlset>
 		`.trim(),
 		{
