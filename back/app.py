@@ -1,6 +1,7 @@
 """
 New Flask application using the refactored WhatsApp processor
 Maintains API compatibility while using the new modular system
+----
 """
 # Gevent monkey patching for infrastructure - MUST be first
 from gevent import monkey
@@ -35,7 +36,7 @@ port_env = port_env or getenv("FLASK_PORT")
 host_env = getenv("HOST")
 max_upload_mb_env = getenv("PUBLIC_MAX_UPLOAD_MB")
 
-prod = (prod_env or "").lower() in ("prod", "production") 
+prod = (prod_env or "").lower() in ("prod", "production")
 port = int(port_env or 5000)
 host = host_env or "0.0.0.0"
 
@@ -162,19 +163,19 @@ def process_zip():
     Maintains compatibility with existing frontend
     """
     sock_send("Iniciando Processamento...")
-    
+
     if 'file' not in request.files:
         return jsonify({"Erro": "Arquivo Não Encontrado"}), 400
-    
+
     file = request.files['file']
     uid = request.args.get('uid')
-    
+
     if not file.filename:
         return jsonify({"Erro": "Nome do Arquivo Incompatível"}), 400
-    
+
     if not (file and file.filename.endswith('.zip')):
         return jsonify({"Erro": "Arquivo inválido"}), 400
-    
+
     task_id = str(uid)
     globals.create_task(task_id)
 
@@ -211,10 +212,10 @@ def serve_media(filename):
         # Security: prevent directory traversal
         if '..' in filename or filename.startswith('/'):
             abort(403)
-        
+
         # Search for the file in all zip_tests subdirectories
         base_dir = "./zip_tests/"
-        
+
         # Look for the file in all processing directories
         for root, dirs, files in os.walk(base_dir):
             file_path = os.path.join(root, filename)
@@ -228,10 +229,10 @@ def serve_media(filename):
                     return send_file(file_path, mimetype='audio/mpeg')
                 else:
                     return send_file(file_path)
-        
+
         # If not found, return 404
         abort(404)
-        
+
     except Exception as e:
         print(f"Error serving media file {filename}: {e}")
         abort(404)
@@ -240,7 +241,7 @@ if __name__ == '__main__':
     print("🚀 Starting WhatsApp Organizer API v2.0 (Refactored)")
     print("📁 Using local file storage (no AWS dependency)")
     print("🧹 LGPD compliant with automatic file cleanup")
-    
+
     if prod:
         print("🌐 Production mode with RabbitMQ")
         socketio.run(app, host=host, port=int(port or 5000))
