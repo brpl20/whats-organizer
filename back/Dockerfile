@@ -61,7 +61,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${FLASK_PORT:-3000}/health')" || exit 1
 
-CMD ["gunicorn", "--preload", "-w", "1", \
-     "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", \
+CMD ["gunicorn", "--preload", "-w", "2", "--threads", "4", \
      "-b", "0.0.0.0:3000", "app:app", \
      "--timeout", "1000", "--limit-request-line", "0"]

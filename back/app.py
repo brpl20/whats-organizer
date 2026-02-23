@@ -3,29 +3,23 @@ New Flask application using the refactored WhatsApp processor
 Maintains API compatibility while using the new modular system
 ----
 """
-# Gevent monkey patching for infrastructure - MUST be first
-from gevent import monkey
-monkey.patch_all()
+import json
+import queue
+import threading
+import tempfile
+import time
+import shutil
 
-from src.utils.connection_handlers import handle_disconnect, handle_connect
-
-from asyncio import new_event_loop, set_event_loop
-from typing import Awaitable, Callable, TypeVar
-from flask import Flask, request, jsonify, send_file, abort, app
-from flask_socketio import SocketIO
+from flask import Flask, request, jsonify, send_file, abort, Response, stream_with_context
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from src.utils.auth import require_api_key
 from os import getenv, path
 from dotenv import load_dotenv
-from concurrent.futures import ThreadPoolExecutor
-from uuid import uuid4
-from src.utils.globals import globals
 import os
 
 from api.whatsapp_api import create_whatsapp_api, WhatsAppAPI
-
 from src.utils.generate_pdf_weasyprint import generate_pdf
 
 port_env = getenv("FLASK_PORT")
@@ -64,75 +58,46 @@ limiter = Limiter(
     storage_uri="memory://",
 )
 
-rmq_url = f"amqp://{getenv('RMQ_HOST')}:{getenv('RMQ_PORT')}"
-socketio = SocketIO(
-    app,
-    cors_allowed_origins=cors_origins,
-    ping_timeout=80,
-    async_mode='gevent' if prod else None,
-    message_queue=rmq_url if prod else None
-)
-
-executor = ThreadPoolExecutor()
-
 # Initialize new API
 whatsapp_api: WhatsAppAPI
 
 try:
     whatsapp_api = create_whatsapp_api()
-    print("✅ API initialization successful")
+    print("API initialization successful")
 except Exception as e:
-    print(f"❌ API initialization failed: {e}")
+    print(f"API initialization failed: {e}")
     import traceback
     traceback.print_exc()
 
-@socketio.on('connect')
-def on_connect():
-    socketio.emit('Smessage', {'data': 'Enviando Arquivo...'})
-    handle_connect()
 
-@socketio.on('disconnect')
-def on_disconnect():
-    """
-    Deletes all PERSONAL FILES LGPD (Most companies would sell this data for $)
-    """
-    handle_disconnect()
+def _ttl_cleanup():
+    """Background daemon that deletes zip_tests/ folders older than 1 hour every 10 minutes"""
+    base = "./zip_tests/"
+    while True:
+        time.sleep(600)  # 10 minutes
+        try:
+            if not os.path.isdir(base):
+                continue
+            now = time.time()
+            for entry in os.listdir(base):
+                entry_path = os.path.join(base, entry)
+                if os.path.isdir(entry_path):
+                    age = now - os.path.getmtime(entry_path)
+                    if age > 3600:  # 1 hour
+                        shutil.rmtree(entry_path, ignore_errors=True)
+                        print(f"TTL cleanup: removed {entry_path}")
+        except Exception as e:
+            print(f"TTL cleanup error: {e}")
 
-@socketio.on('error')
-def on_error():
-    """
-    Deletes all PERSONAL FILES LGPD (Most companies would sell this data for $)
-    """
-    handle_disconnect()
+_cleanup_thread = threading.Thread(target=_ttl_cleanup, daemon=True)
+_cleanup_thread.start()
 
-sock_send: Callable[[str], None] = lambda msg: socketio.emit('Smessage', {'data': msg})
-
-def run_async(coroutine):
-    """Executa uma corotina assíncrona em uma nova thread com seu próprio loop de eventos."""
-    loop = new_event_loop()
-    set_event_loop(loop)
-    try:
-        return loop.run_until_complete(coroutine)
-    finally:
-        loop.close()
-
-T = TypeVar('T')
-def run_coroutine_sync(coro: Awaitable[T]) -> T:
-    """ Creates a new event loop to run asynchronous operations in a threaded environment """
-    loop = new_event_loop()
-    set_event_loop(loop)
-    try:
-        return loop.run_until_complete(coro)
-    finally:
-        loop.close()
 
 @app.route('/download-pdf', methods=['POST'])
 @limiter.limit("20/minute")
 @require_api_key
 def download_pdf():
     """Generate PDF from chat messages using WeasyPrint"""
-    from flask import Response
-
     data = request.get_json(silent=True)
     if not data or 'messages' not in data:
         return jsonify({'Erro': 'Dados de mensagens nao encontrados'}), 400
@@ -141,7 +106,7 @@ def download_pdf():
     is_apple = bool(data.get('isApple', False))
 
     try:
-        pdf_bytes = generate_pdf(messages, is_apple, sock_send)
+        pdf_bytes = generate_pdf(messages, is_apple, lambda msg: None)
     except Exception as e:
         print(f"PDF generation error: {e}")
         return jsonify({'Erro': 'Erro ao gerar o PDF'}), 500
@@ -159,28 +124,78 @@ def download_pdf():
 @require_api_key
 def process_zip():
     """
-    Main processing endpoint using new modular system
+    Main processing endpoint using SSE streaming
     Maintains compatibility with existing frontend
     """
-    sock_send("Iniciando Processamento...")
-
     if 'file' not in request.files:
-        return jsonify({"Erro": "Arquivo Não Encontrado"}), 400
+        return jsonify({"Erro": "Arquivo Nao Encontrado"}), 400
 
     file = request.files['file']
-    uid = request.args.get('uid')
 
     if not file.filename:
-        return jsonify({"Erro": "Nome do Arquivo Incompatível"}), 400
+        return jsonify({"Erro": "Nome do Arquivo Incompativel"}), 400
 
     if not (file and file.filename.endswith('.zip')):
-        return jsonify({"Erro": "Arquivo inválido"}), 400
+        return jsonify({"Erro": "Arquivo invalido"}), 400
 
-    task_id = str(uid)
-    globals.create_task(task_id)
+    # Save file to a temp location BEFORE streaming starts (request context won't be available in bg thread)
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
+    try:
+        file.save(tmp)
+        tmp_path = tmp.name
+    finally:
+        tmp.close()
 
-    # Use new API with progress callback
-    return whatsapp_api.process_zip_file(file, task_id, sock_send)
+    q = queue.Queue()
+
+    def notify(msg):
+        q.put(('progress', msg))
+
+    def background():
+        working_folder = None
+        try:
+            result = whatsapp_api.process_zip_file(tmp_path, notify)
+            working_folder = result.pop('_working_folder', None)
+            if 'Erro' in result:
+                q.put(('error', result))
+            else:
+                q.put(('result', result.get('resultado', [])))
+        except Exception as e:
+            q.put(('error', {"Erro": str(e)}))
+        finally:
+            q.put(('done', None))
+            # LGPD cleanup
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            if working_folder and os.path.isdir(working_folder):
+                shutil.rmtree(working_folder, ignore_errors=True)
+
+    t = threading.Thread(target=background, daemon=True)
+    t.start()
+
+    def generate():
+        while True:
+            try:
+                kind, data = q.get(timeout=600)  # 10 min max
+            except queue.Empty:
+                yield f"event: error\ndata: {json.dumps({'Erro': 'Timeout no processamento'})}\n\n"
+                break
+
+            if kind == 'progress':
+                yield f"event: progress\ndata: {json.dumps({'message': data})}\n\n"
+            elif kind == 'result':
+                yield f"event: result\ndata: {json.dumps(data)}\n\n"
+                break
+            elif kind == 'error':
+                yield f"event: error\ndata: {json.dumps(data)}\n\n"
+                break
+            elif kind == 'done':
+                break
+
+    return Response(stream_with_context(generate()), mimetype='text/event-stream',
+                    headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -238,13 +253,7 @@ def serve_media(filename):
         abort(404)
 
 if __name__ == '__main__':
-    print("🚀 Starting WhatsApp Organizer API v2.0 (Refactored)")
-    print("📁 Using local file storage (no AWS dependency)")
-    print("🧹 LGPD compliant with automatic file cleanup")
-
-    if prod:
-        print("🌐 Production mode with RabbitMQ")
-        socketio.run(app, host=host, port=int(port or 5000))
-    else:
-        print("🔧 Development mode")
-        app.run(host=host, port=int(port or 5000), debug=True)
+    print("Starting WhatsApp Organizer API v2.0 (Refactored)")
+    print("Using local file storage (no AWS dependency)")
+    print("LGPD compliant with automatic file cleanup")
+    app.run(host=host, port=int(port or 5000), debug=not prod)

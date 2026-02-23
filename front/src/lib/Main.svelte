@@ -7,7 +7,6 @@
 		PUBLIC_MAX_UPLOAD_MB
 	} from '$env/static/public';
 	import UploadButton from './UploadButton.svelte';
-	import { onDestroy } from 'svelte';
 	import Video from './ChatComponents/Video.svelte';
 	import Audio from './ChatComponents/Audio.svelte';
 	import Toast from './Toast.svelte';
@@ -31,16 +30,7 @@
 	 * @typedef {import('./types/toast.type.js').ToastProps} ToastProps
 	 * @typedef {import('jszip')=} JsZip
 	 * @typedef {import('mammoth')=} Mammoth
-	 * @typedef {import('socket.io-client').default=} SocketIo
-	 * @typedef {import('socket.io-client').Socket<DefaultEventsMap, DefaultEventsMap>=} SocketType
 	 */
-
-	const prod = (PUBLIC_NODE_ENV || '').toLowerCase() in ['prod', 'production'];
-
-	/** Timeout caso o socketio nao consiga conectar */
-	const socketConnTimeout = 5000;
-
-	const uuid = crypto.randomUUID();
 
 	/** @type {HTMLDivElement | undefined}*/
 	let chatContainer = $state(undefined);
@@ -167,13 +157,6 @@
 	let JSZip = null;
 	/** @type {Mammoth} */
 	let mammoth = null;
-	/** @type {SocketIo} */
-	let io = null;
-
-	/** @type {SocketType} */
-	let socket = null;
-
-	onDestroy(() => (prod ? socket?.disconnect?.() : () => undefined));
 
 	const toggleLimitacoesModal = () => (showLimitacoesModal = !showLimitacoesModal);
 
@@ -348,40 +331,6 @@
 			};
 		});
 
-	async function connectSocket() {
-		if (!prod) return;
-		/**
-		 * Socket.active, if socket still retrying to connect
-		 * Socket.connected if the socket is currently connected
-		 */
-		if (socket?.connected) return;
-
-		io ??= (await import('socket.io-client')).default;
-		socket ??= io(PUBLIC_API_URL, {
-			reconnectionAttempts: 5,
-			transports: ['websocket', 'polling', 'webtransport'],
-			timeout: socketConnTimeout,
-			query: `uid=${uuid}`
-		});
-
-		/** @type {Promise<void>} */
-		const connect = new Promise((resolve, _) => socket.on('connect', resolve));
-		/** @type {Promise<void>} */
-		const timeout = new Promise((_, reject) =>
-			setTimeout(() => reject(new Error('Connection timed out')), socketConnTimeout)
-		);
-
-		Promise.race([connect, timeout]).catch((e) => {
-			console.error(e);
-			socket = null;
-		});
-
-		socket.on('Smessage', (data) => {
-			if (!data?.data) return;
-			toast = { ...toast, text: data.data };
-		});
-	}
-
 	/** @param {SubmitEvent} ev */
 	async function handleSubmit(ev) {
 		uploadDisabled = true;
@@ -431,12 +380,10 @@
 				isSecurityError: false
 			};
 
-			connectSocket();
-
 			const formData = new FormData();
 			formData.append('file', file);
 
-			const response = await fetch(`${PUBLIC_API_URL}/process?uid=${uuid}`, {
+			const response = await fetch(`${PUBLIC_API_URL}/process`, {
 				method: 'POST',
 				body: formData
 			}).catch((e) => {
@@ -454,7 +401,6 @@
 				try {
 					const errorData = await response.json();
 					if (errorData.Erro) {
-						// Check if it's a security error
 						if (
 							errorData.Erro.includes('MALICIOSO') ||
 							errorData.Erro.includes('malicious') ||
@@ -478,35 +424,80 @@
 				return;
 			}
 
-			result = await response.json();
-			if (Array.isArray(result) && result.length > 0 && result[0].ERRO) {
-				toast = { type: 'error', text: result[0].ERRO, isSecurityError: false };
-				return;
-			} // else
-			if (!Array.isArray(result) && result.Erro) {
-				// Check if it's a security error
-				if (
-					result.Erro.includes('MALICIOSO') ||
-					result.Erro.includes('malicious') ||
-					result.Erro.includes('perigosos')
-				) {
-					toast = {
-						type: 'error',
-						text: `ARQUIVO PERIGOSO DETECTADO!\n\n${result.Erro}\n\nPor favor, verifique o conteudo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
-						isSecurityError: true
-					};
-				} else {
-					toast = { type: 'error', text: result.Erro, isSecurityError: false };
-				}
-				return;
-			}
-			messages = result;
-			isProcessingComplete = true;
-			isApple = messages?.[0]?.IsApple;
+			// Read SSE stream
+			const reader = response.body.getReader();
+			const decoder = new TextDecoder();
+			let buffer = '';
+			let streamDone = false;
 
-			processConversation(file);
+			while (!streamDone) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				buffer += decoder.decode(value, { stream: true });
+
+				// Split on double-newline (SSE boundary)
+				const parts = buffer.split('\n\n');
+				// Keep the last (possibly incomplete) part in buffer
+				buffer = parts.pop() || '';
+
+				for (const part of parts) {
+					if (!part.trim()) continue;
+					const lines = part.split('\n');
+					let eventType = '';
+					let dataStr = '';
+					for (const line of lines) {
+						if (line.startsWith('event: ')) {
+							eventType = line.slice(7).trim();
+						} else if (line.startsWith('data: ')) {
+							dataStr += line.slice(6);
+						}
+					}
+					if (!eventType || !dataStr) continue;
+
+					try {
+						const parsed = JSON.parse(dataStr);
+
+						if (eventType === 'progress') {
+							toast = { ...toast, text: parsed.message };
+						} else if (eventType === 'result') {
+							result = parsed;
+							if (Array.isArray(result) && result.length > 0 && result[0].ERRO) {
+								toast = { type: 'error', text: result[0].ERRO, isSecurityError: false };
+								streamDone = true;
+								break;
+							}
+							messages = result;
+							isProcessingComplete = true;
+							isApple = messages?.[0]?.IsApple;
+							processConversation(file);
+							streamDone = true;
+							break;
+						} else if (eventType === 'error') {
+							const errMsg = parsed.Erro || 'Erro desconhecido';
+							if (
+								errMsg.includes('MALICIOSO') ||
+								errMsg.includes('malicious') ||
+								errMsg.includes('perigosos')
+							) {
+								toast = {
+									type: 'error',
+									text: `ARQUIVO PERIGOSO DETECTADO!\n\n${errMsg}\n\nPor favor, verifique o conteudo do arquivo ZIP e remova quaisquer arquivos suspeitos antes de tentar novamente.`,
+									isSecurityError: true
+								};
+							} else {
+								toast = { type: 'error', text: errMsg, isSecurityError: false };
+							}
+							streamDone = true;
+							break;
+						}
+					} catch (parseErr) {
+						console.error('SSE parse error:', parseErr, dataStr);
+					}
+				}
+			}
 		} catch (e) {
-			throw e;
+			toast = { type: 'error', text: verifyFileErr, isSecurityError: false };
+			console.error(e);
 		} finally {
 			isProcessing = false;
 			uploadDisabled = false;
@@ -553,7 +544,6 @@
 			type: 'print',
 			isSecurityError: false
 		};
-		connectSocket();
 
 		try {
 			const response = await fetch(`${PUBLIC_API_URL}/download-pdf`, {

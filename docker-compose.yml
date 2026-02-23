@@ -1,22 +1,4 @@
 services:
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: wo-rabbitmq
-    restart: unless-stopped
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    ports:
-      - "127.0.0.1:15672:15672"
-    networks:
-      - backend-net
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-
   backend-0:
     build:
       context: ./back
@@ -26,18 +8,12 @@ services:
     env_file: .env.backend
     environment:
       - FLASK_PORT=3000
-      - RMQ_HOST=rabbitmq
-      - RMQ_PORT=5672
     command: >
-      gunicorn --preload -w 1
-      -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker
+      gunicorn --preload -w 2 --threads 4
       -b 0.0.0.0:3000 app:app
       --timeout 1000 --limit-request-line 0
     volumes:
       - backend-0-data:/app/zip_tests
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     networks:
       - backend-net
 
@@ -50,18 +26,12 @@ services:
     env_file: .env.backend
     environment:
       - FLASK_PORT=3001
-      - RMQ_HOST=rabbitmq
-      - RMQ_PORT=5672
     command: >
-      gunicorn --preload -w 1
-      -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker
+      gunicorn --preload -w 2 --threads 4
       -b 0.0.0.0:3001 app:app
       --timeout 1000 --limit-request-line 0
     volumes:
       - backend-1-data:/app/zip_tests
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     networks:
       - backend-net
 
