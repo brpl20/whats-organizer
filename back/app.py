@@ -44,7 +44,8 @@ cors_origins = [
     "https://www.whatsorganizer.com.br",
     "http://localhost:5173",
     "http://localhost:5174",
-    "http://localhost:1337"
+    "http://localhost:1337",
+    "http://localhost:3001"
 ]
 
 # Enable CORS for the Flask app
