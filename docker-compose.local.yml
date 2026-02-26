@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: wo-backend
+    restart: unless-stopped
+    env_file: .env.backend
+    environment:
+      - FLASK_ENV=development
+      - FLASK_PORT=3000
+      - HOST=0.0.0.0
+      - PUBLIC_API_URL=http://localhost:3000
+      - PUBLIC_FRONT_URL=http://localhost:3001
+      - PUBLIC_MAX_UPLOAD_MB=100
+    ports:
+      - "3000:3000"
+    volumes:
+      - backend-data:/app/zip_tests
+
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        PUBLIC_API_URL: http://localhost:3000
+        PUBLIC_FRONT_URL: http://localhost:3001
+        PUBLIC_NODE_ENV: development
+        PUBLIC_MAX_UPLOAD_MB: 100
+    container_name: wo-frontend
+    restart: unless-stopped
+    environment:
+      - PUBLIC_API_URL=http://localhost:3000
+      - PUBLIC_FRONT_URL=http://localhost:3001
+      - PUBLIC_NODE_ENV=development
+      - PUBLIC_MAX_UPLOAD_MB=100
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+
+volumes:
+  backend-data:

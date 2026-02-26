@@ -333,7 +333,6 @@
 
 	/** @param {SubmitEvent} ev */
 	async function handleSubmit(ev) {
-		uploadDisabled = true;
 		if (isProcessingDisabled) {
 			toast = {
 				type: 'error',
@@ -342,6 +341,7 @@
 			};
 			return;
 		}
+		uploadDisabled = true;
 		try {
 			ev.preventDefault();
 

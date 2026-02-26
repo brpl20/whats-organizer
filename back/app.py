@@ -149,7 +149,7 @@ def process_zip():
     q = queue.Queue()
 
     def notify(msg):
-        q.put(('progress', msg))
+        q.put(('progress', msg, None))
 
     def background():
         working_folder = None
@@ -157,31 +157,40 @@ def process_zip():
             result = whatsapp_api.process_zip_file(tmp_path, notify)
             working_folder = result.pop('_working_folder', None)
             if 'Erro' in result:
-                q.put(('error', result))
+                q.put(('error', result, working_folder))
             else:
-                q.put(('result', result.get('resultado', [])))
+                q.put(('result', result.get('resultado', []), working_folder))
         except Exception as e:
-            q.put(('error', {"Erro": str(e)}))
+            q.put(('error', {"Erro": str(e)}, working_folder))
         finally:
-            q.put(('done', None))
-            # LGPD cleanup
+            q.put(('done', None, None))
+            # Clean up the uploaded temp zip immediately
             try:
                 os.unlink(tmp_path)
             except OSError:
                 pass
-            if working_folder and os.path.isdir(working_folder):
-                shutil.rmtree(working_folder, ignore_errors=True)
 
     t = threading.Thread(target=background, daemon=True)
     t.start()
 
+    def delayed_cleanup(folder, delay=300):
+        """LGPD cleanup after a delay so the client can fetch media (images, PDFs)"""
+        import time
+        time.sleep(delay)
+        if folder and os.path.isdir(folder):
+            shutil.rmtree(folder, ignore_errors=True)
+
     def generate():
+        cleanup_folder = None
         while True:
             try:
-                kind, data = q.get(timeout=600)  # 10 min max
+                kind, data, folder = q.get(timeout=600)  # 10 min max
             except queue.Empty:
                 yield f"event: error\ndata: {json.dumps({'Erro': 'Timeout no processamento'})}\n\n"
                 break
+
+            if folder:
+                cleanup_folder = folder
 
             if kind == 'progress':
                 yield f"event: progress\ndata: {json.dumps({'message': data})}\n\n"
@@ -193,6 +202,10 @@ def process_zip():
                 break
             elif kind == 'done':
                 break
+
+        # Schedule LGPD cleanup after 5 min so frontend can fetch thumbnails
+        if cleanup_folder:
+            threading.Thread(target=delayed_cleanup, args=(cleanup_folder,), daemon=True).start()
 
     return Response(stream_with_context(generate()), mimetype='text/event-stream',
                     headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
