@@ -1,0 +1,80 @@
+{
+  "messages": [
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "30/05/25",
+      "Time": "07:17",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "01/08/25",
+      "Time": "15:20",
+      "Message": "Olá:Em poucos minutos seu atendimento com *Dr. Chrystiano Nogueira* agendado para hoje às *16:00* irá começar.Clique no link abaixo para acessar a videochamada no horário agendado:-> O especialista será pontual para a consulta. Por favor, aguarde pela ligação no horário combinado_Obs: Este WhatsApp não recebe mensagens._",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "02/08/25",
+      "Time": "08:43",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "08/08/25",
+      "Time": "08:47",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": ".",
+      "ID": 2,
+      "Date": "12/12/25",
+      "Time": "15:59",
+      "Message": "Arquivo Anexado: AOS_System_Users_Manual_Ver_1.0.pdf",
+      "FileAttached": "AOS_System_Users_Manual_Ver_1.0.pdf",
+      "IsApple": false,
+      "links": [
+        "http://localhost:3002/media/AOS_System_Users_Manual_Ver_1.0.pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_AOS_System_Users_Manual_Ver_1.0/page_1.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_AOS_System_Users_Manual_Ver_1.0/page_2.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_AOS_System_Users_Manual_Ver_1.0/page_3.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_AOS_System_Users_Manual_Ver_1.0/page_4.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_AOS_System_Users_Manual_Ver_1.0/page_5.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_AOS_System_Users_Manual_Ver_1.0/page_6.png",
+        "portrait"
+      ]
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234321_processing_cb8049bf/uploaded.zip\nFile Size: 13393099 bytes (12.77 MB)\nCreated: 2026-03-14 23:43:21.287554\nModified: 2026-01-31 09:57:27.174346\nLast Accessed: 2026-01-31 10:00:33.357699\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 2\nTotal uncompressed size: 14014469 bytes (13.37 MB)\nTotal compressed size: 13392757 bytes (12.77 MB)\nOverall compression ratio: 4.44%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-12-12 15:59:56\nNewest file date: 2025-12-12 15:59:56\nFile extensions found: .pdf, .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 0f5e88821c4bb7fcca542e32c89e400a\nSHA1 hash: 6c86e5a42e3474d6f2da002321112c62ab0a455f\nSHA256 hash: fd30570c9644aa68956ca82109257dc9a6076a7a288a522f3750edebf5393006\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis:\n  Time span: 0:00:00\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 2 files from 2025-12-12 15:59:56 to 2025-12-12 15:59:56\n  Most common hours for file timestamps: 15\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nWhatsApp Chat with Doctoralia.txt\n  Size: 1014 bytes (1014.00 B)\n  Compressed: 474 bytes (474.00 B)\n  Method: Deflated\n  Compression Ratio: 53.25%\n  Modified: 2025-12-12 15:59:56\n  CRC-32: 0x5907f50d\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nAOS_System_Users_Manual_Ver_1.0.pdf\n  Size: 14013455 bytes (13.36 MB)\n  Compressed: 13392283 bytes (12.77 MB)\n  Method: Deflated\n  Compression Ratio: 4.43%\n  Modified: 2025-12-12 15:59:56\n  CRC-32: 0x177a1ebc\n  Header Offset: 553\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": null,
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 1.59,
+    "source_file": "test_heavy_pdf.zip"
+  }
+}

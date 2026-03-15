@@ -1,0 +1,80 @@
+{
+  "messages": [
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "30/05/25",
+      "Time": "07:17",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "01/08/25",
+      "Time": "15:20",
+      "Message": "Olá:Em poucos minutos seu atendimento com *Dr. Chrystiano Nogueira* agendado para hoje às *16:00* irá começar.Clique no link abaixo para acessar a videochamada no horário agendado:-> O especialista será pontual para a consulta. Por favor, aguarde pela ligação no horário combinado_Obs: Este WhatsApp não recebe mensagens._",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "02/08/25",
+      "Time": "08:43",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "08/08/25",
+      "Time": "08:47",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": ".",
+      "ID": 2,
+      "Date": "12/12/25",
+      "Time": "14:42",
+      "Message": "Arquivo Anexado: Falecimento Frei Rui 12 06 2025 Rev 3.docx",
+      "FileAttached": "Falecimento Frei Rui 12 06 2025 Rev 3.pdf",
+      "IsApple": false,
+      "links": [
+        "http://localhost:3002/media/Falecimento Frei Rui 12 06 2025 Rev 3.pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_Falecimento Frei Rui 12 06 2025 Rev 3/page_1.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Falecimento Frei Rui 12 06 2025 Rev 3/page_2.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Falecimento Frei Rui 12 06 2025 Rev 3/page_3.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Falecimento Frei Rui 12 06 2025 Rev 3/page_4.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Falecimento Frei Rui 12 06 2025 Rev 3/page_5.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Falecimento Frei Rui 12 06 2025 Rev 3/page_6.png",
+        "portrait"
+      ]
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234316_processing_ef2b6cd3/uploaded.zip\nFile Size: 2955180 bytes (2.82 MB)\nCreated: 2026-03-14 23:43:16.341838\nModified: 2026-01-31 09:57:27.138418\nLast Accessed: 2026-01-31 10:00:33.322422\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 2\nTotal uncompressed size: 2980410 bytes (2.84 MB)\nTotal compressed size: 2954824 bytes (2.82 MB)\nOverall compression ratio: 0.86%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-12-12 14:42:22\nNewest file date: 2025-12-12 14:42:22\nFile extensions found: .docx, .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 09da2686443afe9e4509a7f854c9d56a\nSHA1 hash: bc95473467e3790f3f45728416c2b14822951169\nSHA256 hash: 81a6effb04049fe513f8fdad720e1c9d9a3edba4912c4c0f1f44dc6c0ce6ea2a\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis:\n  Time span: 0:00:00\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 2 files from 2025-12-12 14:42:22 to 2025-12-12 14:42:22\n  Most common hours for file timestamps: 14\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nWhatsApp Chat with Doctoralia.txt\n  Size: 985 bytes (985.00 B)\n  Compressed: 472 bytes (472.00 B)\n  Method: Deflated\n  Compression Ratio: 52.08%\n  Modified: 2025-12-12 14:42:22\n  CRC-32: 0xb876c6ed\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nFalecimento Frei Rui 12 06 2025 Rev 3.docx\n  Size: 2979425 bytes (2.84 MB)\n  Compressed: 2954352 bytes (2.82 MB)\n  Method: Deflated\n  Compression Ratio: 0.84%\n  Modified: 2025-12-12 14:42:22\n  CRC-32: 0x2b071475\n  Header Offset: 551\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": null,
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 4.81,
+    "source_file": "test_docx.zip"
+  }
+}

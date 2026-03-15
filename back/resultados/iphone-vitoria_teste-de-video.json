@@ -1,0 +1,64 @@
+{
+  "messages": [
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:17:48",
+      "Message": "As mensagens e ligações são protegidas com a criptografia de ponta a ponta. Somente as pessoas que fazem parte da conversa podem ler, ouvir e compartilhar esse conteúdo.",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:17:48",
+      "Message": "Teste de vídeos",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:18:18",
+      "Message": "Arquivo Anexado: 00000003-VIDEO-2026-01-26-11-18-18.mp4",
+      "FileAttached": "00000003-VIDEO-2026-01-26-11-18-18.mp4",
+      "IsApple": true
+    },
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:18:46",
+      "Message": "Arquivo Anexado: 00000004-VIDEO-2026-01-26-11-18-46.mp4",
+      "FileAttached": "00000004-VIDEO-2026-01-26-11-18-46.mp4",
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:19:02",
+      "Message": "Arquivo Anexado: 00000005-VIDEO-2026-01-26-11-19-02.mp4",
+      "FileAttached": "00000005-VIDEO-2026-01-26-11-19-02.mp4",
+      "IsApple": true
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234354_processing_13cfe1b1/uploaded.zip\nFile Size: 4545446 bytes (4.33 MB)\nCreated: 2026-03-14 23:43:54.689584\nModified: 2026-01-31 09:57:27.545479\nLast Accessed: 2026-01-31 10:00:34.337589\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 4\nTotal uncompressed size: 4599962 bytes (4.39 MB)\nTotal compressed size: 4544810 bytes (4.33 MB)\nOverall compression ratio: 1.20%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-26 11:18:20\nNewest file date: 2026-01-26 11:19:10\nFile extensions found: .mp4, .txt\nCompression methods used: Deflated\nCreation systems: Z-System\nMD5 hash: d146a3ded979a7157c6907dc475ac8c7\nSHA1 hash: 04c03658507953d8b2bcb2081d53f60acd385a45\nSHA256 hash: cebf28199cef3845801b1e5a48c436c5a83cacd706f63480774214cfe0f1ad14\n\nMac format WhatsApp backup detected - skipping name extraction\n\nOrigin Analysis:\nTimestamp analysis:\n  Time span: 0:00:50\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 4 files from 2026-01-26 11:18:20 to 2026-01-26 11:19:10\n  Most common hours for file timestamps: 11\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\n00000003-VIDEO-2026-01-26-11-18-18.mp4\n  Size: 2737580 bytes (2.61 MB)\n  Compressed: 2697106 bytes (2.57 MB)\n  Method: Deflated\n  Compression Ratio: 1.48%\n  Modified: 2026-01-26 11:18:20\n  CRC-32: 0xe6fdc4f0\n  Header Offset: 0\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000004-VIDEO-2026-01-26-11-18-46.mp4\n  Size: 1248720 bytes (1.19 MB)\n  Compressed: 1246998 bytes (1.19 MB)\n  Method: Deflated\n  Compression Ratio: 0.14%\n  Modified: 2026-01-26 11:18:46\n  CRC-32: 0x2b7c4a4b\n  Header Offset: 2697190\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000005-VIDEO-2026-01-26-11-19-02.mp4\n  Size: 613120 bytes (598.75 KB)\n  Compressed: 600420 bytes (586.35 KB)\n  Method: Deflated\n  Compression Ratio: 2.07%\n  Modified: 2026-01-26 11:19:02\n  CRC-32: 0xc3fb03bf\n  Header Offset: 3944272\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n_chat.txt\n  Size: 542 bytes (542.00 B)\n  Compressed: 286 bytes (286.00 B)\n  Method: Deflated\n  Compression Ratio: 47.23%\n  Modified: 2026-01-26 11:19:10\n  CRC-32: 0xa766b1e5\n  Header Offset: 4544776\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n",
+    "detected_device": "iphone",
+    "whatsapp_contact": "Mv",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "Z-System"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 0.17,
+    "source_file": "teste-de-video.zip"
+  }
+}

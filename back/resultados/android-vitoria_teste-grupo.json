@@ -1,0 +1,22 @@
+{
+  "messages": [
+    {
+      "ERRO": "Conversas em grupo não suportadas"
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234333_processing_4077939e/uploaded.zip\nFile Size: 524 bytes (524.00 B)\nCreated: 2026-03-14 23:43:33.352226\nModified: 2026-01-31 09:57:27.482652\nLast Accessed: 2026-01-31 10:00:07.865415\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 615 bytes (615.00 B)\nTotal compressed size: 326 bytes (326.00 B)\nOverall compression ratio: 46.99%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-23 15:29:56\nNewest file date: 2026-01-23 15:29:56\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 94f2e322622209c759e99e03c0f37305\nSHA1 hash: 8a8e78ffe339a00a23ab99af5a31121737b49d47\nSHA256 hash: 9c0b7589edb19193157c6be6b884e71500419f2647274fe6984aac70f2946fbf\n\nWhatsApp Contacts Found:\n  - Whatsorganize\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Whatsorganize.txt\n  Size: 615 bytes (615.00 B)\n  Compressed: 326 bytes (326.00 B)\n  Method: Deflated\n  Compression Ratio: 46.99%\n  Modified: 2026-01-23 15:29:56\n  CRC-32: 0x2f58d7f6\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Whatsorganize",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 1,
+    "processing_time_seconds": 0.14,
+    "source_file": "teste-grupo.zip"
+  }
+}

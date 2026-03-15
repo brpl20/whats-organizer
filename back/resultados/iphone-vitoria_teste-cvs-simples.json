@@ -1,0 +1,82 @@
+{
+  "messages": [
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:10:16",
+      "Message": "As mensagens e ligações são protegidas com a criptografia de ponta a ponta. Somente as pessoas que fazem parte da conversa podem ler, ouvir e compartilhar esse conteúdo.",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:10:16",
+      "Message": "Oii",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:10:24",
+      "Message": "Teste",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:10:33",
+      "Message": "Oi teste",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:10:59",
+      "Message": "123 test",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:11:04",
+      "Message": "Whatsorganizer",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:11:13",
+      "Message": "Conversa simples",
+      "FileAttached": false,
+      "IsApple": true
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234351_processing_f6fc9956/uploaded.zip\nFile Size: 390 bytes (390.00 B)\nCreated: 2026-03-14 23:43:51.242375\nModified: 2026-01-31 09:57:27.520640\nLast Accessed: 2026-01-31 10:00:07.873286\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 501 bytes (501.00 B)\nTotal compressed size: 258 bytes (258.00 B)\nOverall compression ratio: 48.50%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-26 11:11:20\nNewest file date: 2026-01-26 11:11:20\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: Z-System\nMD5 hash: 60e53007083eab8eac8fb09759fca7a4\nSHA1 hash: b48fd36dbbdd30bbe01ef64a762ebb5f369f0386\nSHA256 hash: 4aec1c04ecfa14b4936de330e46f7f8427d3462931d07f2a7b0239c4ef084583\n\nMac format WhatsApp backup detected - skipping name extraction\n\nOrigin Analysis:\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\n_chat.txt\n  Size: 501 bytes (501.00 B)\n  Compressed: 258 bytes (258.00 B)\n  Method: Deflated\n  Compression Ratio: 48.50%\n  Modified: 2026-01-26 11:11:20\n  CRC-32: 0xaa42a912\n  Header Offset: 0\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n",
+    "detected_device": "iphone",
+    "whatsapp_contact": "Mv",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "Z-System"
+  },
+  "stats": {
+    "total_messages": 7,
+    "processing_time_seconds": 0.18,
+    "source_file": "teste-cvs-simples.zip"
+  }
+}

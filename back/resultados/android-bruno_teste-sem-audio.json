@@ -1,0 +1,118 @@
+{
+  "messages": [
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "01/04/2025",
+      "Time": "07:41",
+      "Message": "Oi, tudo bem???",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 2,
+      "Date": "01/04/2025",
+      "Time": "07:41",
+      "Message": "Quem é vc ?",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "01/04/2025",
+      "Time": "07:41",
+      "Message": "Sou do Android",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "17/04/2025",
+      "Time": "08:03",
+      "Message": "null",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "17/04/2025",
+      "Time": "08:04",
+      "Message": "Esqueceu o celular kkk",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "17/04/2025",
+      "Time": "08:04",
+      "Message": "Qualquer coisa se precisar eu levo quando estiver indo ao mercado",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 2,
+      "Date": "17/04/2025",
+      "Time": "08:04",
+      "Message": "Ahhahahaaha",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 2,
+      "Date": "17/04/2025",
+      "Time": "08:04",
+      "Message": "Não precisa amor relaxa",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "17/04/2025",
+      "Time": "08:04",
+      "Message": "Te amoooo",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "17/04/2025",
+      "Time": "08:04",
+      "Message": "Lindo",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 2,
+      "Date": "21/05/2025",
+      "Time": "15:04",
+      "Message": "Oiii",
+      "FileAttached": null,
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234308_processing_80793098/uploaded.zip\nFile Size: 571 bytes (571.00 B)\nCreated: 2026-03-14 23:43:08.823287\nModified: 2026-01-31 09:57:27.132465\nLast Accessed: 2026-01-31 10:02:00.204987\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 838 bytes (838.00 B)\nTotal compressed size: 355 bytes (355.00 B)\nOverall compression ratio: 57.64%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-05-21 15:05:12\nNewest file date: 2025-05-21 15:05:12\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 89e0808e89c2060f9e65e2e9f43acf65\nSHA1 hash: d60689963b7fa9e98f370c33d6c3164a1a258915\nSHA256 hash: e0103ee3f376f0d57588c6a451d789ff6812445eb21b4b81a9ac5945ecc29a67\n\nWhatsApp Contacts Found:\n  - Bruno Pellizzetti Novo\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Bruno Pellizzetti Novo.txt\n  Size: 838 bytes (838.00 B)\n  Compressed: 355 bytes (355.00 B)\n  Method: Deflated\n  Compression Ratio: 57.64%\n  Modified: 2025-05-21 15:05:12\n  CRC-32: 0x5ea3ba4e\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Bruno Pellizzetti Novo",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 11,
+    "processing_time_seconds": 0.17,
+    "source_file": "teste-sem-audio.zip"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "messages": [
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:21",
+      "Message": "Oiii",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "15:22",
+      "Message": "Oii tudo bem?",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:22",
+      "Message": "Tudo e você?",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "15:22",
+      "Message": "Tô bem tbn",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:22",
+      "Message": "Será que vai chover hoje?",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "15:22",
+      "Message": "Não sei, tomara que não",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:22",
+      "Message": "Acho que não vai",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:22",
+      "Message": "Ta sol",
+      "FileAttached": null,
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234327_processing_8cebe848/uploaded.zip\nFile Size: 453 bytes (453.00 B)\nCreated: 2026-03-14 23:43:27.087631\nModified: 2026-01-31 09:57:27.471742\nLast Accessed: 2026-01-31 10:00:07.863041\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 542 bytes (542.00 B)\nTotal compressed size: 273 bytes (273.00 B)\nOverall compression ratio: 49.63%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-23 15:22:56\nNewest file date: 2026-01-23 15:22:56\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 743091c0dcd61deafccd5b42d88241a2\nSHA1 hash: 099ae8df6c86cad2bb62483fca6ef4bea5dde656\nSHA256 hash: bd530d25b0241eed1d28dfda7dbd887219beda74adf4e0b8fcc4bf3bd3fb1825\n\nWhatsApp Contacts Found:\n  - Mãe\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Mãe.txt\n  Size: 542 bytes (542.00 B)\n  Compressed: 273 bytes (273.00 B)\n  Method: Deflated\n  Compression Ratio: 49.63%\n  Modified: 2026-01-23 15:22:56\n  CRC-32: 0xd96d4319\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Mãe",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 8,
+    "processing_time_seconds": 0.14,
+    "source_file": "teste-cvs-simples.zip"
+  }
+}

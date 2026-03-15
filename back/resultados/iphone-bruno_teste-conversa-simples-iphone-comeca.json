@@ -1,0 +1,64 @@
+{
+  "messages": [
+    {
+      "Name": "Pellizzetti Advocacia Bruno",
+      "ID": 1,
+      "Date": "19/08/2025",
+      "Time": "11:41:25",
+      "Message": "As mensagens e ligações são protegidas com a criptografia de ponta a ponta. Somente as pessoas que fazem parte da conversa podem ler, ouvir e compartilhar esse conteúdo.",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno",
+      "ID": 2,
+      "Date": "19/08/2025",
+      "Time": "11:41:25",
+      "Message": "Oi",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno",
+      "ID": 2,
+      "Date": "19/08/2025",
+      "Time": "11:41:36",
+      "Message": "Estou falando do iPhone",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Pellizzetti Advocacia Bruno",
+      "ID": 1,
+      "Date": "19/08/2025",
+      "Time": "11:41:45",
+      "Message": "E eu do Android!!",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Pellizzetti Advocacia Bruno",
+      "ID": 1,
+      "Date": "19/08/2025",
+      "Time": "11:41:54",
+      "Message": "Será q ele vai pegar quem é quem ???",
+      "FileAttached": false,
+      "IsApple": true
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234346_processing_d76105e4/uploaded.zip\nFile Size: 409 bytes (409.00 B)\nCreated: 2026-03-14 23:43:46.866799\nModified: 2026-01-31 09:57:27.516323\nLast Accessed: 2026-01-31 10:02:00.207051\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 482 bytes (482.00 B)\nTotal compressed size: 277 bytes (277.00 B)\nOverall compression ratio: 42.53%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-08-19 11:44:38\nNewest file date: 2025-08-19 11:44:38\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: Z-System\nMD5 hash: aeaa83bbe66452e75bd39604d54ea4c2\nSHA1 hash: e0798c27e37509fefb1ce6daf245405a871f4d07\nSHA256 hash: 36ab347d61eb42c6274389ba3201a9292e55ce4e47c41d9b84f730be4c31ea52\n\nMac format WhatsApp backup detected - skipping name extraction\n\nOrigin Analysis:\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\n_chat.txt\n  Size: 482 bytes (482.00 B)\n  Compressed: 277 bytes (277.00 B)\n  Method: Deflated\n  Compression Ratio: 42.53%\n  Modified: 2025-08-19 11:44:38\n  CRC-32: 0x4acb88b\n  Header Offset: 0\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n",
+    "detected_device": "iphone",
+    "whatsapp_contact": "Pellizzetti Advocacia Bruno",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "Z-System"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 0.17,
+    "source_file": "teste-conversa-simples-sem-nada-bruno-iphone-comeca.zip"
+  }
+}

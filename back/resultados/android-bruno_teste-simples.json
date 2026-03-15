@@ -1,0 +1,64 @@
+{
+  "messages": [
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "19/08/2025",
+      "Time": "11:45",
+      "Message": "Oiii",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "19/08/2025",
+      "Time": "11:46",
+      "Message": "Agora comeca do pelo droid",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 2,
+      "Date": "19/08/2025",
+      "Time": "11:46",
+      "Message": "Oi droid",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "19/08/2025",
+      "Time": "13:41",
+      "Message": "Muito bom sr. Droid",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "19/08/2025",
+      "Time": "13:42",
+      "Message": "Agora eu tenho esse arquivo.sh pra vc!!!!!",
+      "FileAttached": null,
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234303_processing_362d4c12/uploaded.zip\nFile Size: 479 bytes (479.00 B)\nCreated: 2026-03-14 23:43:03.147139\nModified: 2026-01-31 09:57:27.132527\nLast Accessed: 2026-01-31 10:00:07.021537\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 503 bytes (503.00 B)\nTotal compressed size: 263 bytes (263.00 B)\nOverall compression ratio: 47.71%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-08-19 13:45:46\nNewest file date: 2025-08-19 13:45:46\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 8118bae4e60de4ca2ab216b2bbea242c\nSHA1 hash: 728b1fbe42cda1fc5c79e0d1f67497716a55ef85\nSHA256 hash: 95f65c139232ea08244582c9e031fddbf5d7909ca18d1941c07c5578ed27ce68\n\nWhatsApp Contacts Found:\n  - Bruno Pellizzetti Novo\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Bruno Pellizzetti Novo.txt\n  Size: 503 bytes (503.00 B)\n  Compressed: 263 bytes (263.00 B)\n  Method: Deflated\n  Compression Ratio: 47.71%\n  Modified: 2025-08-19 13:45:46\n  CRC-32: 0xf0ab25c0\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Bruno Pellizzetti Novo",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 0.24,
+    "source_file": "teste-simples.zip"
+  }
+}

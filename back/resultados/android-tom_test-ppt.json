@@ -1,0 +1,64 @@
+{
+  "messages": [
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "30/05/25",
+      "Time": "07:17",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "01/08/25",
+      "Time": "15:20",
+      "Message": "Olá:Em poucos minutos seu atendimento com *Dr. Chrystiano Nogueira* agendado para hoje às *16:00* irá começar.Clique no link abaixo para acessar a videochamada no horário agendado:-> O especialista será pontual para a consulta. Por favor, aguarde pela ligação no horário combinado_Obs: Este WhatsApp não recebe mensagens._",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "02/08/25",
+      "Time": "08:43",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Doctoralia",
+      "ID": 1,
+      "Date": "08/08/25",
+      "Time": "08:47",
+      "Message": "<Media omitted>Dr. Chrystiano Nogueira gostaria de saber como foi o atendimento. Deixe a sua avaliação.",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": ".",
+      "ID": 2,
+      "Date": "12/12/25",
+      "Time": "15:47",
+      "Message": "DOC-20251212-WA0296. (file attached)",
+      "FileAttached": null,
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234323_processing_f80d4d03/uploaded.zip\nFile Size: 1360611 bytes (1.30 MB)\nCreated: 2026-03-14 23:43:23.007871\nModified: 2026-01-31 09:57:27.197828\nLast Accessed: 2026-01-31 10:00:33.662901\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 2\nTotal uncompressed size: 1503171 bytes (1.43 MB)\nTotal compressed size: 1360299 bytes (1.30 MB)\nOverall compression ratio: 9.50%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-12-12 15:47:48\nNewest file date: 2025-12-12 15:47:48\nFile extensions found: ., .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: d4857ccc1ec23e6777ba738435c2d506\nSHA1 hash: 5642fc029fba26a0d057a085f7f67fa8b621cbe7\nSHA256 hash: f208171bf177c218697a888ce14e227ca80c11542051b55757ef5e1722af50a7\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis:\n  Time span: 0:00:00\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 2 files from 2025-12-12 15:47:48 to 2025-12-12 15:47:48\n  Most common hours for file timestamps: 15\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nWhatsApp Chat with Doctoralia.txt\n  Size: 963 bytes (963.00 B)\n  Compressed: 459 bytes (459.00 B)\n  Method: Deflated\n  Compression Ratio: 52.34%\n  Modified: 2025-12-12 15:47:48\n  CRC-32: 0x9fe71ed0\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nDOC-20251212-WA0296.\n  Size: 1502208 bytes (1.43 MB)\n  Compressed: 1359840 bytes (1.30 MB)\n  Method: Deflated\n  Compression Ratio: 9.48%\n  Modified: 2025-12-12 15:47:48\n  CRC-32: 0xa6bf3d7f\n  Header Offset: 538\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": null,
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 0.15,
+    "source_file": "test_ppt.zip"
+  }
+}

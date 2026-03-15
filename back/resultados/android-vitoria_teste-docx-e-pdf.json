@@ -1,0 +1,68 @@
+{
+  "messages": [
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:02",
+      "Message": "Testando documentos Docx e PDF",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:03",
+      "Message": "Arquivo Anexado: INFORMATIVO_XXIII_ECCI.docx",
+      "FileAttached": "INFORMATIVO_XXIII_ECCI.pdf",
+      "IsApple": false,
+      "links": [
+        "http://localhost:3002/media/INFORMATIVO_XXIII_ECCI.pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_INFORMATIVO_XXIII_ECCI/page_1.png",
+        "portrait"
+      ]
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:04",
+      "Message": "Arquivo Anexado: Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+      "FileAttached": "Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+      "IsApple": false,
+      "links": [
+        "http://localhost:3002/media/Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_Relatório Técnico - Carrinho de controle via bluetooth./page_1.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Relatório Técnico - Carrinho de controle via bluetooth./page_2.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Relatório Técnico - Carrinho de controle via bluetooth./page_3.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Relatório Técnico - Carrinho de controle via bluetooth./page_4.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Relatório Técnico - Carrinho de controle via bluetooth./page_5.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_Relatório Técnico - Carrinho de controle via bluetooth./page_6.png",
+        "portrait"
+      ]
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234329_processing_8ec4c3a2/uploaded.zip\nFile Size: 1010250 bytes (986.57 KB)\nCreated: 2026-03-14 23:43:29.749501\nModified: 2026-01-31 09:57:27.481642\nLast Accessed: 2026-01-31 10:00:34.315178\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 3\nTotal uncompressed size: 1049260 bytes (1.00 MB)\nTotal compressed size: 1009710 bytes (986.04 KB)\nOverall compression ratio: 3.77%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-23 15:04:38\nNewest file date: 2026-01-23 15:04:38\nFile extensions found: .docx, .pdf, .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: a3c0c31ce8f27b6f84fa827573e3f088\nSHA1 hash: 9c7879a99f7db40c8b892dc10a247224798ac10b\nSHA256 hash: d6bea4b1fe155affc65b4fc44649fa4507863e0536868574ce36bbd82f781cc8\n\nWhatsApp Contacts Found:\n  - Mãe\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis:\n  Time span: 0:00:00\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 3 files from 2026-01-23 15:04:38 to 2026-01-23 15:04:38\n  Most common hours for file timestamps: 15\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Mãe.txt\n  Size: 451 bytes (451.00 B)\n  Compressed: 298 bytes (298.00 B)\n  Method: Deflated\n  Compression Ratio: 33.92%\n  Modified: 2026-01-23 15:04:38\n  CRC-32: 0x260779a3\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nINFORMATIVO_XXIII_ECCI.docx\n  Size: 698563 bytes (682.19 KB)\n  Compressed: 695706 bytes (679.40 KB)\n  Method: Deflated\n  Compression Ratio: 0.41%\n  Modified: 2026-01-23 15:04:38\n  CRC-32: 0xc99b06fb\n  Header Offset: 377\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nRelatório Técnico - Carrinho de controle via bluetooth..pdf\n  Size: 350246 bytes (342.04 KB)\n  Compressed: 313706 bytes (306.35 KB)\n  Method: Deflated\n  Compression Ratio: 10.43%\n  Modified: 2026-01-23 15:04:38\n  CRC-32: 0xf6ef97eb\n  Header Offset: 696156\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Mãe",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 3,
+    "processing_time_seconds": 3.5,
+    "source_file": "teste-docx-e-pdf.zip"
+  }
+}

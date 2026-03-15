@@ -1,0 +1,117 @@
+{
+  "messages": [
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:19:52",
+      "Message": "As mensagens e ligações são protegidas com a criptografia de ponta a ponta. Somente as pessoas que fazem parte da conversa podem ler, ouvir e compartilhar esse conteúdo.",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:19:52",
+      "Message": "Teste de Docx e pdf",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:47:00",
+      "Message": "Arquivo Anexado: 00000003-Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+      "FileAttached": "00000003-Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+      "IsApple": true,
+      "links": [
+        "http://localhost:3002/media/00000003-Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_00000003-Relatório Técnico - Carrinho de controle via bluetooth./page_1.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000003-Relatório Técnico - Carrinho de controle via bluetooth./page_2.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000003-Relatório Técnico - Carrinho de controle via bluetooth./page_3.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000003-Relatório Técnico - Carrinho de controle via bluetooth./page_4.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000003-Relatório Técnico - Carrinho de controle via bluetooth./page_5.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000003-Relatório Técnico - Carrinho de controle via bluetooth./page_6.png",
+        "portrait"
+      ]
+    },
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:47:32",
+      "Message": "Arquivo Anexado: 00000004-INFORMATIVO- SUMMITFAG  2025.docx",
+      "FileAttached": "00000004-INFORMATIVO- SUMMITFAG  2025.pdf",
+      "IsApple": true,
+      "links": [
+        "http://localhost:3002/media/00000004-INFORMATIVO- SUMMITFAG  2025.pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_00000004-INFORMATIVO- SUMMITFAG  2025/page_1.png",
+        "portrait"
+      ]
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:48:34",
+      "Message": "Arquivo Anexado: 00000005-Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+      "FileAttached": "00000005-Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+      "IsApple": true,
+      "links": [
+        "http://localhost:3002/media/00000005-Relatório Técnico - Carrinho de controle via bluetooth..pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_00000005-Relatório Técnico - Carrinho de controle via bluetooth./page_1.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000005-Relatório Técnico - Carrinho de controle via bluetooth./page_2.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000005-Relatório Técnico - Carrinho de controle via bluetooth./page_3.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000005-Relatório Técnico - Carrinho de controle via bluetooth./page_4.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000005-Relatório Técnico - Carrinho de controle via bluetooth./page_5.png",
+        "portrait",
+        "http://localhost:3002/media/pdf_images_00000005-Relatório Técnico - Carrinho de controle via bluetooth./page_6.png",
+        "portrait"
+      ]
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:48:43",
+      "Message": "Arquivo Anexado: 00000006-INFORMATIVO- SUMMITFAG  2025.docx",
+      "FileAttached": "00000006-INFORMATIVO- SUMMITFAG  2025.pdf",
+      "IsApple": true,
+      "links": [
+        "http://localhost:3002/media/00000006-INFORMATIVO- SUMMITFAG  2025.pdf",
+        "pdf",
+        "http://localhost:3002/media/pdf_images_00000006-INFORMATIVO- SUMMITFAG  2025/page_1.png",
+        "portrait"
+      ]
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234356_processing_1b980a24/uploaded.zip\nFile Size: 3502087 bytes (3.34 MB)\nCreated: 2026-03-14 23:43:56.028198\nModified: 2026-01-31 09:57:27.562325\nLast Accessed: 2026-01-31 10:00:34.359091\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 5\nTotal uncompressed size: 3581040 bytes (3.42 MB)\nTotal compressed size: 3501131 bytes (3.34 MB)\nOverall compression ratio: 2.23%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-26 11:47:02\nNewest file date: 2026-01-26 11:49:08\nFile extensions found: .docx, .pdf, .txt\nCompression methods used: Deflated\nCreation systems: Z-System\nMD5 hash: 0482baa49a31fcd131bdff928967ba96\nSHA1 hash: 5c8021e71a5e453d89d20b4c2be7bbe7da859f0e\nSHA256 hash: 6c5ac3159cb2e3b0b7c90da519075498ec44c8624c19edc35b6d234a31b7511d\n\nMac format WhatsApp backup detected - skipping name extraction\n\nOrigin Analysis:\nTimestamp analysis:\n  Time span: 0:02:06\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 5 files from 2026-01-26 11:47:02 to 2026-01-26 11:49:08\n  Most common hours for file timestamps: 11\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\n00000003-Relato╠ürio Te╠ücnico - Carrinho de controle via bluetooth..pdf\n  Size: 350246 bytes (342.04 KB)\n  Compressed: 313708 bytes (306.36 KB)\n  Method: Deflated\n  Compression Ratio: 10.43%\n  Modified: 2026-01-26 11:47:02\n  CRC-32: 0xf6ef97eb\n  Header Offset: 0\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000004-INFORMATIVO- SUMMITFAG  2025.docx\n  Size: 1439789 bytes (1.37 MB)\n  Compressed: 1436666 bytes (1.37 MB)\n  Method: Deflated\n  Compression Ratio: 0.22%\n  Modified: 2026-01-26 11:47:42\n  CRC-32: 0xf34590a8\n  Header Offset: 313826\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000005-Relato╠ürio Te╠ücnico - Carrinho de controle via bluetooth..pdf\n  Size: 350246 bytes (342.04 KB)\n  Compressed: 313708 bytes (306.36 KB)\n  Method: Deflated\n  Compression Ratio: 10.43%\n  Modified: 2026-01-26 11:47:02\n  CRC-32: 0xf6ef97eb\n  Header Offset: 1750580\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000006-INFORMATIVO- SUMMITFAG  2025.docx\n  Size: 1439789 bytes (1.37 MB)\n  Compressed: 1436666 bytes (1.37 MB)\n  Method: Deflated\n  Compression Ratio: 0.22%\n  Modified: 2026-01-26 11:47:42\n  CRC-32: 0xf34590a8\n  Header Offset: 2064406\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n_chat.txt\n  Size: 970 bytes (970.00 B)\n  Compressed: 383 bytes (383.00 B)\n  Method: Deflated\n  Compression Ratio: 60.52%\n  Modified: 2026-01-26 11:49:08\n  CRC-32: 0x5d4764f6\n  Header Offset: 3501160\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n",
+    "detected_device": "iphone",
+    "whatsapp_contact": "Mv",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "Z-System"
+  },
+  "stats": {
+    "total_messages": 6,
+    "processing_time_seconds": 6.25,
+    "source_file": "teste-docx-e-pdf.zip"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "messages": [
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "01/04/2025",
+      "Time": "07:41",
+      "Message": "Oi, tudo bem???",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 2,
+      "Date": "01/04/2025",
+      "Time": "07:41",
+      "Message": "Quem é vc ?",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 1,
+      "Date": "01/04/2025",
+      "Time": "07:41",
+      "Message": "Sou do Android",
+      "FileAttached": null,
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234307_processing_c5451832/uploaded.zip\nFile Size: 456 bytes (456.00 B)\nCreated: 2026-03-14 23:43:07.356665\nModified: 2026-01-31 09:57:27.132343\nLast Accessed: 2026-01-31 10:02:00.204948\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 396 bytes (396.00 B)\nTotal compressed size: 240 bytes (240.00 B)\nOverall compression ratio: 39.39%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-04-01 07:42:08\nNewest file date: 2025-04-01 07:42:08\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 1bea6191aef3b309339e7cc9abdf6632\nSHA1 hash: 650299367c18efc3fee158b5e0597dc9df075cac\nSHA256 hash: 835b0e33ebf0773b7c51013282e6cefb0799636f8de51a936a7781c3d25c3191\n\nWhatsApp Contacts Found:\n  - Bruno Pellizzetti Novo\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Bruno Pellizzetti Novo.txt\n  Size: 396 bytes (396.00 B)\n  Compressed: 240 bytes (240.00 B)\n  Method: Deflated\n  Compression Ratio: 39.39%\n  Modified: 2025-04-01 07:42:08\n  CRC-32: 0x801019ae\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Bruno Pellizzetti Novo",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 3,
+    "processing_time_seconds": 0.16,
+    "source_file": "teste-conversa-simples-sem-nada-bruno-android-comeca.zip"
+  }
+}

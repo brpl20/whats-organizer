@@ -1,0 +1,68 @@
+{
+  "messages": [
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:49:45",
+      "Message": "As mensagens e ligações são protegidas com a criptografia de ponta a ponta. Somente as pessoas que fazem parte da conversa podem ler, ouvir e compartilhar esse conteúdo.",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "26/01/2026",
+      "Time": "11:49:45",
+      "Message": "Arquivo Anexado: 00000002-AUDIO-2026-01-26-11-49-45.opus",
+      "FileAttached": "00000002-AUDIO-2026-01-26-11-49-45.opus",
+      "IsApple": true,
+      "AudioTranscription": ""
+    },
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "26/01/2026",
+      "Time": "11:49:54",
+      "Message": "Arquivo Anexado: 00000003-AUDIO-2026-01-26-11-49-55.opus",
+      "FileAttached": "00000003-AUDIO-2026-01-26-11-49-55.opus",
+      "IsApple": true,
+      "AudioTranscription": ""
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "27/01/2026",
+      "Time": "15:00:33",
+      "Message": "Arquivo Anexado: 00000004-AUDIO-2026-01-27-15-00-33.opus",
+      "FileAttached": "00000004-AUDIO-2026-01-27-15-00-33.opus",
+      "IsApple": true,
+      "AudioTranscription": ""
+    },
+    {
+      "Name": "Mv",
+      "ID": 1,
+      "Date": "27/01/2026",
+      "Time": "15:00:48",
+      "Message": "Arquivo Anexado: 00000005-AUDIO-2026-01-27-15-00-49.opus",
+      "FileAttached": "00000005-AUDIO-2026-01-27-15-00-49.opus",
+      "IsApple": true,
+      "AudioTranscription": ""
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234402_processing_e6c68589/uploaded.zip\nFile Size: 34727 bytes (33.91 KB)\nCreated: 2026-03-14 23:44:02.422230\nModified: 2026-01-31 09:57:27.564439\nLast Accessed: 2026-01-31 10:00:34.375135\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 5\nTotal uncompressed size: 34271 bytes (33.47 KB)\nTotal compressed size: 33915 bytes (33.12 KB)\nOverall compression ratio: 1.04%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-26 11:49:44\nNewest file date: 2026-01-27 15:01:00\nFile extensions found: .opus, .txt\nCompression methods used: Deflated\nCreation systems: Z-System\nMD5 hash: 6ddb8f883b23f0324c05c8bd5e438304\nSHA1 hash: 516b8d07ec87e8ff8dfc3150b73b1d445eba571a\nSHA256 hash: ec383646e18beb62e9c06592e9c1eee973f45a1084e7808cea0d967b6b24f132\n\nMac format WhatsApp backup detected - skipping name extraction\n\nOrigin Analysis:\nTimestamp analysis:\n  Time span: 1 day, 3:11:16\n  All files created/modified within a week\n  Found 2 clusters of timestamps (files created/modified together)\n  Largest cluster: 3 files from 2026-01-27 15:00:32 to 2026-01-27 15:01:00\n  Most common hours for file timestamps: 15, 11\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\n00000002-AUDIO-2026-01-26-11-49-45.opus\n  Size: 10343 bytes (10.10 KB)\n  Compressed: 10331 bytes (10.09 KB)\n  Method: Deflated\n  Compression Ratio: 0.12%\n  Modified: 2026-01-26 11:49:44\n  CRC-32: 0xdc010462\n  Header Offset: 0\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000003-AUDIO-2026-01-26-11-49-55.opus\n  Size: 5803 bytes (5.67 KB)\n  Compressed: 5788 bytes (5.65 KB)\n  Method: Deflated\n  Compression Ratio: 0.26%\n  Modified: 2026-01-26 11:49:56\n  CRC-32: 0x9b379ebf\n  Header Offset: 10416\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000004-AUDIO-2026-01-27-15-00-33.opus\n  Size: 8618 bytes (8.42 KB)\n  Compressed: 8601 bytes (8.40 KB)\n  Method: Deflated\n  Compression Ratio: 0.20%\n  Modified: 2026-01-27 15:00:32\n  CRC-32: 0xfc53e27f\n  Header Offset: 16289\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000005-AUDIO-2026-01-27-15-00-49.opus\n  Size: 8937 bytes (8.73 KB)\n  Compressed: 8907 bytes (8.70 KB)\n  Method: Deflated\n  Compression Ratio: 0.34%\n  Modified: 2026-01-27 15:00:48\n  CRC-32: 0x9a428d89\n  Header Offset: 24975\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n_chat.txt\n  Size: 570 bytes (570.00 B)\n  Compressed: 288 bytes (288.00 B)\n  Method: Deflated\n  Compression Ratio: 49.47%\n  Modified: 2026-01-27 15:01:00\n  CRC-32: 0xedf7f6f5\n  Header Offset: 33967\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n",
+    "detected_device": "iphone",
+    "whatsapp_contact": "Mv",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "Z-System"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 1.2,
+    "source_file": "teste-multiplos-audios.zip"
+  }
+}

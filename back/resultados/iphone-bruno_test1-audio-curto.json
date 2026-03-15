@@ -1,0 +1,56 @@
+{
+  "messages": [
+    {
+      "Name": "Pellizzetti Advocacia Bruno",
+      "ID": 1,
+      "Date": "03/09/2024",
+      "Time": "20:24:43",
+      "Message": "As mensagens e ligações são protegidas com a criptografia de ponta a ponta. Somente as pessoas que fazem parte da conversa podem ler, ouvir e compartilhar esse conteúdo.",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno",
+      "ID": 2,
+      "Date": "29/03/2025",
+      "Time": "02:28:20",
+      "Message": "Teste 1",
+      "FileAttached": false,
+      "IsApple": true
+    },
+    {
+      "Name": "Bruno",
+      "ID": 2,
+      "Date": "01/04/2025",
+      "Time": "07:15:38",
+      "Message": "Arquivo Anexado: 00000076-AUDIO-2025-04-01-07-15-38.opus",
+      "FileAttached": "00000076-AUDIO-2025-04-01-07-15-38.opus",
+      "IsApple": true,
+      "AudioTranscription": ""
+    },
+    {
+      "Name": "Pellizzetti Advocacia Bruno",
+      "ID": 1,
+      "Date": "01/04/2025",
+      "Time": "07:16:41",
+      "Message": "Não vou testar nada",
+      "FileAttached": false,
+      "IsApple": true
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234343_processing_47fecd33/uploaded.zip\nFile Size: 5658 bytes (5.53 KB)\nCreated: 2026-03-14 23:43:43.900366\nModified: 2026-01-31 09:57:27.516170\nLast Accessed: 2026-01-31 10:02:00.207000\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 2\nTotal uncompressed size: 5485 bytes (5.36 KB)\nTotal compressed size: 5356 bytes (5.23 KB)\nOverall compression ratio: 2.35%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-04-01 07:15:36\nNewest file date: 2025-04-01 07:17:58\nFile extensions found: .opus, .txt\nCompression methods used: Deflated\nCreation systems: OS X (Darwin)\nMD5 hash: 3597baeac3a3b8451f7d87358008e149\nSHA1 hash: bd4db464630253fe405ebc5df09414fbdc6b1233\nSHA256 hash: 283e06243c4965c103b51c6043395ae18044cb05baa222f0ab07b06778d5e508\n\nMac format WhatsApp backup detected - skipping name extraction\n\nOrigin Analysis:\nDetected possible creation tools: macOS ZIP utility\nTimestamp analysis:\n  Time span: 0:02:22\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 2 files from 2025-04-01 07:15:36 to 2025-04-01 07:17:58\n  Most common hours for file timestamps: 7\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\n00000076-AUDIO-2025-04-01-07-15-38.opus\n  Size: 5054 bytes (4.94 KB)\n  Compressed: 5053 bytes (4.93 KB)\n  Method: Deflated\n  Compression Ratio: 0.02%\n  Modified: 2025-04-01 07:15:36\n  CRC-32: 0x6fa5c675\n  Header Offset: 0\n  Encrypted: No\n  Create System: OS X (Darwin)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n_chat.txt\n  Size: 431 bytes (431.00 B)\n  Compressed: 303 bytes (303.00 B)\n  Method: Deflated\n  Compression Ratio: 29.70%\n  Modified: 2025-04-01 07:17:58\n  CRC-32: 0xa3e2edf6\n  Header Offset: 5138\n  Encrypted: No\n  Create System: OS X (Darwin)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n",
+    "detected_device": "iphone",
+    "whatsapp_contact": "Pellizzetti Advocacia Bruno",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "OS X (Darwin)"
+  },
+  "stats": {
+    "total_messages": 4,
+    "processing_time_seconds": 1.35,
+    "source_file": "test1-audio-curto.zip"
+  }
+}

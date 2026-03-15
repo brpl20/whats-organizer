@@ -1,0 +1,64 @@
+{
+  "messages": [
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "14:50",
+      "Message": "Testando",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "14:50",
+      "Message": "123",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "14:50",
+      "Message": "Testando 123",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "14:51",
+      "Message": "Arquivo Anexado: IMG-20260123-WA0014.jpg",
+      "FileAttached": "IMG-20260123-WA0014.jpg",
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "14:51",
+      "Message": "Arquivo Anexado: IMG-20260123-WA0015.jpg",
+      "FileAttached": "IMG-20260123-WA0015.jpg",
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234328_processing_9fc6d7e1/uploaded.zip\nFile Size: 280709 bytes (274.13 KB)\nCreated: 2026-03-14 23:43:28.392496\nModified: 2026-01-31 09:57:27.469014\nLast Accessed: 2026-01-31 10:00:34.313207\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 3\nTotal uncompressed size: 282564 bytes (275.94 KB)\nTotal compressed size: 280253 bytes (273.68 KB)\nOverall compression ratio: 0.82%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-23 14:52:24\nNewest file date: 2026-01-23 14:52:24\nFile extensions found: .jpg, .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 584e4b0bee9be4d8db0af1380caa0e0d\nSHA1 hash: 457ecb85f7b6716dd5aeed05606d275a6fd7e733\nSHA256 hash: a02ebabe54cd3be809202147f5832d6b308bb27fdad2db66d97e5ab0bdb8f56d\n\nWhatsApp Contacts Found:\n  - Mãe\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis:\n  Time span: 0:00:00\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 3 files from 2026-01-23 14:52:24 to 2026-01-23 14:52:24\n  Most common hours for file timestamps: 14\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Mãe.txt\n  Size: 454 bytes (454.00 B)\n  Compressed: 252 bytes (252.00 B)\n  Method: Deflated\n  Compression Ratio: 44.49%\n  Modified: 2026-01-23 14:52:24\n  CRC-32: 0x85458b2\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nIMG-20260123-WA0014.jpg\n  Size: 130296 bytes (127.24 KB)\n  Compressed: 128973 bytes (125.95 KB)\n  Method: Deflated\n  Compression Ratio: 1.02%\n  Modified: 2026-01-23 14:52:24\n  CRC-32: 0x400ca6a1\n  Header Offset: 331\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nIMG-20260123-WA0015.jpg\n  Size: 151814 bytes (148.26 KB)\n  Compressed: 151028 bytes (147.49 KB)\n  Method: Deflated\n  Compression Ratio: 0.52%\n  Modified: 2026-01-23 14:52:24\n  CRC-32: 0xe61d4085\n  Header Offset: 129373\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Mãe",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 0.14,
+    "source_file": "teste-cvs-simples-com-img.zip"
+  }
+}

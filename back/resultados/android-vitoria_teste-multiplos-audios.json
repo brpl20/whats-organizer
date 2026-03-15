@@ -1,0 +1,64 @@
+{
+  "messages": [
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "14:54",
+      "Message": "Beleza agora áudios",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "14:54",
+      "Message": "<Mídia oculta>",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "15:00",
+      "Message": "<Mídia oculta>",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:00",
+      "Message": "<Mídia oculta>",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "15:00",
+      "Message": "<Mídia oculta>",
+      "FileAttached": null,
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234333_processing_9e38b868/uploaded.zip\nFile Size: 403 bytes (403.00 B)\nCreated: 2026-03-14 23:43:33.589167\nModified: 2026-01-31 09:57:27.482715\nLast Accessed: 2026-01-31 10:00:07.865428\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 1\nTotal uncompressed size: 423 bytes (423.00 B)\nTotal compressed size: 223 bytes (223.00 B)\nOverall compression ratio: 47.28%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-23 15:01:04\nNewest file date: 2026-01-23 15:01:04\nFile extensions found: .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: 54581965f2c2028f22953acfbedd42c5\nSHA1 hash: a839322c4bf767262b9f80774310238d776025f4\nSHA256 hash: b0794cdd79b042633394ee767ece6e1c59b6a07231274736e003717fd47c03dc\n\nWhatsApp Contacts Found:\n  - Mãe\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis: Not enough timestamps for analysis\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Mãe.txt\n  Size: 423 bytes (423.00 B)\n  Compressed: 223 bytes (223.00 B)\n  Method: Deflated\n  Compression Ratio: 47.28%\n  Modified: 2026-01-23 15:01:04\n  CRC-32: 0xc07fc390\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Mãe",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 0.13,
+    "source_file": "teste-multiplos-audios.zip"
+  }
+}

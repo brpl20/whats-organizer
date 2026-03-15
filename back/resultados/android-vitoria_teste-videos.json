@@ -1,0 +1,64 @@
+{
+  "messages": [
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:32",
+      "Message": "Arquivo Anexado: VID-20260123-WA0033.mp4",
+      "FileAttached": "VID-20260123-WA0033.mp4",
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:32",
+      "Message": "Teste de vídeos",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:32",
+      "Message": "Mensagem apagada",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Vitoria",
+      "ID": 1,
+      "Date": "23/01/2026",
+      "Time": "15:33",
+      "Message": "Arquivo Anexado: VID-20260123-WA0037.mp4",
+      "FileAttached": "VID-20260123-WA0037.mp4",
+      "IsApple": false
+    },
+    {
+      "Name": "Mãe",
+      "ID": 2,
+      "Date": "23/01/2026",
+      "Time": "15:33",
+      "Message": "Arquivo Anexado: VID-20260123-WA0038.mp4",
+      "FileAttached": "VID-20260123-WA0038.mp4",
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234333_processing_c1333597/uploaded.zip\nFile Size: 3130073 bytes (2.99 MB)\nCreated: 2026-03-14 23:43:33.829622\nModified: 2026-01-31 09:57:27.511704\nLast Accessed: 2026-01-31 10:00:34.320014\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 4\nTotal uncompressed size: 3149297 bytes (3.00 MB)\nTotal compressed size: 3129479 bytes (2.98 MB)\nOverall compression ratio: 0.63%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-23 15:33:52\nNewest file date: 2026-01-23 15:33:52\nFile extensions found: .mp4, .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: dd09df080e7adb4cd49c9338289158df\nSHA1 hash: 0809ca30c41463e202c27d534ebd9f137e5d0184\nSHA256 hash: 71f63498fbb6c798c4b20455339f102bd1a68487812c7082e0093de7e50a3b99\n\nWhatsApp Contacts Found:\n  - Mãe\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis:\n  Time span: 0:00:00\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 4 files from 2026-01-23 15:33:52 to 2026-01-23 15:33:52\n  Most common hours for file timestamps: 15\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Mãe.txt\n  Size: 510 bytes (510.00 B)\n  Compressed: 261 bytes (261.00 B)\n  Method: Deflated\n  Compression Ratio: 48.82%\n  Modified: 2026-01-23 15:33:52\n  CRC-32: 0xc4c098ec\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nVID-20260123-WA0033.mp4\n  Size: 955297 bytes (932.91 KB)\n  Compressed: 952026 bytes (929.71 KB)\n  Method: Deflated\n  Compression Ratio: 0.34%\n  Modified: 2026-01-23 15:33:52\n  CRC-32: 0xffff1814\n  Header Offset: 340\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nVID-20260123-WA0037.mp4\n  Size: 973606 bytes (950.79 KB)\n  Compressed: 969732 bytes (947.00 KB)\n  Method: Deflated\n  Compression Ratio: 0.40%\n  Modified: 2026-01-23 15:33:52\n  CRC-32: 0xa9eba465\n  Header Offset: 952435\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nVID-20260123-WA0038.mp4\n  Size: 1219884 bytes (1.16 MB)\n  Compressed: 1207460 bytes (1.15 MB)\n  Method: Deflated\n  Compression Ratio: 1.02%\n  Modified: 2026-01-23 15:33:52\n  CRC-32: 0xea2bcf95\n  Header Offset: 1922236\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Mãe",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 5,
+    "processing_time_seconds": 0.16,
+    "source_file": "teste-videos.zip"
+  }
+}

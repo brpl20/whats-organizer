@@ -1,0 +1,56 @@
+{
+  "messages": [
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 1,
+      "Date": "29/03/2025",
+      "Time": "02:28",
+      "Message": "Teste 1",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti Novo",
+      "ID": 1,
+      "Date": "01/04/2025",
+      "Time": "07:15",
+      "Message": "Arquivo Anexado: PTT-20250401-WA0001.opus",
+      "FileAttached": "PTT-20250401-WA0001.opus",
+      "IsApple": false,
+      "AudioTranscription": ""
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "01/04/2025",
+      "Time": "07:16",
+      "Message": "Não vou testar nada",
+      "FileAttached": null,
+      "IsApple": false
+    },
+    {
+      "Name": "Bruno Pellizzetti",
+      "ID": 2,
+      "Date": "01/04/2025",
+      "Time": "07:27",
+      "Message": "Arquivo Anexado: IMG-20250401-WA0003.jpg",
+      "FileAttached": "IMG-20250401-WA0003.jpg",
+      "IsApple": false
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234304_processing_928d69e0/uploaded.zip\nFile Size: 54964 bytes (53.68 KB)\nCreated: 2026-03-14 23:43:04.338520\nModified: 2026-01-31 09:57:27.132261\nLast Accessed: 2026-01-31 10:02:00.204892\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 3\nTotal uncompressed size: 56669 bytes (55.34 KB)\nTotal compressed size: 54470 bytes (53.19 KB)\nOverall compression ratio: 3.88%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2025-04-01 07:28:06\nNewest file date: 2025-04-01 07:28:06\nFile extensions found: .jpg, .opus, .txt\nCompression methods used: Deflated\nCreation systems: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\nMD5 hash: b8ead1e08f16a8d27f78108901c08d44\nSHA1 hash: 3e14fec5c61ca3c2435ba8a6454f1b6af2aab4b2\nSHA256 hash: 147ac342f6f16a8406261d7f9c718e93d36df9491bf4dadded2c7174388d1c0d\n\nWhatsApp Contacts Found:\n  - Bruno Pellizzetti Novo\nName extraction successful: True\n\nOrigin Analysis:\nDetected possible creation tools: MS-DOS/Windows ZIP utility\nTimestamp analysis:\n  Time span: 0:00:00\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 3 files from 2025-04-01 07:28:06 to 2025-04-01 07:28:06\n  Most common hours for file timestamps: 7\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\nConversa do WhatsApp com Bruno Pellizzetti Novo.txt\n  Size: 515 bytes (515.00 B)\n  Compressed: 312 bytes (312.00 B)\n  Method: Deflated\n  Compression Ratio: 39.42%\n  Modified: 2025-04-01 07:28:06\n  CRC-32: 0x4ee054d6\n  Header Offset: 0\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nPTT-20250401-WA0001.opus\n  Size: 5054 bytes (4.94 KB)\n  Compressed: 5053 bytes (4.93 KB)\n  Method: Deflated\n  Compression Ratio: 0.02%\n  Modified: 2025-04-01 07:28:06\n  CRC-32: 0x6fa5c675\n  Header Offset: 409\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n\nIMG-20250401-WA0003.jpg\n  Size: 51100 bytes (49.90 KB)\n  Compressed: 49105 bytes (47.95 KB)\n  Method: Deflated\n  Compression Ratio: 3.90%\n  Modified: 2025-04-01 07:28:06\n  CRC-32: 0xfee6bbaa\n  Header Offset: 5532\n  Encrypted: No\n  Create System: MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)\n  Extract Version: 20\n  Flag Bits: 0b100000001000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b0\n",
+    "detected_device": "android",
+    "whatsapp_contact": "Bruno Pellizzetti Novo",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"
+  },
+  "stats": {
+    "total_messages": 4,
+    "processing_time_seconds": 2.93,
+    "source_file": "teste-audio-curto-uma-imagem.zip"
+  }
+}

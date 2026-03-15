@@ -1,0 +1,22 @@
+{
+  "messages": [
+    {
+      "ERRO": "Conversas em grupo não suportadas"
+    }
+  ],
+  "analysis": {
+    "analysis": "ZIP File Analysis: uploaded.zip\nFull Path: /Users/brpl20/code/whats-organizer/back/zip_tests/20260314_234353_processing_df379a58/uploaded.zip\nFile Size: 87275 bytes (85.23 KB)\nCreated: 2026-03-14 23:43:53.400870\nModified: 2026-01-31 09:57:27.520562\nLast Accessed: 2026-01-31 10:00:34.337056\nFile Permissions: 644\nOwner UID: 502\nOwner GID: 20\nNumber of files: 3\nTotal uncompressed size: 87867 bytes (85.81 KB)\nTotal compressed size: 86805 bytes (84.77 KB)\nOverall compression ratio: 1.21%\nContains directories: No\nContains encrypted files: No\nOldest file date: 2026-01-27 15:08:40\nNewest file date: 2026-01-27 15:12:24\nFile extensions found: .jpg, .opus, .txt\nCompression methods used: Deflated\nCreation systems: Z-System\nMD5 hash: 27b78852006cc39bdff01d1120fe5b4d\nSHA1 hash: a6e00fdf50d96f0286036da9a98a44055ff73c0f\nSHA256 hash: 730b47128663dac7a877c3eaf79656e500678614628913bdea41a2f286035a9c\n\nMac format WhatsApp backup detected - skipping name extraction\n\nOrigin Analysis:\nTimestamp analysis:\n  Time span: 0:03:44\n  All files created/modified within a single day\n  Found 1 clusters of timestamps (files created/modified together)\n  Largest cluster: 3 files from 2026-01-27 15:08:40 to 2026-01-27 15:12:24\n  Most common hours for file timestamps: 15\n  Most files were modified during typical working hours (9am-6pm)\n\nNo digital signatures were detected in this ZIP file.\n\nDetailed File List:\n\n00000005-PHOTO-2026-01-27-15-08-41.jpg\n  Size: 77496 bytes (75.68 KB)\n  Compressed: 76832 bytes (75.03 KB)\n  Method: Deflated\n  Compression Ratio: 0.86%\n  Modified: 2026-01-27 15:08:40\n  CRC-32: 0xf9d23814\n  Header Offset: 0\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n00000006-AUDIO-2026-01-27-15-08-48.opus\n  Size: 9624 bytes (9.40 KB)\n  Compressed: 9599 bytes (9.37 KB)\n  Method: Deflated\n  Compression Ratio: 0.26%\n  Modified: 2026-01-27 15:08:48\n  CRC-32: 0xd042c34c\n  Header Offset: 76916\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n\n_chat.txt\n  Size: 747 bytes (747.00 B)\n  Compressed: 374 bytes (374.00 B)\n  Method: Deflated\n  Compression Ratio: 49.93%\n  Modified: 2026-01-27 15:12:24\n  CRC-32: 0x9085cd18\n  Header Offset: 86600\n  Encrypted: No\n  Create System: Z-System\n  Extract Version: 20\n  Flag Bits: 0b1000\n  Volume: 0\n  Internal Attributes: 0b0\n  External Attributes: 0b10000001101001000000000000000000\n",
+    "detected_device": "iphone",
+    "whatsapp_contact": "Grupo teste whatsorganizer",
+    "file_count": 0,
+    "extracted_size": 0,
+    "compression_ratio": 0.0,
+    "suspicious_files": [],
+    "creation_system": "Z-System"
+  },
+  "stats": {
+    "total_messages": 1,
+    "processing_time_seconds": 1.19,
+    "source_file": "teste-cvs-grupo.zip"
+  }
+}
