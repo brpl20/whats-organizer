@@ -384,7 +384,12 @@
 
 	/** @param {SubmitEvent} ev */
 	async function handleSubmit(ev) {
-		uploadDisabled = true;
+		// preventDefault PRECISA ser incondicional: qualquer return antes dele
+		// deixa o browser fazer o submit nativo do form e recarregar a pagina.
+		ev.preventDefault();
+
+		// Ler isProcessingDisabled ANTES de escrever em uploadDisabled: em Svelte 5
+		// o $derived recomputa na leitura, entao escrever antes auto-dispara o guard.
 		if (isProcessingDisabled) {
 			toast = {
 				type: 'error',
@@ -393,9 +398,9 @@
 			};
 			return;
 		}
-		try {
-			ev.preventDefault();
 
+		uploadDisabled = true;
+		try {
 			/** @type { { target: {elements: HTMLCollection & HTMLInputElement } } */
 			const { target } = ev;
 			const elements = target.elements;
@@ -500,6 +505,15 @@
 				}
 				return;
 			}
+			if (Array.isArray(result) && result.length === 0) {
+				toast = {
+					type: 'error',
+					text: 'Nenhuma mensagem encontrada no arquivo. Confira se o zip e uma conversa exportada do WhatsApp.',
+					isSecurityError: false
+				};
+				return;
+			}
+
 			messages = result;
 			isProcessingComplete = true;
 			isApple = messages?.[0]?.IsApple;
